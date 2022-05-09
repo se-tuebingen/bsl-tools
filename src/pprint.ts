@@ -1,32 +1,32 @@
-function pprint(p: AST.program): string {
+function pprint(p: BSL_AST.program): string {
   return p.map(printDefOrExpr).join('\n');
 }
-function printDefOrExpr(eod: AST.defOrExpr) {
-  if(AST.isDefinition(eod)) {
+function printDefOrExpr(eod: BSL_AST.defOrExpr) {
+  if(BSL_AST.isDefinition(eod)) {
     return printDefinition(eod);
   } else {
     return printE(eod);
   }
 }
-function printDefinition(d: AST.definition) {
-  if(AST.isFDefine(d)) {
+function printDefinition(d: BSL_AST.definition) {
+  if(BSL_AST.isFDefine(d)) {
     return `(define ${printName(d.fname)} (${d.args.map(printName).join(' ')}) ${printE(d.body)})`;
-  } else if(AST.isCDefine(d)) {
+  } else if(BSL_AST.isCDefine(d)) {
     return `(define ${printName(d.cname)} ${printE(d.value)})`;
-  } else if(AST.isSDefine(d)) {
+  } else if(BSL_AST.isSDefine(d)) {
     return `(define ${printName(d.binding)} (${d.properties.map(printName).join(' ')}))`
   } else {
     console.error('Invalid input to printDefinition');
   }
 }
-function printE(e: AST.e): string {
-  if(AST.isFCall(e)) {
+function printE(e: BSL_AST.e): string {
+  if(BSL_AST.isFCall(e)) {
     return `(${printName(e.fname)} ${e.args.map(printE).join(' ')})`;
-  } else if(AST.isCond(e)) {
+  } else if(BSL_AST.isCond(e)) {
     return `(cond ${e.options.map(printOption).join(' ')})`;
-  } else if(AST.isName(e)) {
+  } else if(BSL_AST.isName(e)) {
     return printName(e);
-  } else if(AST.isV(e)) {
+  } else if(BSL_AST.isV(e)) {
     if(typeof(e) === 'string' && e !== `'()`) {
       return `"${e}"`;
     } else {
@@ -38,15 +38,15 @@ function printE(e: AST.e): string {
   }
 }
 
-function printOption(o: AST.option) {
+function printOption(o: BSL_AST.option) {
   return `[${printE(o.guard)} ${printE(o.value)}]`;
 }
 
-function printName(s: AST.name): string {
+function printName(s: BSL_AST.name): string {
   return s.symbol;
 }
 
-const testprogram: AST.program = [
+const testprogram: BSL_AST.program = [
   {
     fname:
     {symbol: 'f'},
