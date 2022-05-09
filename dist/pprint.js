@@ -3,7 +3,7 @@ function pprint(p) {
     return p.map(printDefOrExpr).join('\n');
 }
 function printDefOrExpr(eod) {
-    if (AST.isDefinition(eod)) {
+    if (BSL_AST.isDefinition(eod)) {
         return printDefinition(eod);
     }
     else {
@@ -11,13 +11,13 @@ function printDefOrExpr(eod) {
     }
 }
 function printDefinition(d) {
-    if (AST.isFDefine(d)) {
+    if (BSL_AST.isFunDef(d)) {
         return `(define ${printName(d.fname)} (${d.args.map(printName).join(' ')}) ${printE(d.body)})`;
     }
-    else if (AST.isCDefine(d)) {
+    else if (BSL_AST.isConstDef(d)) {
         return `(define ${printName(d.cname)} ${printE(d.value)})`;
     }
-    else if (AST.isSDefine(d)) {
+    else if (BSL_AST.isStructDef(d)) {
         return `(define ${printName(d.binding)} (${d.properties.map(printName).join(' ')}))`;
     }
     else {
@@ -25,16 +25,16 @@ function printDefinition(d) {
     }
 }
 function printE(e) {
-    if (AST.isFCall(e)) {
+    if (BSL_AST.isCall(e)) {
         return `(${printName(e.fname)} ${e.args.map(printE).join(' ')})`;
     }
-    else if (AST.isCond(e)) {
+    else if (BSL_AST.isCond(e)) {
         return `(cond ${e.options.map(printOption).join(' ')})`;
     }
-    else if (AST.isName(e)) {
+    else if (BSL_AST.isName(e)) {
         return printName(e);
     }
-    else if (AST.isV(e)) {
+    else if (BSL_AST.isV(e)) {
         if (typeof (e) === 'string' && e !== `'()`) {
             return `"${e}"`;
         }
@@ -48,7 +48,7 @@ function printE(e) {
     }
 }
 function printOption(o) {
-    return `[${printE(o.guard)} ${printE(o.value)}]`;
+    return `[${printE(o.condition)} ${printE(o.result)}]`;
 }
 function printName(s) {
     return s.symbol;
@@ -62,15 +62,15 @@ const testprogram = [
     {
         options: [
             {
-                guard: {
+                condition: {
                     fname: { symbol: '=' },
                     args: [{ symbol: 'x' }, 3]
                 },
-                value: 'isThree'
+                result: 'isThree'
             },
             {
-                guard: false,
-                value: `'()`
+                condition: false,
+                result: `'()`
             }
         ]
     },
