@@ -1,2 +1,23 @@
-<script src="dist/bsl_ast.js"></script>
-<script src="dist/pprint.js"></script>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>BSL Tools Test Page</title>
+  <script src="dist/bsl_ast.js"></script>
+  <script src="dist/pprint.js"></script>
+  <script src="dist/layout.js"></script>
+  <link rel="stylesheet" href="dist/tree.css">
+
+</head>
+
+<body>
+  <div id="test"></div>
+  <script>
+    const el = document.getElementById('test');
+    treeProgram(testprogram, el);
+  </script>
+
+</body>
+
+</html>
