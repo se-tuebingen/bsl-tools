@@ -11,12 +11,15 @@ function treeProgram(program: BSL_AST.program, target: HTMLElement){
   target.innerHTML = program.map(treeDefOrExpr).join('\n');
 }
 function treeDefOrExpr(root: BSL_AST.defOrExpr) {
-  return `<ul class="tree"><li>${BSL_AST.isDefinition(root) ? treeDefinition(root): treeE(root)}</li></ul>`;
+  return `<ul class="tree ast"><li>${BSL_AST.isDefinition(root) ? treeDefinition(root): treeE(root)}</li></ul>`;
 }
 function treeDefinition(d: BSL_AST.definition) {
   if(BSL_AST.isFunDef(d)) {
     return `
-      <span>${pprint([d])}</span>
+      <span>
+        <div class="name">Function Definition</div>
+        <div>( define ( <div class="hole">name</div> <div class="hole">name+</div> ) <div class="hole">e</div> )</div>
+      </span>
       <ul>
         <li>${treeName(d.fname)}</li>
         <li>${d.args.map(treeName).join('</li><li>')}</li>
@@ -24,14 +27,20 @@ function treeDefinition(d: BSL_AST.definition) {
       </ul>`;
   } else if(BSL_AST.isConstDef(d)) {
     return `
-      <span>${pprint([d])}</span>
+      <span>
+        <div class="name">Constant Definition</div>
+        <div>( define <div class="hole">name</div> <div class="hole">e</div> )</div>
+      </span>
       <ul>
         <li>${treeName(d.cname)}</li>
         <li>${treeE(d.value)}</li>
       </ul>`;
   } else if(BSL_AST.isStructDef(d)) {
     return `
-      <span>${pprint([d])}</span>
+      <span>
+        <div class="name">Struct Definition</div>
+        <div>(define-struct <div class="hole">name</div> ( <div class="hole">name*</div> ) )</div>
+      </span>
       <ul>
         <li>${treeName(d.binding)}</li>
         <li>${d.properties.map(treeName).join('</li><li>')}</li>
@@ -43,21 +52,31 @@ function treeDefinition(d: BSL_AST.definition) {
 function treeE(e: BSL_AST.expr): string {
   if(BSL_AST.isCall(e)) {
     return `
-      <span>${pprint([e])}</span>
+      <span>
+        <div class="name">Function Call</div>
+        <div>( <div class="hole">name</div> <div class="hole">e*</div> )</div>
+      </span>
       <ul>
         <li>${treeName(e.fname)}</li>
         <li>${e.args.map(treeE).join('</li><li>')}</li>
       </ul>`;
   } else if(BSL_AST.isCond(e)) {
     return `
-      <span>${pprint([e])}</span>
+      <span>
+        <div class="name">Cond-Expression</div>
+        <div>( cond <div class="hole">[ e e ]+</div> )</div>
+      </span>
       <ul>
         <li>${e.options.map(treeOption).join('</li><li>')}</li>
       </ul>`;
   } else if(BSL_AST.isName(e)) {
     return treeName(e);
   } else if(BSL_AST.isV(e)) {
-    return `<span>${pprint([e])}</span>`;
+    return `
+      <span>
+        <div class="name">Literal Value</div>
+        <div>${pprint([e])}</div>
+      </span>`;
   } else {
     console.error('Invalid input to treeE');
     return `<span>${e}</span>`;
@@ -66,7 +85,10 @@ function treeE(e: BSL_AST.expr): string {
 
 function treeOption(o: BSL_AST.Clause) {
   return `
-    <span>${printOption(o)}</span>
+    <span>
+      <div class="name">Cond-Option</div>
+      <div>[ <div class="hole">e</div> <div class="hole">e</div> ]</div>
+    </span>
     <ul>
       <li>${treeE(o.condition)}</li>
       <li>${treeE(o.result)}</li>
@@ -75,5 +97,9 @@ function treeOption(o: BSL_AST.Clause) {
 }
 
 function treeName(s: BSL_AST.Name): string {
-  return `<span>${s.symbol}</span>`;
+  return `
+    <span>
+      <div class="name">Symbol</div>
+      <div>${s.symbol}</div>
+    </span>`;
 }

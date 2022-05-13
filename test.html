@@ -18,6 +18,73 @@
     treeProgram(testprogram, el);
   </script>
 
+<style>
+  .test1 {
+    /* display: block; */
+    width: 100px;
+    height: 30px;
+    background-color: azure;
+  }
+  .test2 {
+    width: 50px;
+    height: 60px;
+    background-color: blue;
+  }
+  .test3 {
+    height: 20px;
+    background-color: green;
+  }
+  .ast {
+    --node-background: #ebf0f4; /* racket azure */
+    --text-grey: #444; /* like in scribble */
+    --hole-yellow: #fdf68d; /* pale yellow */
+  }
+  .ast span {
+    font-family: 'Fira-Mono', monospace;
+    background-color: var(--node-background); /* racket azure */
+  }
+  .ast .name {
+    color: var(--text-grey);
+    font-style: italic;
+    font-size: small;
+    text-align: left;
+    margin-bottom: 0.5em;
+  }
+  .ast .hole {
+    display: inline;
+    background-color: var(--hole-yellow);
+    border: 1px solid var(--text-grey);
+    color: var(--text-grey);
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+  }
+</style>
+  <div>
+    <ul class="tree ast">
+      <li>
+        <span class="test1"></span>
+        <ul>
+          <li>
+            <span class="test1 test2"></span>
+            <ul>
+              <li><span class="test1 test3"></span></li>
+              <li><span class="test1 test3"></span></li>
+            </ul>
+          </li>
+          <li>
+            <span class="test1 test3"></span>
+            <ul>
+              <li><span class="test1 test3"></span></li>
+              <li><span>
+                <div class="name">Function Call</div>
+                <div>(<div class="hole">name</div> <div class="hole">args</div>)</div>
+              </span></li>
+            </ul>
+          </li>
+        </ul>
+    </ul>
+  </div>
+
 </body>
 
 </html>
