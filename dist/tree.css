@@ -113,3 +113,9 @@ https://www.cssscript.com/clean-tree-diagram/
   padding-left: 0.25em;
   padding-right: 0.25em;
 }
+
+/* highlight way back up */
+.tree li:hover > span {
+  border-color: black;
+  border-style: dashed;
+}
