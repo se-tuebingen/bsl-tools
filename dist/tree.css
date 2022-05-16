@@ -4,7 +4,10 @@
 /*
 CSS for tree by Ross Angus
 https://www.cssscript.com/clean-tree-diagram/
+(Edited and extended)
 */
+
+/* ###### node layout ######## */
 .tree,
 .tree ul,
 .tree li {
@@ -34,23 +37,6 @@ https://www.cssscript.com/clean-tree-diagram/
     vertical-align: top;
 }
 
-.tree li:before {
-    outline: solid 1px var(--branch-color);
-    content: "";
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-}
-
-/* .tree li:first-child:before {
-    left: 50%;
-}
-
-.tree li:last-child:before {
-    right: 50%;
-} */
-
 .tree code,
 .tree span {
     border: solid .1em var(--branch-color);
@@ -61,47 +47,25 @@ https://www.cssscript.com/clean-tree-diagram/
     position: relative;
 }
 
-/* .tree ul:before, */
-.tree code:before,
-.tree span:before {
-    outline: solid 1px var(--branch-color);
-    content: "";
-    height: .5em;
-    left: 50%;
-    position: absolute;
-}
-
-/* .tree ul:before {
-    top: -.5em;
-} */
-
-.tree code:before,
-.tree span:before {
-    top: -.55em;
-}
-
-.tree>li {
-    margin-top: 0;
-}
-
-/* custom AST styles */
-.ast {
+/* ########### custom AST node  styles ######## */
+.tree {
   --node-background: #ebf0f4; /* racket azure */
   --text-grey: #444; /* like in scribble */
   --hole-yellow: #fdf68d; /* pale yellow */
+  --highlight-border-connectors: lime;
 }
-.ast span {
+.tree span {
   font-family: 'Fira-Mono', monospace;
   background-color: var(--node-background); /* racket azure */
 }
-.ast .name {
+.tree .name {
   color: var(--text-grey);
   font-style: italic;
   font-size: small;
   text-align: left;
   margin-bottom: 0.5em;
 }
-.ast .hole {
+.tree .hole {
   display: inline;
   background-color: var(--hole-yellow);
   border: 1px solid var(--text-grey);
@@ -111,62 +75,74 @@ https://www.cssscript.com/clean-tree-diagram/
   position: relative;
 }
 
-/* highlight way back up */
-.tree li:hover > span {
-  border-color: black;
-  border-style: dashed;
+/* ###### connectors ########### */
+/* part above box */
+.tree span:before {
+    outline: solid 1px var(--branch-color);
+    content: "";
+    height: .5em;
+    left: 50%;
+    position: absolute;
+    top: calc(-.5em - 2px);
 }
-
-/* assign leaves to holes */
-.ast .hole::after {
-  outline: solid 1px var(--branch-color);
+/* horizontal part + part pointing to corresp. hole
+   -> width etc will be set via JavaScript
+      Javascript cannot style ::before elements directly
+      (since they are not part of the DOM),
+      the variables will be set on the parent li element */
+.tree li::before {
+  box-sizing: border-box;
   content: "";
-  height: .7em; /* 0.5em + 0.2em padding */
   position: absolute;
-  z-index: -1;
-  left: 50%;
-  top: 100%;
-}
-
-.ast .hole-1::after {
-  height: .5em; /* 0.3em + 0.2em padding */
-}
-.ast li.child-1::before {
-  top: -.2em;
-}
-.ast li.child-1 > span::before {
-  top: -.75em;
-  height: 0.7em;
-}
-
-.ast .hole-3::after {
-  height: .9em; /* 0.7em + 0.2em padding */
-}
-.ast li.child-3::before {
-  top: .2em;
-}
-.ast li.child-3 > span::before {
-  top: -.35em;
-  height: 0.3em;
-}
-
-.ast li::before {
+  height: .5em; /* overridden for some */
+  top: -.5em;
   left: var(--connector-left, auto);
   right: var(--connector-right, auto);
   width: var(--connector-width, 100%);
+
+  border: solid 2px var(--branch-color);
+  border-top-style: none;
+  border-left-style: var(--connector-border-left-style, none);
+  border-right-style: var(--connector-border-right-style, none);
 }
 
-/* highlight way back down */
+/* prevent up to 3 connectors from crossing */
+.tree li.child-1::before {
+  height: .3em;
+}
+.tree li.child-1 > span::before {
+  top: calc(-.7em - 2px);
+  height: 0.7em;
+}
+
+.tree li.child-3::before {
+  height: .7em;
+}
+.tree li.child-3 > span::before {
+  top: calc(-.3em - 2px);
+  height: 0.3em;
+}
+
+/* ####### highlight way back up from a node ###### */
+.tree li:hover > span {
+  border-color: var(--highlight-border-connectors);
+}
 .tree li:hover::before {
-  outline: solid 1px black;
+  border-color: var(--highlight-border-connectors);
+  z-index: 1000;
 }
 .tree li:hover > span::before {
-  outline: solid 1px black;
+  outline-color: var(--highlight-border-connectors);
 }
 
+/* ######## hide connectors over root ######## */
 .tree>li:before,
 .tree>li:after,
 .tree>li>code:before,
 .tree>li>span:before {
     outline: none !important;
+    border: none !important;
+}
+.tree>li {
+    margin-top: 0;
 }

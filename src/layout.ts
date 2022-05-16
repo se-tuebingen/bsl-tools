@@ -1,12 +1,11 @@
-// // layout boxes as a tree
-// interface node {
-//   el: HTMLElement;
-//   children: node[];
-//   childrenContainer?: HTMLElement;
-// }
+// ######### LAYOUT AST AS TREE DIAGRAM ########
+// depends on pprint.ts for printing code
 
 // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetLeft
+
+// #### main api #####
+// add forest of program expressions to html element
 function treeProgram(program: BSL_AST.program, target: HTMLElement){
   target.innerHTML = program.map(treeDefOrExpr).join('\n');
   // align connectors horizontally
@@ -14,48 +13,12 @@ function treeProgram(program: BSL_AST.program, target: HTMLElement){
   adjustConnectors('hole-2','child-2');
   adjustConnectors('hole-3','child-3');
 }
-function adjustConnectors(holeClass:string, childClass: string) {
-  Array.from(document.getElementsByClassName(holeClass)).map(h => {
-    const el: HTMLElement = h as HTMLElement;
-    const xpos = 0.5 * (el.getBoundingClientRect().x + el.getBoundingClientRect().right) ;
 
-    // navigate the DOM
-    const div = el.parentElement as HTMLElement;
-    if(!div) {
-      console.error(`${holeClass} element in wrong structure, should be span > div > div.${holeClass}`, el);
-      return;
-    }
-    const span = el.parentElement?.parentElement as HTMLElement;
-    if(!span) {
-      console.error(`${holeClass} element in wrong structure, should be span > div > div.${holeClass}`, el);
-      return;
-    }
-    const ul = span.nextElementSibling as HTMLElement;
-    if(!ul) {
-      console.error(`${holeClass} element used in node without children ul list`);
-      return;
-    };
-
-    // process children
-    Array.from(ul.children).filter(c => c.classList.contains(childClass)).map(c => {
-      const child = c as HTMLElement;
-      const xposChild = 0.5 * (child.getBoundingClientRect().x + child.getBoundingClientRect().right);
-      const xdiff = xpos - xposChild;
-      let cssText = '';
-      if (xdiff < 0) {
-        cssText += `--connector-left: auto; --connector-right: 50%;`;
-      } else {
-        cssText += `--connector-left: 50%; --connector-right: auto;`;
-      }
-      cssText += `--connector-width: ${Math.abs(xdiff)}px;`;
-      child.style.cssText = cssText;
-    });
-
-  });
-}
+// #### render helpers (textual html generators) ####
 function treeDefOrExpr(root: BSL_AST.defOrExpr) {
   return `<ul class="tree ast"><li>${BSL_AST.isDefinition(root) ? treeDefinition(root): treeE(root)}</li></ul>`;
 }
+
 function treeDefinition(d: BSL_AST.definition) {
   if(BSL_AST.isFunDef(d)) {
     return `
@@ -92,6 +55,7 @@ function treeDefinition(d: BSL_AST.definition) {
     console.error('Invalid input to printDefinition');
   }
 }
+
 function treeE(e: BSL_AST.expr): string {
   if(BSL_AST.isCall(e)) {
     return `
@@ -145,4 +109,55 @@ function treeName(s: BSL_AST.Name): string {
       <div class="name">Symbol</div>
       <div>${s.symbol}</div>
     </span>`;
+}
+
+// ###### layout helper ########
+// dynamically compute dimensions of connectors between nodes
+// such that they point to the correct "hole"
+function adjustConnectors(holeClass:string, childClass: string) {
+  Array.from(document.getElementsByClassName(holeClass)).map(h => {
+    const el: HTMLElement = h as HTMLElement;
+    const xpos = 0.5 * (el.getBoundingClientRect().x + el.getBoundingClientRect().right) ;
+
+    // navigate the DOM
+    const div = el.parentElement as HTMLElement;
+    if(!div) {
+      console.error(`${holeClass} element in wrong structure, should be span > div > div.${holeClass}`, el);
+      return;
+    }
+    const span = el.parentElement?.parentElement as HTMLElement;
+    if(!span) {
+      console.error(`${holeClass} element in wrong structure, should be span > div > div.${holeClass}`, el);
+      return;
+    }
+    const ul = span.nextElementSibling as HTMLElement;
+    if(!ul) {
+      console.error(`${holeClass} element used in node without children ul list`);
+      return;
+    };
+
+    // process children
+    Array.from(ul.children).filter(c => c.classList.contains(childClass)).map(c => {
+      const child = c as HTMLElement;
+      const xposChild = 0.5 * (child.getBoundingClientRect().x + child.getBoundingClientRect().right);
+      const xdiff = xpos - xposChild;
+      let cssText = '';
+      if (xdiff < 0) {
+        cssText += `
+          --connector-left: auto;
+          --connector-right: 50%;
+          --connector-border-left-style: solid;
+          --connector-border-right-style: none;`;
+      } else {
+        cssText += `
+          --connector-left: 50%;
+          --connector-right: auto;
+          --connector-border-left-style: none;
+          --connector-border-right-style: solid;`;
+      }
+      cssText += `--connector-width: ${Math.abs(xdiff) + 1}px;`;
+      child.style.cssText = cssText;
+    });
+
+  });
 }
