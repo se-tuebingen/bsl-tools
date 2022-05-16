@@ -9,6 +9,49 @@
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetLeft
 function treeProgram(program: BSL_AST.program, target: HTMLElement){
   target.innerHTML = program.map(treeDefOrExpr).join('\n');
+  // align connectors horizontally
+  adjustConnectors('hole-1','child-1');
+  adjustConnectors('hole-2','child-2');
+  adjustConnectors('hole-3','child-3');
+}
+function adjustConnectors(holeClass:string, childClass: string) {
+  Array.from(document.getElementsByClassName(holeClass)).map(h => {
+    const el: HTMLElement = h as HTMLElement;
+    const xpos = 0.5 * (el.getBoundingClientRect().x + el.getBoundingClientRect().right) ;
+
+    // navigate the DOM
+    const div = el.parentElement as HTMLElement;
+    if(!div) {
+      console.error(`${holeClass} element in wrong structure, should be span > div > div.${holeClass}`, el);
+      return;
+    }
+    const span = el.parentElement?.parentElement as HTMLElement;
+    if(!span) {
+      console.error(`${holeClass} element in wrong structure, should be span > div > div.${holeClass}`, el);
+      return;
+    }
+    const ul = span.nextElementSibling as HTMLElement;
+    if(!ul) {
+      console.error(`${holeClass} element used in node without children ul list`);
+      return;
+    };
+
+    // process children
+    Array.from(ul.children).filter(c => c.classList.contains(childClass)).map(c => {
+      const child = c as HTMLElement;
+      const xposChild = 0.5 * (child.getBoundingClientRect().x + child.getBoundingClientRect().right);
+      const xdiff = xpos - xposChild;
+      let cssText = '';
+      if (xdiff < 0) {
+        cssText += `--connector-left: auto; --connector-right: 50%;`;
+      } else {
+        cssText += `--connector-left: 50%; --connector-right: auto;`;
+      }
+      cssText += `--connector-width: ${Math.abs(xdiff)}px;`;
+      child.style.cssText = cssText;
+    });
+
+  });
 }
 function treeDefOrExpr(root: BSL_AST.defOrExpr) {
   return `<ul class="tree ast"><li>${BSL_AST.isDefinition(root) ? treeDefinition(root): treeE(root)}</li></ul>`;
@@ -18,32 +61,32 @@ function treeDefinition(d: BSL_AST.definition) {
     return `
       <span>
         <div class="name">Function Definition</div>
-        <div>( define ( <div class="hole">name</div> <div class="hole">name+</div> ) <div class="hole">e</div> )</div>
+        <div>( define ( <div class="hole hole-1">name</div> <div class="hole hole-2">name+</div> ) <div class="hole hole-3">e</div> )</div>
       </span>
       <ul>
-        <li>${treeName(d.fname)}</li>
-        <li>${d.args.map(treeName).join('</li><li>')}</li>
-        <li>${treeE(d.body)}</li>
+        <li class="child-1">${treeName(d.fname)}</li>
+        <li class="child-2">${d.args.map(treeName).join('</li class="child-2"><li>')}</li>
+        <li class="child-3">${treeE(d.body)}</li>
       </ul>`;
   } else if(BSL_AST.isConstDef(d)) {
     return `
       <span>
         <div class="name">Constant Definition</div>
-        <div>( define <div class="hole">name</div> <div class="hole">e</div> )</div>
+        <div>( define <div class="hole hole-1">name</div> <div class="hole hole-2">e</div> )</div>
       </span>
       <ul>
-        <li>${treeName(d.cname)}</li>
-        <li>${treeE(d.value)}</li>
+        <li class="child-1">${treeName(d.cname)}</li>
+        <li class="child-2">${treeE(d.value)}</li>
       </ul>`;
   } else if(BSL_AST.isStructDef(d)) {
     return `
       <span>
         <div class="name">Struct Definition</div>
-        <div>(define-struct <div class="hole">name</div> ( <div class="hole">name*</div> ) )</div>
+        <div>(define-struct <div class="hole hole-1">name</div> ( <div class="hole hole-2">name*</div> ) )</div>
       </span>
       <ul>
-        <li>${treeName(d.binding)}</li>
-        <li>${d.properties.map(treeName).join('</li><li>')}</li>
+        <li class="child-1">${treeName(d.binding)}</li>
+        <li class="child-2">${d.properties.map(treeName).join('</li class="child-2"><li>')}</li>
       </ul>`;
   } else {
     console.error('Invalid input to printDefinition');
@@ -54,20 +97,20 @@ function treeE(e: BSL_AST.expr): string {
     return `
       <span>
         <div class="name">Function Call</div>
-        <div>( <div class="hole">name</div> <div class="hole">e*</div> )</div>
+        <div>( <div class="hole hole-1">name</div> <div class="hole hole-2">e*</div> )</div>
       </span>
       <ul>
-        <li>${treeName(e.fname)}</li>
-        <li>${e.args.map(treeE).join('</li><li>')}</li>
+        <li class="child-1">${treeName(e.fname)}</li>
+        <li class="child-2">${e.args.map(treeE).join('</li><li class="child-2">')}</li>
       </ul>`;
   } else if(BSL_AST.isCond(e)) {
     return `
       <span>
         <div class="name">Cond-Expression</div>
-        <div>( cond <div class="hole">[ e e ]+</div> )</div>
+        <div>( cond <div class="hole hole-2">[ e e ]+</div> )</div>
       </span>
       <ul>
-        <li>${e.options.map(treeOption).join('</li><li>')}</li>
+        <li class="child-2">${e.options.map(treeOption).join('</li class="child-2"><li>')}</li>
       </ul>`;
   } else if(BSL_AST.isName(e)) {
     return treeName(e);
@@ -87,11 +130,11 @@ function treeOption(o: BSL_AST.Clause) {
   return `
     <span>
       <div class="name">Cond-Option</div>
-      <div>[ <div class="hole">e</div> <div class="hole">e</div> ]</div>
+      <div>[ <div class="hole hole-1">e</div> <div class="hole hole-2">e</div> ]</div>
     </span>
     <ul>
-      <li>${treeE(o.condition)}</li>
-      <li>${treeE(o.result)}</li>
+      <li class="child-1">${treeE(o.condition)}</li>
+      <li class="child-2">${treeE(o.result)}</li>
     </ul>
   `;
 }

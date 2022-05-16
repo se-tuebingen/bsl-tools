@@ -1,3 +1,6 @@
+.tree {
+  --branch-color: #666;
+}
 /*
 CSS for tree by Ross Angus
 https://www.cssscript.com/clean-tree-diagram/
@@ -32,7 +35,7 @@ https://www.cssscript.com/clean-tree-diagram/
 }
 
 .tree li:before {
-    outline: solid 1px #666;
+    outline: solid 1px var(--branch-color);
     content: "";
     left: 0;
     position: absolute;
@@ -50,7 +53,7 @@ https://www.cssscript.com/clean-tree-diagram/
 
 .tree code,
 .tree span {
-    border: solid .1em #666;
+    border: solid .1em var(--branch-color);
     border-radius: .2em;
     display: inline-block;
     margin: 0 .2em .5em;
@@ -58,19 +61,19 @@ https://www.cssscript.com/clean-tree-diagram/
     position: relative;
 }
 
-.tree ul:before,
+/* .tree ul:before, */
 .tree code:before,
 .tree span:before {
-    outline: solid 1px #666;
+    outline: solid 1px var(--branch-color);
     content: "";
     height: .5em;
     left: 50%;
     position: absolute;
 }
 
-.tree ul:before {
+/* .tree ul:before {
     top: -.5em;
-}
+} */
 
 .tree code:before,
 .tree span:before {
@@ -112,10 +115,50 @@ https://www.cssscript.com/clean-tree-diagram/
   color: var(--text-grey);
   padding-left: 0.25em;
   padding-right: 0.25em;
+  position: relative;
 }
 
 /* highlight way back up */
 .tree li:hover > span {
   border-color: black;
   border-style: dashed;
+}
+
+/* assign leaves to holes */
+.ast .hole::after {
+  outline: solid 1px var(--branch-color);
+  content: "";
+  height: .7em; /* 0.5em + 0.2em padding */
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 100%;
+}
+
+.ast .hole-1::after {
+  height: .5em; /* 0.3em + 0.2em padding */
+}
+.ast li.child-1::before {
+  top: -.2em;
+}
+.ast li.child-1 > span::before {
+  top: -.75em;
+  height: 0.7em;
+}
+
+.ast .hole-3::after {
+  height: .9em; /* 0.7em + 0.2em padding */
+}
+.ast li.child-3::before {
+  top: .2em;
+}
+.ast li.child-3 > span::before {
+  top: -.35em;
+  height: 0.3em;
+}
+
+.ast li::before {
+  left: var(--connector-left, auto);
+  right: var(--connector-right, auto);
+  width: var(--connector-width, 100%);
 }
