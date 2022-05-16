@@ -43,13 +43,13 @@ https://www.cssscript.com/clean-tree-diagram/
     top: 0;
 }
 
-.tree li:first-child:before {
+/* .tree li:first-child:before {
     left: 50%;
 }
 
 .tree li:last-child:before {
     right: 50%;
-}
+} */
 
 .tree code,
 .tree span {
@@ -82,13 +82,6 @@ https://www.cssscript.com/clean-tree-diagram/
 
 .tree>li {
     margin-top: 0;
-}
-
-.tree>li:before,
-.tree>li:after,
-.tree>li>code:before,
-.tree>li>span:before {
-    outline: none;
 }
 
 /* custom AST styles */
@@ -161,4 +154,19 @@ https://www.cssscript.com/clean-tree-diagram/
   left: var(--connector-left, auto);
   right: var(--connector-right, auto);
   width: var(--connector-width, 100%);
+}
+
+/* highlight way back down */
+.tree li:hover::before {
+  outline: solid 1px black;
+}
+.tree li:hover > span::before {
+  outline: solid 1px black;
+}
+
+.tree>li:before,
+.tree>li:after,
+.tree>li>code:before,
+.tree>li>span:before {
+    outline: none !important;
 }

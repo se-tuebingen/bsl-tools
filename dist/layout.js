@@ -64,7 +64,7 @@ function treeDefinition(d) {
       </span>
       <ul>
         <li class="child-1">${treeName(d.fname)}</li>
-        <li class="child-2">${d.args.map(treeName).join('</li class="child-2"><li>')}</li>
+        <li class="child-2">${d.args.map(treeName).join('</li><li class="child-2">')}</li>
         <li class="child-3">${treeE(d.body)}</li>
       </ul>`;
     }
@@ -87,7 +87,7 @@ function treeDefinition(d) {
       </span>
       <ul>
         <li class="child-1">${treeName(d.binding)}</li>
-        <li class="child-2">${d.properties.map(treeName).join('</li class="child-2"><li>')}</li>
+        <li class="child-2">${d.properties.map(treeName).join('</li><li class="child-2">')}</li>
       </ul>`;
     }
     else {
@@ -113,7 +113,7 @@ function treeE(e) {
         <div>( cond <div class="hole hole-2">[ e e ]+</div> )</div>
       </span>
       <ul>
-        <li class="child-2">${e.options.map(treeOption).join('</li class="child-2"><li>')}</li>
+        <li class="child-2">${e.options.map(treeOption).join('</li><li class="child-2">')}</li>
       </ul>`;
     }
     else if (BSL_AST.isName(e)) {
