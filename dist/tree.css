@@ -146,3 +146,25 @@ https://www.cssscript.com/clean-tree-diagram/
 .tree>li {
     margin-top: 0;
 }
+
+/* ####### collapse nodes ######## */
+.tree span[data-collapsed] ~ ul {
+  visibility: hidden;
+}
+.tree .full {
+  display: none;
+}
+.tree span[data-collapsed] > .full {
+  display: block;
+}
+.tree span[data-collapsed] > .empty {
+  display: none;
+}
+.tree span:hover {
+  cursor: pointer;
+}
+.tree .full .hole {
+  display: inline-block;
+  transform: translate(var(--translate-x, 0), var(--translate-y, 0));
+  transition: transform 1s ease-out;
+}
