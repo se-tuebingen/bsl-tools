@@ -26,20 +26,38 @@ function treeDefinition(d: BSL_AST.definition) {
     return `
       <span>
         <div class="name">Function Definition</div>
-        <div class="empty">( define ( <div class="hole hole-1">name</div> <div class="hole hole-2">name+</div> ) <div class="hole hole-3">e</div> )</div>
-        <div class="full">( define ( <div class="hole">${pprint([d.fname])}</div> <div class="hole">${d.args.map(printName).join('</div> <div class="hole">')}</div> ) <div class="hole">${pprint([d.body])}</div> )</div>
+        <div>( define
+          (
+            <div class="part">${pprint([d.fname])}</div>
+            <div class="hole hole-1">name</div>
+
+            ${d.args.map(a =>
+              `<div class="part">${printName(a)}</div>`
+            ).join('')}
+            <div class="hole hole-2">name+</div>
+          )
+          <div class="part">${pprint([d.body])}</div>
+          <div class="hole hole-3">e</div>
+        )</div>
       </span>
       <ul>
         <li class="child-1">${treeName(d.fname)}</li>
-        <li class="child-2">${d.args.map(treeName).join('</li><li class="child-2">')}</li>
+        ${d.args.map(a =>
+          `<li class="child-2">${treeName(a)}</li>`
+        ).join('')}
         <li class="child-3">${treeE(d.body)}</li>
       </ul>`;
   } else if(BSL_AST.isConstDef(d)) {
     return `
       <span>
         <div class="name">Constant Definition</div>
-        <div class="empty">( define <div class="hole hole-1">name</div> <div class="hole hole-2">e</div> )</div>
-        <div class="full">( define <div class="hole">${pprint([d.cname])}</div> <div class="hole">${pprint([d.value])}</div> )</div>
+        <div>( define
+          <div class="part">${pprint([d.cname])}</div>
+          <div class="hole hole-1">name</div>
+
+          <div class="part">${pprint([d.value])}</div>
+          <div class="hole hole-2">e</div>
+        )</div>
       </span>
       <ul>
         <li class="child-1">${treeName(d.cname)}</li>
@@ -50,13 +68,23 @@ function treeDefinition(d: BSL_AST.definition) {
       <span>
         <div class="name">Struct Definition</div>
 
-        <div class="empty">(define-struct <div class="hole hole-1">name</div> ( <div class="hole hole-2">name*</div> ) )</div>
+        <div>(define-struct
 
-        <div class="full">(define-struct <div class="hole">${pprint([d.binding])}</div> ( <div class="hole">${d.properties.map(printName).join('</div> <div class="hole">')}</div> ) )</div>
+          <div class="part">${pprint([d.binding])}</div>
+          <div class="hole hole-1">name</div>
+          (
+            ${d.properties.map(p =>
+              `<div class="part">${printName(p)}</div>`
+            ).join(' ')}
+            <div class="hole hole-2">name*</div>
+          )
+        )</div>
       </span>
       <ul>
         <li class="child-1">${treeName(d.binding)}</li>
-        <li class="child-2">${d.properties.map(treeName).join('</li><li class="child-2">')}</li>
+        ${d.properties.map(p =>
+          `<li class="child-2">${treeName(p)}</li>`
+        ).join('')}
       </ul>`;
   } else {
     console.error('Invalid input to printDefinition');
@@ -69,23 +97,37 @@ function treeE(e: BSL_AST.expr): string {
       <span>
         <div class="name">Function Call</div>
 
-        <div class="empty">( <div class="hole hole-1">name</div> <div class="hole hole-2">e*</div> )</div>
+        <div>(
+          <div class="part">${pprint([e.fname])}</div>
+          <div class="hole hole-1">name</div>
 
-        <div class="full">( <div class="hole">${pprint([e.fname])}</div> <div class="hole">${e.args.map(printE).join('</div> <div class="hole">')}</div> )</div>
+          ${e.args.map(a =>
+            `<div class="part">${printE(a)}</div>`
+          ).join(' ')}
+          <div class="hole hole-2">e*</div>
+        )</div>
       </span>
       <ul>
         <li class="child-1">${treeName(e.fname)}</li>
-        <li class="child-2">${e.args.map(treeE).join('</li><li class="child-2">')}</li>
+        ${e.args.map(a =>
+          `<li class="child-2">${treeE(a)}</li>`
+        ).join('')}
       </ul>`;
   } else if(BSL_AST.isCond(e)) {
     return `
       <span>
         <div class="name">Cond-Expression</div>
-        <div class="empty">( cond <div class="hole hole-2">[ e e ]+</div> )</div>
-        <div class="full" style="text-align: left;">(cond <br><div class="hole">${e.options.map(printOption).join('</div> <div class="hole">')}</div><br>)</div>
+        <div>( cond
+          ${e.options.map(o =>
+            `<div class="part">${printOption(o)}</div>`
+          ).join(' ')}
+          <div class="hole hole-2">[ e e ]+</div>
+         )</div>
       </span>
       <ul>
-        <li class="child-2">${e.options.map(treeOption).join('</li><li class="child-2">')}</li>
+        ${e.options.map(o =>
+          `<li class="child-2">${treeOption(o)}</li>`
+        ).join(' ')}
       </ul>`;
   } else if(BSL_AST.isName(e)) {
     return treeName(e);
@@ -105,8 +147,14 @@ function treeOption(o: BSL_AST.Clause) {
   return `
     <span>
       <div class="name">Cond-Option</div>
-      <div class="empty">[ <div class="hole hole-1">e</div> <div class="hole hole-2">e</div> ]</div>
-      <div class="full">[ <div class="hole">${pprint([o.condition])}</div> <div class="hole">${pprint([o.result])}</div> ]</div>
+      <div>[
+        <div class="part">${pprint([o.condition])}</div>
+        <div class="hole hole-1">e</div>
+
+        <div class="part">${pprint([o.result])}</div>
+        <div class="hole hole-2">e</div>
+       ]
+      </div>
     </span>
     <ul>
       <li class="child-1">${treeE(o.condition)}</li>

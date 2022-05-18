@@ -65,8 +65,8 @@ https://www.cssscript.com/clean-tree-diagram/
   text-align: left;
   margin-bottom: 0.5em;
 }
-.tree .hole {
-  display: inline;
+.tree .hole, .tree .part {
+  display: inline-block;
   background-color: var(--hole-yellow);
   border: 1px solid var(--text-grey);
   color: var(--text-grey);
@@ -172,8 +172,19 @@ https://www.cssscript.com/clean-tree-diagram/
   transition: opacity 1s ease-out;
 }
 
+/* show/hide parts/holes */
+.tree .part {
+  display: none;
+}
+.tree span[data-collapsed] .part {
+  display: inline-block;
+}
+.tree span[data-collapsed] .hole {
+  display: none;
+}
+
 /* float holes to leaves */
-.tree .full {
+/* .tree .full {
   display: none;
 }
 .tree span[data-collapsed] > .full {
@@ -187,4 +198,4 @@ https://www.cssscript.com/clean-tree-diagram/
   display: inline-block;
   transform: translate(var(--translate-x, 0), var(--translate-y, 0));
   transition: transform 1s ease-out;
-}
+} */
