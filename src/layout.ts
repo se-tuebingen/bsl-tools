@@ -139,21 +139,7 @@ function adjustConnectors(holeClass:string, childClass: string) {
     if (xpos == 0) return;
 
     // navigate the DOM
-    const div = el.parentElement as HTMLElement;
-    if(!div) {
-      console.error(`${holeClass} element in wrong structure, should be span > div > div.${holeClass}`, el);
-      return;
-    }
-    const span = el.parentElement?.parentElement as HTMLElement;
-    if(!span) {
-      console.error(`${holeClass} element in wrong structure, should be span > div > div.${holeClass}`, el);
-      return;
-    }
-    const ul = span.nextElementSibling as HTMLElement;
-    if(!ul) {
-      console.error(`${holeClass} element used in node without children ul list`);
-      return;
-    };
+    const ul = navigateDOM([el], '../../+')[0];
 
     // process children
     Array.from(ul.children).filter(c => c.classList.contains(childClass)).map(c => {
@@ -182,35 +168,77 @@ function adjustConnectors(holeClass:string, childClass: string) {
 }
 // add information on where holes should move on expansion
 function addHoleTranslations() {
-  Array.from(document.getElementsByClassName('full')).map(d => {
-    const div: HTMLElement = d as HTMLElement;
-    const holes = Array.from(div.getElementsByClassName('hole'));
+  // Array.from(document.getElementsByClassName('full')).map(d => {
+  //   const div: HTMLElement = d as HTMLElement;
+  //   const holes = Array.from(div.getElementsByClassName('hole'));
+  //
+  //   const span: HTMLElement = div.parentElement as HTMLElement;
+  //   if(!span) { console.error("hole without parent"); return; }
+  //   const ul: HTMLElement = span.nextElementSibling as HTMLElement;
+  //   if(!ul) { console.error("hole in span without ul sibling"); return; }
+  //
+  //   const childNodes = Array.from(ul.children
+  //     ).filter(c => c.tagName == 'LI'
+  //     ).flatMap(c => Array.from(c.children)
+  //     ).filter(c => c.tagName == 'SPAN'
+  //   ).map(c => Array.from(c.children).filter(c => c.tagName == 'DIV')[1]);
+  //
+  //   if(holes.length != childNodes.length) {
+  //     console.error(`Holes length: ${holes.length}, child Nodes length: ${childNodes.length}.`);
+  //     return;
+  //   }
+  //   for(let i = 0; i < holes.length; i++) {
+  //     console.log(`Matching up: ${holes[i].innerHTML} and ${childNodes[i].innerHTML}`);
+  //     const childX = childNodes[i].getBoundingClientRect().x;
+  //     const childY = childNodes[i].getBoundingClientRect().y;
+  //
+  //     holes[i].setAttribute('data-translate-x', `${childX}`);
+  //     holes[i].setAttribute('data-translate-y', `${childY}`);
+  //   }
+  //
+  // });
+}
 
-    const span: HTMLElement = div.parentElement as HTMLElement;
-    if(!span) { console.error("hole without parent"); return; }
-    const ul: HTMLElement = span.nextElementSibling as HTMLElement;
-    if(!ul) { console.error("hole in span without ul sibling"); return; }
+// navigate the DOM using path notation
+// .. -> parent
+// +  -> next sibling
+// .class -> all children with a class
+// tag -> all children of a certain tag
+// divided by /
+function navigateDOM(positions: HTMLElement[], path: string): HTMLElement[] {
+  const steps = path.split('/');
+  const currStep = steps.shift() as string;
+  if (currStep == '') return positions;
+  const restSteps = steps.join('/');
 
-    const childNodes = Array.from(ul.children
-      ).filter(c => c.tagName == 'LI'
-      ).flatMap(c => Array.from(c.children)
-      ).filter(c => c.tagName == 'SPAN'
-    ).map(c => Array.from(c.children).filter(c => c.tagName == 'DIV')[1]);
-
-    if(holes.length != childNodes.length) {
-      console.error(`Holes length: ${holes.length}, child Nodes length: ${childNodes.length}.`);
-      return;
+  if (currStep == '..') {
+    // navigate up
+    const newPositions = positions.map(p => p.parentElement);
+    if (newPositions.every(p => p)) {
+      return navigateDOM(newPositions as HTMLElement[], restSteps);
+    } else {
+      console.error(`Error traversing ${path}: Missing parentElement`, positions);
+      return [];
     }
-    for(let i = 0; i < holes.length; i++) {
-      console.log(`Matching up: ${holes[i].innerHTML} and ${childNodes[i].innerHTML}`);
-      const childX = childNodes[i].getBoundingClientRect().x;
-      const childY = childNodes[i].getBoundingClientRect().y;
-
-      holes[i].setAttribute('data-translate-x', `${childX}`);
-      holes[i].setAttribute('data-translate-y', `${childY}`);
+  } else if (currStep == '+') {
+    // navigate sideways
+    const newPositions = positions.map(p => p.nextElementSibling);
+    if (newPositions.every(p => p)) {
+      return navigateDOM(newPositions as HTMLElement[], restSteps);
+    } else {
+      console.error(`Error traversing ${path}: Missing nextElementSibling`, positions);
+      return [];
     }
-
-  });
+  } else if (currStep.startsWith('.')) {
+    // navigate down + filter for class
+    const className = currStep.slice(1);
+    const newPositions = positions.flatMap(p => Array.from(p.children).filter(c => c.classList.contains(className)));
+    return navigateDOM(newPositions as HTMLElement[], restSteps);
+  } else {
+    // navigate down + filter for tag
+    const newPositions = positions.flatMap(p => Array.from(p.children).filter(c => c.tagName == currStep.toUpperCase()));
+    return navigateDOM(newPositions as HTMLElement[], restSteps);
+  }
 }
 
 // collapse/expand nodes
@@ -219,33 +247,34 @@ function addCollapsers(target: HTMLElement) {
     l.onclick = () => {
       const li : HTMLElement  = l as HTMLElement;
       if(li.getAttribute('data-collapsed')) {
-        // move holes where children will be
-        const full = Array.from(li.children).filter(c => c.classList.contains('full'))[0] as HTMLElement;
-        if(!full) { console.error('expanding node without full div in span', li); return; }
-
-        Array.from(full.children).filter(
-          c => c.classList.contains('hole')
-        ).map(c => {
-          console.log('Moving',c);
-          const el = c as HTMLElement;
-          const currX = c.getBoundingClientRect().x;
-          const currY = c.getBoundingClientRect().y;
-          const shouldX = Math.floor(parseFloat(el.getAttribute('data-translate-x') as string));
-          const shouldY = Math.floor(parseFloat(el.getAttribute('data-translate-y') as string));
-          el.style.cssText = `
-            --translate-x: ${shouldX - currX}px;
-            --translate-y: 3em;
-          `; // TODO: fix y coordinate, handle centering
-          console.log(el);
-          window.setTimeout(() => {
-            el.style.cssText = '';
-          }, 1100);
-        });
-
-        // wait until animation has finished
-        window.setTimeout(() => {
-          li.removeAttribute('data-collapsed');
-        }, 1000);
+        // // move holes where children will be
+        // const full = Array.from(li.children).filter(c => c.classList.contains('full'))[0] as HTMLElement;
+        // if(!full) { console.error('expanding node without full div in span', li); return; }
+        //
+        // Array.from(full.children).filter(
+        //   c => c.classList.contains('hole')
+        // ).map(c => {
+        //   console.log('Moving',c);
+        //   const el = c as HTMLElement;
+        //   const currX = c.getBoundingClientRect().x;
+        //   const currY = c.getBoundingClientRect().y;
+        //   const shouldX = Math.floor(parseFloat(el.getAttribute('data-translate-x') as string));
+        //   const shouldY = Math.floor(parseFloat(el.getAttribute('data-translate-y') as string));
+        //   el.style.cssText = `
+        //     --translate-x: ${shouldX - currX}px;
+        //     --translate-y: 3em;
+        //   `; // TODO: fix y coordinate, handle centering
+        //   console.log(el);
+        //   window.setTimeout(() => {
+        //     el.style.cssText = '';
+        //   }, 1100);
+        // });
+        //
+        // // wait until animation has finished
+        // window.setTimeout(() => {
+        //   li.removeAttribute('data-collapsed');
+        // }, 1000);
+        li.removeAttribute('data-collapsed');
       } else {
         li.setAttribute('data-collapsed', 'true');
         const ul = li.nextElementSibling as HTMLElement;
