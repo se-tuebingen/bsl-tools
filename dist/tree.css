@@ -65,15 +65,6 @@ https://www.cssscript.com/clean-tree-diagram/
   text-align: left;
   margin-bottom: 0.5em;
 }
-.tree .hole {
-  display: inline-block;
-  background-color: var(--hole-yellow);
-  border: 1px solid var(--text-grey);
-  color: var(--text-grey);
-  padding-left: 0.25em;
-  padding-right: 0.25em;
-  position: relative;
-}
 
 /* ###### connectors ########### */
 /* part above box */
@@ -166,21 +157,35 @@ https://www.cssscript.com/clean-tree-diagram/
   opacity: 0%;
   visibility: hidden;
   animation: hide-delayed 1s;
+  transition: opacity 0.5s ease-out 0.5s;
 }
 .tree ul {
   opacity: 100%;
   transition: opacity 1s ease-out;
 }
 
-/* show/hide parts/holes */
+/* ######### holes ########## */
+.tree .hole {
+  display: inline-block;
+  background-color: var(--hole-yellow);
+  border: 1px solid var(--text-grey);
+  color: var(--text-grey);
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  position: relative;
+}
+/* show/hide parts/holes  and float them into place */
 .tree .code, .tree .placeholder {
-  display: inline;
+  display: inline-block;
 }
 .tree .code {
-  color: transparent;
+  /* color: transparent; */
+  transform: translate(var(--translate-x,0), var(--translate-y,0));
+  transition: transform 1s ease-out;
 }
 .tree span[data-collapsed] .code {
   color: var(--text-grey);
+  transform: translate(0,0);
 }
 .tree .placeholder {
   color: var(--text-grey);
@@ -200,20 +205,3 @@ https://www.cssscript.com/clean-tree-diagram/
 .tree .hole-names {
   min-width: 2.5em;
 }
-
-/* float holes to leaves */
-/* .tree .full {
-  display: none;
-}
-.tree span[data-collapsed] > .full {
-  display: block;
-}
-.tree span[data-collapsed] > .empty {
-  display: none;
-}
-
-.tree .full .hole {
-  display: inline-block;
-  transform: translate(var(--translate-x, 0), var(--translate-y, 0));
-  transition: transform 1s ease-out;
-} */

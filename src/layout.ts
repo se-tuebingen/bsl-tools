@@ -9,9 +9,9 @@
 function treeProgram(program: BSL_AST.program, target: HTMLElement){
   target.innerHTML = program.map(treeDefOrExpr).join('\n');
   // align connectors horizontally
-  adjustAllConnectors();
+  adjustAllConnectors(target);
   // add data where holes should move upon expanding
-  addHoleTranslations();
+  addHoleTranslations(target);
   // add collapsers
   addCollapsers(target);
 }
@@ -196,13 +196,13 @@ function treeName(s: BSL_AST.Name): string {
 // ###### layout helper ########
 // dynamically compute dimensions of connectors between nodes
 // such that they point to the correct "hole"
-function adjustAllConnectors() {
-  adjustConnectors('hole-1','child-1');
-  adjustConnectors('hole-2','child-2');
-  adjustConnectors('hole-3','child-3');
+function adjustAllConnectors(tree: HTMLElement) {
+  adjustConnectors(tree,'hole-1','child-1');
+  adjustConnectors(tree,'hole-2','child-2');
+  adjustConnectors(tree,'hole-3','child-3');
 }
-function adjustConnectors(holeClass:string, childClass: string) {
-  Array.from(document.getElementsByClassName(holeClass)).map(h => {
+function adjustConnectors(tree: HTMLElement, holeClass:string, childClass: string) {
+  Array.from(tree.getElementsByClassName(holeClass)).map(h => {
     const el: HTMLElement = h as HTMLElement;
     const xpos = 0.5 * (el.getBoundingClientRect().x + el.getBoundingClientRect().right) ;
     // no layout effect if hole is invisible
@@ -237,36 +237,33 @@ function adjustConnectors(holeClass:string, childClass: string) {
   });
 }
 // add information on where holes should move on expansion
-function addHoleTranslations() {
-  // Array.from(document.getElementsByClassName('full')).map(d => {
-  //   const div: HTMLElement = d as HTMLElement;
-  //   const holes = Array.from(div.getElementsByClassName('hole'));
-  //
-  //   const span: HTMLElement = div.parentElement as HTMLElement;
-  //   if(!span) { console.error("hole without parent"); return; }
-  //   const ul: HTMLElement = span.nextElementSibling as HTMLElement;
-  //   if(!ul) { console.error("hole in span without ul sibling"); return; }
-  //
-  //   const childNodes = Array.from(ul.children
-  //     ).filter(c => c.tagName == 'LI'
-  //     ).flatMap(c => Array.from(c.children)
-  //     ).filter(c => c.tagName == 'SPAN'
-  //   ).map(c => Array.from(c.children).filter(c => c.tagName == 'DIV')[1]);
-  //
-  //   if(holes.length != childNodes.length) {
-  //     console.error(`Holes length: ${holes.length}, child Nodes length: ${childNodes.length}.`);
-  //     return;
-  //   }
-  //   for(let i = 0; i < holes.length; i++) {
-  //     console.log(`Matching up: ${holes[i].innerHTML} and ${childNodes[i].innerHTML}`);
-  //     const childX = childNodes[i].getBoundingClientRect().x;
-  //     const childY = childNodes[i].getBoundingClientRect().y;
-  //
-  //     holes[i].setAttribute('data-translate-x', `${childX}`);
-  //     holes[i].setAttribute('data-translate-y', `${childY}`);
-  //   }
-  //
-  // });
+function addHoleTranslations(tree: HTMLElement) {
+  Array.from(tree.getElementsByClassName('name')).map(e => {
+    // code figments in parent node
+    const codes = navigateDOM([e as HTMLElement], '+/.hole/.code');
+    if(codes.length == 0) return;
+    // corresponding child node elements
+    const children = navigateDOM([e as HTMLElement], '../+/li/span/.name/+');
+
+    if(codes.length != children.length) {
+      console.error('Error: More or less children than code figments', e, codes, children);
+      return;
+    }
+
+    for(let i = 0; i < codes.length; i++) {
+      const code = codes[i];
+      const child = children[i];
+
+      const codePos = code.getBoundingClientRect();
+      const childPos = child.getBoundingClientRect();
+
+      code.style.cssText = `
+        --translate-x: ${(childPos.x + childPos.right)/2 - (codePos.x + codePos.right)/2}px;
+        --translate-y: ${childPos.y - codePos.y}px;
+      `;
+    }
+
+  });
 }
 
 // navigate the DOM using path notation
@@ -317,43 +314,16 @@ function addCollapsers(target: HTMLElement) {
     l.onclick = () => {
       const li : HTMLElement  = l as HTMLElement;
       if(li.getAttribute('data-collapsed')) {
-        // // move holes where children will be
-        // const full = Array.from(li.children).filter(c => c.classList.contains('full'))[0] as HTMLElement;
-        // if(!full) { console.error('expanding node without full div in span', li); return; }
-        //
-        // Array.from(full.children).filter(
-        //   c => c.classList.contains('hole')
-        // ).map(c => {
-        //   console.log('Moving',c);
-        //   const el = c as HTMLElement;
-        //   const currX = c.getBoundingClientRect().x;
-        //   const currY = c.getBoundingClientRect().y;
-        //   const shouldX = Math.floor(parseFloat(el.getAttribute('data-translate-x') as string));
-        //   const shouldY = Math.floor(parseFloat(el.getAttribute('data-translate-y') as string));
-        //   el.style.cssText = `
-        //     --translate-x: ${shouldX - currX}px;
-        //     --translate-y: 3em;
-        //   `; // TODO: fix y coordinate, handle centering
-        //   console.log(el);
-        //   window.setTimeout(() => {
-        //     el.style.cssText = '';
-        //   }, 1100);
-        // });
-        //
-        // // wait until animation has finished
-        // window.setTimeout(() => {
-        //   li.removeAttribute('data-collapsed');
-        // }, 1000);
         li.removeAttribute('data-collapsed');
       } else {
         li.setAttribute('data-collapsed', 'true');
         const ul = li.nextElementSibling as HTMLElement;
         if(!ul) return;
+        // recursively close children
         Array.from(ul.getElementsByTagName('span')).map(s => {
           s.setAttribute('data-collapsed', 'true');
         });
       }
-      // adjustAllConnectors(); unnecessary for display:hidden
     }
   });
 }
