@@ -148,9 +148,31 @@ https://www.cssscript.com/clean-tree-diagram/
 }
 
 /* ####### collapse nodes ######## */
-.tree span[data-collapsed] ~ ul {
-  visibility: hidden;
+/* click on span to hide/show */
+.tree span:hover {
+  cursor: pointer;
 }
+
+/* smooth transition between hiding and showing */
+@keyframes hide-delayed {
+  99% {
+    visibility: visible;
+  }
+  100% {
+    visibility: hidden;
+  }
+}
+.tree span[data-collapsed] ~ ul {
+  opacity: 0%;
+  visibility: hidden;
+  animation: hide-delayed 1s;
+}
+.tree ul {
+  opacity: 100%;
+  transition: opacity 1s ease-out;
+}
+
+/* float holes to leaves */
 .tree .full {
   display: none;
 }
@@ -160,9 +182,7 @@ https://www.cssscript.com/clean-tree-diagram/
 .tree span[data-collapsed] > .empty {
   display: none;
 }
-.tree span:hover {
-  cursor: pointer;
-}
+
 .tree .full .hole {
   display: inline-block;
   transform: translate(var(--translate-x, 0), var(--translate-y, 0));
