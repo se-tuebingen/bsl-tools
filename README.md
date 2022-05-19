@@ -28,3 +28,12 @@ and the [Info 1 script at 8.3](https://ps-tuebingen.github.io/informatik-1-skrip
 [] Abstract Syntax Tree als Datentyp in TypeScript beschreiben
 [] Show Tree Structure BSL
 [] Transform Racket sexpr -> JSON / other datat structure
+
+# Meeting 19.05.22
+
+- Parser in JS/TS bauen
+- Scribble Plugin bauen für ("string" / sexpr -> Tree)
+
+
+## Nice to have
+- PNG Vollbild von Tree für PDF
