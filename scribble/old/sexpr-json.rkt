@@ -39,8 +39,8 @@ nested-sexpr
     [(cons? sexpr) (cons (first sexpr) (sexpr->list (rest sexpr)))]
     )
 )
-
-(list?(sexpr->list sexpr))
+(for ([i sexpr])
+(sexpr->list sexpr)
 (jsexpr? (sexpr->list sexpr))
 ;list->jsexpr-list
 ; ListOfSymbols -> JSExpression List
