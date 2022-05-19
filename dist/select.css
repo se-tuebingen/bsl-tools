@@ -1,0 +1,3 @@
+.selectable [data-selected] {
+  background-color: paleturquoise;
+}
