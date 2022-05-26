@@ -35,13 +35,12 @@ nested-sexpr
 (define (sexpr->list sexpr)
   (cond
     [(empty? sexpr)empty]
-    [(symbol? (first sexpr))(cons(symbol->string (first sexpr))(sexpr->list(rest sexpr)))]
     [(cons? sexpr) (cons (first sexpr) (sexpr->list (rest sexpr)))]
     )
 )
-(for ([i sexpr])
+
+
 (sexpr->list sexpr)
-(jsexpr? (sexpr->list sexpr))
 ;list->jsexpr-list
 ; ListOfSymbols -> JSExpression List
 ; (define (slist->jslist slst)
