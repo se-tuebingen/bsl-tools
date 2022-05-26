@@ -94,3 +94,14 @@
 ; simple example
 
 (define sexpr '(+ (* 4 5) 3))
+
+; define a function to extract the expr
+(define (extract-expr sexpr)
+  (cond
+    [(empty? sexpr)empty]
+    [(keyword? (first sexpr))
+    (cons(first sexpr)(extract-expr (rest sexpr)))]
+    [(cons? sexpr) (cons (first sexpr) 
+    (extract-expr (rest sexpr)))]   
+    )
+)
