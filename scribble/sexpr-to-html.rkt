@@ -57,55 +57,103 @@
 ;
 
 ; BSL-Tree data definitions
-; program type
-(define program (listof defOrExpr))
+
+; name is a keyword
+(define name (keyword?))
+
+; Value types
+(define v (or/c name boolean? string? number? '()))
+
+; Expr is call or cond or name or v
+(define expr (or/c call cond name v))
+
+; clause is a pair of expr
+(define clause (pair expr expr))
+
+; Cond: List of clauses
+(define cond (list? clause))
+
+; call is a name and list of expr
+(define call (pair name (list expr)))
+
+; funDef is a name a list of names and a expr
+(define funDef (pair name (pair (list name) expr)))
+
+; constDef is a name and a expr
+(define constDef (pair name expr))
+
+; structDef is a name and a list of names
+(define structDef (pair name (list name)))
+
+; definition is either a funDef or constDef or structDef
+(define definition (or/c funDef constDef structDef))
+
+;definitions
+(define definition (or/c FunDef ConstDef StructDef))
+
 ;defOrExpr
 (define defOrExpr (or/c definition expr))
 
-; definitions
-(define definition (or/c FunDef ConstDef StructDef))
-
-; FunDef
-(define FunDef (fname, args, body))
-; ConstDef
-(define ConstDef (cname, value))
-; StructDef
-(define StructDef (binding, properties))
-
-; Call
-(define Call (fname, args))
-; Clause
-(define Clause (condition, result))
-; define contract: Cond is list of Clause
-(define Cond (listof Clause))
+; program type
+(define program (listof defOrExpr))
 
 
-; Expr type
-(define expr (or/c keyword? v)) ; add call cond later
 
-; Value types
-(define v (or/c boolean? string? number? '()))
-
-; add Definitions later
-
-; Name Type
-(define name (or/c keyword?))
+; Example program
+;
+(program (list (funDef (name (keyword "x2"))
+                          (list (name (keyword "x")))
+                          (expr (name (keyword "x"))))
+                (call (name (keyword "+"))
+                      (list (expr (v 2))))))
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+;;; ;sexpr->program
+;;; (define sexpr->program
+;;;   (lambda (sexpr)
+;;;     (cond
+;;;       ((and (keyword? sexpr)
+;;;             (keyword? (keyword "define")))
+;;;        (list (name (keyword "define"))
+;;;              (sexpr->program (cdr sexpr))
+;;;              (sexpr->program (cddr sexpr))))
+;;;       ((and (keyword? sexpr)
+;;;             (keyword? (keyword "call")))
+;;;        (list (name (keyword "call"))
+;;;              (sexpr->program (cdr sexpr))
+;;;              (sexpr->program (cddr sexpr))))
+;;;       ((and (keyword? sexpr)
+;;;             (keyword? (keyword "cond")))
+;;;        (list (name (keyword "cond"))
+;;;              (sexpr->program (cdr sexpr))))
+;;;       ((and (keyword? sexpr)
+;;;             (keyword? (keyword "let")))
+;;;        (list (name (keyword "let"))
+;;;              (sexpr->program (cdr sexpr))
+;;;              (sexpr->program (cddr sexpr))))
+;;;       ((and (keyword? sexpr)
+;;;             (keyword? (keyword "letrec")))
+;;;        (list (name (keyword "letrec"))
+;;;              (sexpr->program (cdr sexpr))
+;;;              (sexpr->program (cddr sexpr))))
+;;;       ((and (keyword? sexpr)
+;;;             (keyword? (keyword "let*")))
+;;;        (list (name (keyword "let*"))
+;;;              (sexpr->program (cdr sexpr))
+;;;              (sexpr->program (cddr sexpr))))
+;;;       ((and (keyword? sexpr)
+;;;             (keyword? (keyword "letrec*")))
+;;;        (list (name (keyword "letrec*"))
+;;;              (sexpr->program (cdr sexpr))
+;;;              (sexpr->program (cddr sexpr))))
+;;;       ((and (keyword? sexpr)
+;;;             (keyword? (keyword "let-values")))
+;;;        (list (name (keyword "let-values"))
+;;;              (sexpr-> program (cdr sexpr))  ; bindings  (listof (pair name expr))
 
 
 ; JSON container
