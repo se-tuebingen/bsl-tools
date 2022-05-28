@@ -26,18 +26,18 @@
 ;     </ul>            )
 ;     <li></li>       3
 ;   </ul>             )
-; </ul>              ) 
+; </ul>              )
 ; </bsl-tree>
 
 
 ; NEW (IF IN HTML)
-; 
+;
 ;<bsl-tree>
-;   <ul>            
+;   <ul>
 ;       <li>            (+
-;        <ul> 
+;        <ul>
 ;           <li></li>       (* a b)
-;           <li></li>       2           
+;           <li></li>       2
 ;        </ul>
 ;       </li>           )
 ;   </ul>
@@ -46,7 +46,7 @@
 ; Possible JSON
 ;
 ; JSON STRUCTURE
-; {"data": [define, 
+; {"data": [define,
 ;                [x],
 ;                [2],
 ;          ]
@@ -56,23 +56,60 @@
 ;              3]}
 ;
 
+; BSL-Tree data definitions
+; program type
+(define program (listof defOrExpr))
+;defOrExpr
+(define defOrExpr (or/c definition expr))
 
-(provide sexpr->json-container)
+; definitions
+(define definition (or/c FunDef ConstDef StructDef))
 
-; Value types
-(define v (or/c boolean? string? number? '()))
-; 
+; FunDef
+(define FunDef (fname, args, body))
+; ConstDef
+(define ConstDef (cname, value))
+; StructDef
+(define StructDef (binding, properties))
+
+; Call
+(define Call (fname, args))
+; Clause
+(define Clause (condition, result))
+; define contract: Cond is list of Clause
+(define Cond (listof Clause))
+
 
 ; Expr type
 (define expr (or/c keyword? v)) ; add call cond later
+
+; Value types
+(define v (or/c boolean? string? number? '()))
 
 ; add Definitions later
 
 ; Name Type
 (define name (or/c keyword?))
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ; JSON container
-(struct/contract JSON-container 
+(struct/contract JSON-container
 ([expr-list (listof expr)]))
 
 ; for now its only
@@ -84,8 +121,8 @@
     [(empty? sexpr)empty]
     [(keyword? (first sexpr))
     (cons(first sexpr)(sexpr->json-container (rest sexpr)))]
-    [(cons? sexpr) (cons (first sexpr) 
-    (sexpr->json-container (rest sexpr)))]   
+    [(cons? sexpr) (cons (first sexpr)
+    (sexpr->json-container (rest sexpr)))]
     )
 )
 
@@ -101,7 +138,7 @@
     [(empty? sexpr)empty]
     [(keyword? (first sexpr))
     (cons(first sexpr)(extract-expr (rest sexpr)))]
-    [(cons? sexpr) (cons (first sexpr) 
-    (extract-expr (rest sexpr)))]   
+    [(cons? sexpr) (cons (first sexpr)
+    (extract-expr (rest sexpr)))]
     )
 )
