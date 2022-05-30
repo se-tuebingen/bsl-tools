@@ -29,7 +29,7 @@ function treeDefinition(d: BSL_AST.definition) {
         <div>( define
           (
             <div class="hole hole-1 hole-name">
-              <div class="code">${pprint([d.fname])}</div>
+              <div class="code">${pprint([d.name])}</div>
               <div class="placeholder">name</div>
             </div>
             <div class="hole hole-2 hole-names">
@@ -46,7 +46,7 @@ function treeDefinition(d: BSL_AST.definition) {
         )</div>
       </span>
       <ul>
-        <li class="child-1">${treeName(d.fname)}</li>
+        <li class="child-1">${treeName(d.name)}</li>
         ${d.args.map(a =>
           `<li class="child-2">${treeName(a)}</li>`
         ).join('')}
@@ -58,7 +58,7 @@ function treeDefinition(d: BSL_AST.definition) {
         <div class="name">Constant Definition</div>
         <div>( define
           <div class="hole hole-1 hole-name">
-            <div class="code">${pprint([d.cname])}</div>
+            <div class="code">${pprint([d.name])}</div>
             <div class="placeholder">name</div>
           </div>
 
@@ -69,7 +69,7 @@ function treeDefinition(d: BSL_AST.definition) {
         )</div>
       </span>
       <ul>
-        <li class="child-1">${treeName(d.cname)}</li>
+        <li class="child-1">${treeName(d.name)}</li>
         <li class="child-2">${treeE(d.value)}</li>
       </ul>`;
   } else if(BSL_AST.isStructDef(d)) {
@@ -111,7 +111,7 @@ function treeE(e: BSL_AST.expr): string {
 
         <div>(
           <div class="hole hole-1 hole-name">
-            <div class="code">${pprint([e.fname])}</div>
+            <div class="code">${pprint([e.name])}</div>
             <div class="placeholder">name</div>
           </div>
 
@@ -124,7 +124,7 @@ function treeE(e: BSL_AST.expr): string {
         )</div>
       </span>
       <ul>
-        <li class="child-1">${treeName(e.fname)}</li>
+        <li class="child-1">${treeName(e.name)}</li>
         ${e.args.map(a =>
           `<li class="child-2">${treeE(a)}</li>`
         ).join('')}

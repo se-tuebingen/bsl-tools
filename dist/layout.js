@@ -26,7 +26,7 @@ function treeDefinition(d) {
         <div>( define
           (
             <div class="hole hole-1 hole-name">
-              <div class="code">${pprint([d.fname])}</div>
+              <div class="code">${pprint([d.name])}</div>
               <div class="placeholder">name</div>
             </div>
             <div class="hole hole-2 hole-names">
@@ -41,7 +41,7 @@ function treeDefinition(d) {
         )</div>
       </span>
       <ul>
-        <li class="child-1">${treeName(d.fname)}</li>
+        <li class="child-1">${treeName(d.name)}</li>
         ${d.args.map(a => `<li class="child-2">${treeName(a)}</li>`).join('')}
         <li class="child-3">${treeE(d.body)}</li>
       </ul>`;
@@ -52,7 +52,7 @@ function treeDefinition(d) {
         <div class="name">Constant Definition</div>
         <div>( define
           <div class="hole hole-1 hole-name">
-            <div class="code">${pprint([d.cname])}</div>
+            <div class="code">${pprint([d.name])}</div>
             <div class="placeholder">name</div>
           </div>
 
@@ -63,7 +63,7 @@ function treeDefinition(d) {
         )</div>
       </span>
       <ul>
-        <li class="child-1">${treeName(d.cname)}</li>
+        <li class="child-1">${treeName(d.name)}</li>
         <li class="child-2">${treeE(d.value)}</li>
       </ul>`;
     }
@@ -102,7 +102,7 @@ function treeE(e) {
 
         <div>(
           <div class="hole hole-1 hole-name">
-            <div class="code">${pprint([e.fname])}</div>
+            <div class="code">${pprint([e.name])}</div>
             <div class="placeholder">name</div>
           </div>
 
@@ -113,7 +113,7 @@ function treeE(e) {
         )</div>
       </span>
       <ul>
-        <li class="child-1">${treeName(e.fname)}</li>
+        <li class="child-1">${treeName(e.name)}</li>
         ${e.args.map(a => `<li class="child-2">${treeE(a)}</li>`).join('')}
       </ul>`;
     }

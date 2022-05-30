@@ -10,9 +10,9 @@ function printDefOrExpr(eod: BSL_AST.defOrExpr) {
 }
 function printDefinition(d: BSL_AST.definition) {
   if(BSL_AST.isFunDef(d)) {
-    return `(define ${printName(d.fname)} (${d.args.map(printName).join(' ')}) ${printE(d.body)})`;
+    return `(define ${printName(d.name)} (${d.args.map(printName).join(' ')}) ${printE(d.body)})`;
   } else if(BSL_AST.isConstDef(d)) {
-    return `(define ${printName(d.cname)} ${printE(d.value)})`;
+    return `(define ${printName(d.name)} ${printE(d.value)})`;
   } else if(BSL_AST.isStructDef(d)) {
     return `(define ${printName(d.binding)} (${d.properties.map(printName).join(' ')}))`
   } else {
@@ -21,7 +21,7 @@ function printDefinition(d: BSL_AST.definition) {
 }
 function printE(e: BSL_AST.expr): string {
   if(BSL_AST.isCall(e)) {
-    return `(${printName(e.fname)} ${e.args.map(printE).join(' ')})`;
+    return `(${printName(e.name)} ${e.args.map(printE).join(' ')})`;
   } else if(BSL_AST.isCond(e)) {
     return `(cond ${e.options.map(printOption).join(' ')})`;
   } else if(BSL_AST.isName(e)) {
@@ -49,7 +49,7 @@ function printName(s: BSL_AST.Name): string {
 const testprogram: BSL_AST.program = [
   {
     type: BSL_AST.Production.FunctionDefinition,
-    fname: {
+    name: {
       type: BSL_AST.Production.Symbol,
       symbol: 'f'
     },
@@ -62,7 +62,7 @@ const testprogram: BSL_AST.program = [
     }],
     body: {
       type: BSL_AST.Production.FunctionCall,
-      fname: {
+      name: {
         type: BSL_AST.Production.Symbol,
         symbol: '+'
       },
@@ -80,7 +80,7 @@ const testprogram: BSL_AST.program = [
       {
         condition: {
           type: BSL_AST.Production.FunctionCall,
-          fname: {
+          name: {
             type: BSL_AST.Production.Symbol,
             symbol: '='
           },
@@ -99,7 +99,7 @@ const testprogram: BSL_AST.program = [
   },
   {
     type: BSL_AST.Production.ConstantDefinition,
-    cname: {
+    name: {
       type: BSL_AST.Production.Symbol,
       symbol: 'x'
     },

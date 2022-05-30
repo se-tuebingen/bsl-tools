@@ -15,13 +15,13 @@ module BSL_AST{
 
     export interface FunDef{
         type: Production.FunctionDefinition;
-        fname: Name;
+        name: Name;
         args: Name[];
         body: expr;
     }
     export interface ConstDef{
         type: Production.ConstantDefinition;
-        cname: Name;
+        name: Name;
         value: expr;
     }
     export interface StructDef{
@@ -33,7 +33,7 @@ module BSL_AST{
 
     export interface Call{
         type: Production.FunctionCall;
-        fname: Name;
+        name: Name;
         args: expr[];
     };
     export interface Clause{
