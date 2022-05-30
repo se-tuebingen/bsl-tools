@@ -48,17 +48,46 @@ function printName(s: BSL_AST.Name): string {
 
 const testprogram: BSL_AST.program = [
   {
-    fname:
-    {symbol: 'f'},
-    args: [{symbol: 'x'}, {symbol: 'y'}],
-    body: {fname: {symbol: '+'}, args: [{symbol: 'x'}, {symbol: 'y'}]}
+    type: BSL_AST.Production.FunctionDefinition,
+    fname: {
+      type: BSL_AST.Production.Symbol,
+      symbol: 'f'
+    },
+    args: [{
+      type: BSL_AST.Production.Symbol,
+      symbol: 'x'
+    }, {
+      type: BSL_AST.Production.Symbol,
+      symbol: 'y'
+    }],
+    body: {
+      type: BSL_AST.Production.FunctionCall,
+      fname: {
+        type: BSL_AST.Production.Symbol,
+        symbol: '+'
+      },
+      args: [{
+        type: BSL_AST.Production.Symbol,
+        symbol: 'x'
+      }, {
+        type: BSL_AST.Production.Symbol,
+        symbol: 'y'
+      }]}
   },
   {
+    type: BSL_AST.Production.CondExpression,
     options: [
       {
         condition: {
-          fname: {symbol: '='},
-          args: [{symbol: 'x'}, 3]
+          type: BSL_AST.Production.FunctionCall,
+          fname: {
+            type: BSL_AST.Production.Symbol,
+            symbol: '='
+          },
+          args: [{
+            type: BSL_AST.Production.Symbol,
+            symbol: 'x'
+          }, 3]
         },
         result: 'isThree'
       },
@@ -69,14 +98,28 @@ const testprogram: BSL_AST.program = [
     ]
   },
   {
-    cname: {symbol: 'x'},
+    type: BSL_AST.Production.ConstantDefinition,
+    cname: {
+      type: BSL_AST.Production.Symbol,
+      symbol: 'x'
+    },
     value: 42
   },
   {
-    binding: {symbol: 'name'},
+    type: BSL_AST.Production.StructDefinition,
+    binding: {
+      type: BSL_AST.Production.Symbol,
+      symbol: 'name'
+    },
     properties: [
-      {symbol: 'firstName'},
-      {symbol: 'lastName'}
+      {
+        type: BSL_AST.Production.Symbol,
+        symbol: 'firstName'
+      },
+      {
+        type: BSL_AST.Production.Symbol,
+        symbol: 'lastName'
+      }
     ]
   }
 ];
