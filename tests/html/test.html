@@ -4,16 +4,17 @@
 
 <head>
   <title>BSL Tools Test Page</title>
-  <script src="dist/bsl_ast.js"></script>
-  <script src="dist/pprint.js"></script>
-  <script src="dist/layout.js"></script>
-  <link rel="stylesheet" href="dist/tree.css">
+  <script src="../../dist/bsl_ast.js"></script>
+  <script src="../../dist/pprint.js"></script>
+  <script src="../../dist/layout.js"></script>
+  <link rel="stylesheet" href="../../dist/tree.css">
 
 </head>
 
 <body>
   <div id="test"></div>
   <script>
+    console.log(pprint(testprogram));
     const el = document.getElementById('test');
     treeProgram(testprogram, el);
   </script>

@@ -131,5 +131,3 @@ const testprogram = [
         ]
     }
 ];
-console.log('done');
-console.log(pprint(testprogram));

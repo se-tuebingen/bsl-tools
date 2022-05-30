@@ -123,5 +123,3 @@ const testprogram: BSL_AST.program = [
     ]
   }
 ];
-console.log('done');
-console.log(pprint(testprogram));
