@@ -1,12 +1,13 @@
 // ######### LAYOUT AST AS TREE DIAGRAM ########
 // depends on pprint.ts for printing code
-
+import * as BSL_AST from "./BSL_AST";
+import * as Pprint from "./Pprint";
 // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetLeft
 
 // #### main api #####
 // add forest of program expressions to html element
-function treeProgram(program: BSL_AST.program, target: HTMLElement){
+export function treeProgram(program: BSL_AST.program, target: HTMLElement){
   target.innerHTML = program.map(treeDefOrExpr).join('\n');
   // align connectors horizontally
   adjustAllConnectors(target);
@@ -29,18 +30,18 @@ function treeDefinition(d: BSL_AST.definition) {
         <div>( define
           (
             <div class="hole hole-1 hole-name">
-              <div class="code">${pprint([d.name])}</div>
+              <div class="code">${Pprint.pprint([d.name])}</div>
               <div class="placeholder">name</div>
             </div>
             <div class="hole hole-2 hole-names">
               ${d.args.map(a =>
-                `<div class="code">${printName(a)}</div>`
+                `<div class="code">${Pprint.printName(a)}</div>`
               ).join(' ')}
               <div class="placeholder">name+</div>
             </div>
           )
           <div class="hole hole-3">
-            <div class="code">${pprint([d.body])}</div>
+            <div class="code">${Pprint.pprint([d.body])}</div>
             <div class="placeholder">e</div>
           </div>
         )</div>
@@ -58,12 +59,12 @@ function treeDefinition(d: BSL_AST.definition) {
         <div class="name">Constant Definition</div>
         <div>( define
           <div class="hole hole-1 hole-name">
-            <div class="code">${pprint([d.name])}</div>
+            <div class="code">${Pprint.pprint([d.name])}</div>
             <div class="placeholder">name</div>
           </div>
 
           <div class="hole hole-2">
-            <div class="code">${pprint([d.value])}</div>
+            <div class="code">${Pprint.pprint([d.value])}</div>
             <div class="placeholder">e</div>
           </div>
         )</div>
@@ -79,13 +80,13 @@ function treeDefinition(d: BSL_AST.definition) {
 
         <div>(define-struct
           <div class="hole hole-1 hole-name">
-            <div class="code">${pprint([d.binding])}</div>
+            <div class="code">${Pprint.pprint([d.binding])}</div>
             <div class="placeholder">name</div>
           </div>
           (
             <div class="hole hole-2 hole-names">
               ${d.properties.map(p =>
-                `<div class="code">${printName(p)}</div>`
+                `<div class="code">${Pprint.printName(p)}</div>`
               ).join(' ')}
               <div class="placeholder">name*</div>
             </div>
@@ -111,13 +112,13 @@ function treeE(e: BSL_AST.expr): string {
 
         <div>(
           <div class="hole hole-1 hole-name">
-            <div class="code">${pprint([e.name])}</div>
+            <div class="code">${Pprint.pprint([e.name])}</div>
             <div class="placeholder">name</div>
           </div>
 
           <div class="hole hole-2">
             ${e.args.map(a =>
-              `<div class="code">${printE(a)}</div>`
+              `<div class="code">${Pprint.printE(a)}</div>`
             ).join(' ')}
             <div class="placeholder">e*</div>
           </div>
@@ -136,7 +137,7 @@ function treeE(e: BSL_AST.expr): string {
         <div>( cond
           <div class="hole hole-2">
             ${e.options.map(o =>
-              `<div class="code">${printOption(o)}</div>`
+              `<div class="code">${Pprint.printOption(o)}</div>`
             ).join(' ')}
             <div class="placeholder">[ e e ]+</div>
           </div>
@@ -153,7 +154,7 @@ function treeE(e: BSL_AST.expr): string {
     return `
       <span>
         <div class="name">Literal Value</div>
-        <div>${pprint([e])}</div>
+        <div>${Pprint.pprint([e])}</div>
       </span>`;
   } else {
     console.error('Invalid input to treeE');
@@ -167,12 +168,12 @@ function treeOption(o: BSL_AST.Clause) {
       <div class="name">Cond-Option</div>
       <div>[
         <div class="hole hole-1">
-          <div class="code">${pprint([o.condition])}</div>
+          <div class="code">${Pprint.pprint([o.condition])}</div>
           <div class="placeholder">e</div>
         </div>
 
         <div class="hole hole-2">
-          <div class="code">${pprint([o.result])}</div>
+          <div class="code">${Pprint.pprint([o.result])}</div>
           <div class="placeholder">e</div>
         </div>
        ]

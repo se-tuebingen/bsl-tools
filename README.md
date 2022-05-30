@@ -20,8 +20,18 @@ BSL Core Language from the Info 1 script:
                |     <v>
 ```
 
-For reference see also the [Racket webpage for BSL](https://docs.racket-lang.org/htdp-langs/beginner.html) 
+For reference see also the [Racket webpage for BSL](https://docs.racket-lang.org/htdp-langs/beginner.html)
 and the [Info 1 script at 8.3](https://ps-tuebingen.github.io/informatik-1-skript/bsl-semantics.html)
+
+## Development Setup
+
+We are using [webpack](https://webpack.js.org/guides/ecma-script-modules/) to bundle all TypeScript ressources into one single JavaScript file.
+
+You need to have [NodeJS](nodejs.org) installed, on Ubuntu it is recommended to install it via [NodeSource](https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions).
+
+The first time you clone the project, and everytime you pull changes that might add new dependencies, you need to run `npm install` in the project.
+
+To compile sources, run `npm run build`. Notice that the command does not terminate: Webpack keeps watching your input files and recompiles if you save any changes.
 
 ## ToDos
 

@@ -1,14 +1,16 @@
-function pprint(p: BSL_AST.program): string {
+import * as BSL_AST from "./BSL_AST";
+
+export function pprint(p: BSL_AST.program): string {
   return p.map(printDefOrExpr).join('\n');
 }
-function printDefOrExpr(eod: BSL_AST.defOrExpr) {
+export function printDefOrExpr(eod: BSL_AST.defOrExpr) {
   if(BSL_AST.isDefinition(eod)) {
     return printDefinition(eod);
   } else {
     return printE(eod);
   }
 }
-function printDefinition(d: BSL_AST.definition) {
+export function printDefinition(d: BSL_AST.definition) {
   if(BSL_AST.isFunDef(d)) {
     return `(define ${printName(d.name)} (${d.args.map(printName).join(' ')}) ${printE(d.body)})`;
   } else if(BSL_AST.isConstDef(d)) {
@@ -19,7 +21,7 @@ function printDefinition(d: BSL_AST.definition) {
     console.error('Invalid input to printDefinition');
   }
 }
-function printE(e: BSL_AST.expr): string {
+export function printE(e: BSL_AST.expr): string {
   if(BSL_AST.isCall(e)) {
     return `(${printName(e.name)} ${e.args.map(printE).join(' ')})`;
   } else if(BSL_AST.isCond(e)) {
@@ -38,15 +40,15 @@ function printE(e: BSL_AST.expr): string {
   }
 }
 
-function printOption(o: BSL_AST.Clause) {
+export function printOption(o: BSL_AST.Clause) {
   return `[${printE(o.condition)} ${printE(o.result)}]`;
 }
 
-function printName(s: BSL_AST.Name): string {
+export function printName(s: BSL_AST.Name): string {
   return s.symbol;
 }
 
-const testprogram: BSL_AST.program = [
+export const testprogram: BSL_AST.program = [
   {
     type: BSL_AST.Production.FunctionDefinition,
     name: {
