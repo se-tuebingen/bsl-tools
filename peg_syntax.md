@@ -12,6 +12,18 @@ A expression is one of:
   - Four primitive functions: `+, -, *, \`
   - One of four literals `v`: `boolean, string, number, empty`
 
+second step: parser for definitions
+
+A Definition is one of:
+  - FunDef <=> (define (name args+) expr)
+  - ConstDef <=> (define name expr)
+  - StructDef <=> (define-struct name (name+))
+
+  Additional things:
+  - Vergleichsoperationen für cond ((= 2 3) sowie (and / or) z.B.)
+  -
+
+
 # example peg.js
 
 Expression
@@ -41,7 +53,51 @@ _ "whitespace"
   = [ \t\n\r]*
 
 
-# Implementation Arithmetic Expressions & more
+# Implementation Expressions
+Expression
+  = _ all: (Primitive / Name / Value){return all;}
+
+Primitive
+  = ("("
+  ("+" / "-" / "*" / "/")
+  (Expression / Value)* ")")
+
+Name "name"
+  = _ name:[A-Za-z]+ {
+  return name.join("")}
+
+Value "value"
+  = val:(Integer / Boolean / Empty / String){
+  return val;
+  }
+Integer "integer"
+  = _ [0-9]+ {return parseInt(text(), 10);}
+
+Boolean
+  =_ bool:("#true" / "#false"){
+	if (bool === "#true"){return true}
+    else{return false}
+  }
+
+Empty
+  = _ "'()"{return null}
+
+String
+  = _ '"' str: [A-Za-z]+ '"'{
+  return str.join("")}
+
+  _ "whitespace"
+    = [ \t\n\r]*
+
+# Implementation Definitition
+
+Definition
+  = _ all: ("(define" () )
+
+# Second step: Parser for definitions and expressions
+
+
+# Interpreter beginnings
 
 Expression
   = _ all:("("
@@ -60,16 +116,14 @@ Expression
   return result / element;
   });}
   else{
-  return all.reduce(function(result, element){
-  return result + element;
-  });}
+  return all}
   }
 Name "name"
   = _  name:[A-Za-z]+ {
-  return name}
+  return name.join("")}
 Value "value"
-  = expr:(Integer / Boolean / Empty / String){
-  return expr;
+  = val:(Integer / Boolean / Empty / String){
+  return val;
   }
 Integer "integer"
   = _ [0-9]+ {return parseInt(text(), 10);}
@@ -84,12 +138,8 @@ Empty
   = _ "'()"{return null}
 
 String
-  = _ '"' str:[A-Za-z]+ '"'{
-  return str}
+  = _ '"' str: [A-Za-z]+ '"'{
+  return str.join("")}
 
   _ "whitespace"
     = [ \t\n\r]*
-
-
-
-# Second step: Parser for definitions and expressions
