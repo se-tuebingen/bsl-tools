@@ -28,6 +28,7 @@ export interface StructDef{
     binding: Name;
     properties: Name[];
 };
+
 export type expr = Call | Cond | Name | v;
 
 export interface Call{
