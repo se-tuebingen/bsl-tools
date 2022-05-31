@@ -41,21 +41,55 @@ _ "whitespace"
   = [ \t\n\r]*
 
 
-# Implementation Arithmetic Expressions
+# Implementation Arithmetic Expressions & more
 
 Expression
-  = head:"("  tail: "+" / "-" / "*" / "/"_ Expression / Integer)* {
-    return tail.reduce(function(result, element){
-      if (element[0] === "+"){return result + element[1];}
-      if (element[0] === "-"){return result - element[1];}
-      if (element[0] === "*"){return result * element[1];}
-      if (element[0] === "/"){return result / element[1];}
-      }, head);
+  = _ all:("("
+  (("+" / "-" / "*" / "/"))
+  (Expression / Value)* ")" / Name / Value){
+  if (all[1] === "+"){return all[2].reduce(function(result, element){
+  return result + element;
+  });}
+  if (all[1] === "-"){return all[2].reduce(function(result, element){
+  return result - element;
+  });}
+  if (all[1] === "*"){return all[2].reduce(function(result, element){
+  return result * element;
+  });}
+  if (all[1] === "/"){return all[2].reduce(function(result, element){
+  return result / element;
+  });}
+  else{
+  return all.reduce(function(result, element){
+  return result + element;
+  });}
   }
-
+Name "name"
+  = _  name:[A-Za-z]+ {
+  return name}
+Value "value"
+  = expr:(Integer / Boolean / Empty / String){
+  return expr;
+  }
 Integer "integer"
   = _ [0-9]+ {return parseInt(text(), 10);}
 
+Boolean
+  =_ bool:("#true" / "#false"){
+	if (bool === "#true"){return true}
+    else{return false}
+  }
+
+Empty
+  = _ "'()"{return null}
+
+String
+  = _ '"' str:[A-Za-z]+ '"'{
+  return str}
+
   _ "whitespace"
     = [ \t\n\r]*
-second step: Parser for definitions and expressions
+
+
+
+# Second step: Parser for definitions and expressions
