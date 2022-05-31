@@ -55,12 +55,18 @@ _ "whitespace"
 
 # Implementation Expressions
 Expression
-  = _ all: (Primitive / Name / Value){return all;}
+  = _ all: (Primitive / Cond / Call / Name / Value){return all;}
 
 Primitive
   = ("("
   ("+" / "-" / "*" / "/")
   (Expression / Value)* ")")
+
+Cond
+  = ("(cond" (_"[" condition: Expression result: Expression "]"_)+ ")")
+
+Call
+  = ("(" Name Expression* ")")
 
 Name "name"
   = _ name:[A-Za-z]+ {
@@ -80,21 +86,36 @@ Boolean
   }
 
 Empty
-  = _ "'()"{return null}
+  = _ "'()"{return "empty"}
 
 String
   = _ '"' str: [A-Za-z]+ '"'{
   return str.join("")}
 
   _ "whitespace"
-    = [ \t\n\r]*
+    = [ \t\n\r]*{}
 
 # Implementation Definitition
 
 Definition
-  = _ all: ("(define" () )
+  = _ all: (StructDef / FunDef / ConstDef)
 
-# Second step: Parser for definitions and expressions
+StructDef
+  = ("(define-struct" Name (Name)+)")"
+
+FunDef
+  = ( "(define" Name ("(" (Name) ")" + Expression ")")
+
+ConstDef
+  = ( "(define" Name Expression ")")
+
+
+
+# Second step: JSON to BSL_AST objects
+
+
+
+
 
 
 # Interpreter beginnings
