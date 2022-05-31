@@ -35,9 +35,10 @@ To compile sources, run `npm run build`. Notice that the command does not termin
 
 ## ToDos
 
-[] Abstract Syntax Tree als Datentyp in TypeScript beschreiben
-[] Show Tree Structure BSL
+[x] Abstract Syntax Tree als Datentyp in TypeScript beschreiben
+[x] Show Tree Structure BSL
 [] Transform Racket sexpr -> JSON / other datat structure
+[] Added Peg.js generator to .github/workflows
 
 # Meeting 19.05.22
 

@@ -22,20 +22,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-// re-export public API
-const BSL_AST = __importStar(require("./BSL_AST"));
-window.BSL_AST = BSL_AST;
-const Pprint = __importStar(require("./Pprint"));
-window.Pprint = Pprint;
-const Layout = __importStar(require("./Layout"));
-window.Layout = Layout;
-// add css
-const tree_css_1 = __importDefault(require("./ressources/tree.css"));
-const styleNode = document.createElement('style');
-styleNode.innerHTML = tree_css_1.default;
-document.getElementsByTagName('head')[0].appendChild(styleNode);
-//# sourceMappingURL=bsl_tools.js.map
+const p = __importStar(require("./parser.js"));
+;
+// Parse BSL Tree
+function parseBslTree(el) {
+    let root = el;
+    let text = el.innerText;
+    return {
+        root: root,
+        text: text,
+    };
+}
+// Get BSL Trees
+const bslHtmlCol = document.getElementsByTagName("bsl-tree");
+for (let i = 0; i < bslHtmlCol.length; i++) {
+    let bslHtml = bslHtmlCol[i];
+    let bslTree = parseBslTree(bslHtml);
+    console.log(bslTree.text);
+    let json = p.parse(bslTree.text);
+    console.log(json);
+}
+// assign JSON parts to BSL_AST-Structures
+//# sourceMappingURL=assignJson.js.map
