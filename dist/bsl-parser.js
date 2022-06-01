@@ -959,4 +959,4 @@ module.exports = /*
             parse: peg$parse
         };
     })();
-//# sourceMappingURL=parser.js.map
+//# sourceMappingURL=bsl-parser.js.map

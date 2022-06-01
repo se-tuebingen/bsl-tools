@@ -1,35 +1,8 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.testprogram = exports.printName = exports.printOption = exports.printE = exports.printDefinition = exports.printDefOrExpr = exports.pprint = void 0;
-const BSL_AST = __importStar(require("./BSL_AST"));
-function pprint(p) {
+import * as BSL_AST from "./BSL_AST";
+export function pprint(p) {
     return p.map(printDefOrExpr).join('\n');
 }
-exports.pprint = pprint;
-function printDefOrExpr(eod) {
+export function printDefOrExpr(eod) {
     if (BSL_AST.isDefinition(eod)) {
         return printDefinition(eod);
     }
@@ -37,8 +10,7 @@ function printDefOrExpr(eod) {
         return printE(eod);
     }
 }
-exports.printDefOrExpr = printDefOrExpr;
-function printDefinition(d) {
+export function printDefinition(d) {
     if (BSL_AST.isFunDef(d)) {
         return `(define ${printName(d.name)} (${d.args.map(printName).join(' ')}) ${printE(d.body)})`;
     }
@@ -52,8 +24,7 @@ function printDefinition(d) {
         console.error('Invalid input to printDefinition');
     }
 }
-exports.printDefinition = printDefinition;
-function printE(e) {
+export function printE(e) {
     if (BSL_AST.isCall(e)) {
         return `(${printName(e.name)} ${e.args.map(printE).join(' ')})`;
     }
@@ -76,16 +47,13 @@ function printE(e) {
         return `<${e}>`;
     }
 }
-exports.printE = printE;
-function printOption(o) {
+export function printOption(o) {
     return `[${printE(o.condition)} ${printE(o.result)}]`;
 }
-exports.printOption = printOption;
-function printName(s) {
+export function printName(s) {
     return s.symbol;
 }
-exports.printName = printName;
-exports.testprogram = [
+export const testprogram = [
     {
         type: BSL_AST.Production.FunctionDefinition,
         name: {

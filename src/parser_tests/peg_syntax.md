@@ -53,62 +53,66 @@ _ "whitespace"
   = [ \t\n\r]*
 
 
-# Implementation Expressions
+# Implementation BSL (more or less)
+Program
+  = all:DefOrExpr{return {"program":all}}
+
+DefOrExpr
+  = all:(Definition / Expression){return {"def-or-expr": all}}
+
+Definition
+  = _ def: (StructDef / FunDef / ConstDef){return {"Definition": def}}
+
+StructDef
+  = struct:("(define-struct" _ Name (Name)+)")"{return {"StructDef": struct}}
+
+FunDef
+  = fun:("(define" Name ("(" Name) ")" + Expression ")"){return {"FunDef": fun}}
+
+ConstDef
+  = con:( "(define" Name Expression ")"){return {"ConstDef":con}}
+    
 Expression
-  = _ all: (Primitive / Cond / Call / Name / Value){return all;}
+  = _ expr: (Primitive / Cond / Call / Name / Value){return {"Expression": expr}}
 
 Primitive
-  = ("("
+  = prim:("("
   ("+" / "-" / "*" / "/")
-  (Expression / Value)* ")")
+  (Expression)* ")"){return prim}
 
 Cond
-  = ("(cond" (_"[" condition: Expression result: Expression "]"_)+ ")")
+  = cond:("(cond" _("[" _ condition: Expression result: Expression _"]"_)+ _")"){return {"cond": cond}}
 
 Call
-  = ("(" Name Expression* ")")
+  = call:("(" Name Expression* ")"){return {"call":call}}
 
 Name "name"
   = _ name:[A-Za-z]+ {
-  return name.join("")}
+  return {"Name":name.join("")}}
 
 Value "value"
-  = val:(Integer / Boolean / Empty / String){
-  return val;
+  = val:(Number / Boolean / Empty / String){
+  return {"Value": val}
   }
-Integer "integer"
-  = _ [0-9]+ {return parseInt(text(), 10);}
+Number "number"
+  = _ [0-9]+ {return {"Number":parseInt(text(), 10)}}
 
 Boolean
   =_ bool:("#true" / "#false"){
-	if (bool === "#true"){return true}
-    else{return false}
+	if (bool === "#true"){return {"boolean":true}}
+    else{return {"boolean":false}}
   }
 
 Empty
-  = _ "'()"{return "empty"}
+  = _ "'()"{return {"empty": null}}
 
 String
   = _ '"' str: [A-Za-z]+ '"'{
-  return str.join("")}
+  return {"string": str.join("")}}
 
-  _ "whitespace"
-    = [ \t\n\r]*{}
 
-# Implementation Definitition
-
-Definition
-  = _ all: (StructDef / FunDef / ConstDef)
-
-StructDef
-  = ("(define-struct" Name (Name)+)")"
-
-FunDef
-  = ( "(define" Name ("(" (Name) ")" + Expression ")")
-
-ConstDef
-  = ( "(define" Name Expression ")")
-
+_ "whitespace"
+  = [\t \n \r]* {return undefined}
 
 
 # Second step: JSON to BSL_AST objects
