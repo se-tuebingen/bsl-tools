@@ -16,7 +16,7 @@ export function printDefinition(d: BSL_AST.definition) {
   } else if(BSL_AST.isConstDef(d)) {
     return `(define ${printName(d.name)} ${printE(d.value)})`;
   } else if(BSL_AST.isStructDef(d)) {
-    return `(define ${printName(d.binding)} (${d.properties.map(printName).join(' ')}))`
+    return `(define-struct ${printName(d.binding)} (${d.properties.map(printName).join(' ')}))`
   } else {
     console.error('Invalid input to printDefinition');
   }
@@ -31,6 +31,8 @@ export function printE(e: BSL_AST.expr): string {
   } else if(BSL_AST.isV(e)) {
     if(typeof(e) === 'string' && e !== `'()`) {
       return `"${e}"`;
+    } else if(typeof(e) === 'boolean') {
+      return e ? '#true' : '#false';
     } else {
       return `${e}`;
     }
