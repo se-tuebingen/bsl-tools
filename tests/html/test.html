@@ -9,12 +9,14 @@
 </head>
 
 <body>
-  <div id="test"></div>
-  <script>
-    console.log(Pprint.pprint(Pprint.testprogram));
-    const el = document.getElementById('test');
-    Layout.treeProgram(Pprint.testprogram, el);
-  </script>
+  <bsl-tree>
+    (define f (x y) (+ x y))
+    (cond [(= x 3) "isThree"] [#false '()])
+    (define x 42)
+    (define-struct name (firstName lastName))
+  </bsl-tree>
+
+  <bsl-tree>nonvalid(code)</bsl-tree>
 
 </body>
 

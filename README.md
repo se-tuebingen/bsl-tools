@@ -4,6 +4,21 @@ Beginning Student Language is a programming language in DrRacket. This repositor
 - Stepper (Auswertungskontext)
 - BSL "Try out" box (Interpreter)
 
+## How to use
+
+Currently, the only implemented module is the collapsible AST tree view.
+The interface is as follows:
+```html
+<!-- import the bsl_tools script somewhere on the page, ideally in the head -->
+<script src="bsl_tools.js"></script>
+
+<!-- anywhere else in the document -->
+<bsl-tree>
+  (valid bsl syntax)
+</bsl-tree>
+```
+Anything inside the `<bsl-tree>` tag is parsed according to the  BSL Core Language as documented below.
+
 ## BSL Abstract Syntax Tree
 
 BSL Core Language from the Info 1 script:
@@ -32,6 +47,11 @@ You need to have [NodeJS](nodejs.org) installed, on Ubuntu it is recommended to 
 The first time you clone the project, and everytime you pull changes that might add new dependencies, you need to run `npm install` in the project.
 
 To compile sources, run `npm run build`. Notice that the command does not terminate: Webpack keeps watching your input files and recompiles if you save any changes.
+
+For generating a BSL parser, we are using the [`ts-pegjs`](https://github.com/metadevpro/ts-pegjs) package, which builds upon `pegjs`.
+This package installs a binary which compiles the grammar found in `src/grammar/bsl.pegjs` to a TypeScript parser module. The best way to test and edit the grammar is the [pegjs online version](https://pegjs.org/online), since it has syntax highlighting and live testing.
+
+The command to compile the parser is included in the `npm run build` script (see `package.json` for details), but will not automatically be compiled on save by webpack.
 
 ## ToDos
 
