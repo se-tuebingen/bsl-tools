@@ -1,11 +1,6 @@
-// re-export public API
 import * as BSL_AST from './BSL_AST';
-// (window as any).BSL_AST = BSL_AST;
-// import * as Pprint from './Pprint';
-// (window as any).Pprint = Pprint;
-import * as Layout from './Layout';
-// (window as any).Layout = Layout;
-import { parse } from './BSL_parser';
+import * as BSL_Tree from './BSL_Tree';
+import { parse } from './BSL_Parser';
 
 // add css
 import {default as tree} from './ressources/tree.css';
@@ -18,7 +13,7 @@ function processBslTrees() {
   Array.from(document.getElementsByTagName('bsl-tree')).map(el => {
     try {
       const program : BSL_AST.program = parse(el.innerHTML);
-      Layout.treeProgram(program,el as HTMLElement);
+      BSL_Tree.treeProgram(program,el as HTMLElement);
     } catch(e) {
       el.innerHTML += `<br>${e}`;
     }
