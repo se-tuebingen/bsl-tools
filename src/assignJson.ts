@@ -114,7 +114,7 @@ const example =
 }
 
 // Parser Functions
-
+/* 
 function parseValue(val:any) :boolean | string | number | `'()`{
 if (val.hasOwnProperty("boolean") && val != undefined){
    return val.boolean;
@@ -128,6 +128,9 @@ if (val.hasOwnProperty("boolean") && val != undefined){
    console.log("There is no valid value!");
    return undefined;
 }
+}
+function parseCall(call:any) : BSL_AST.Call {
+   if (call.hasOwnProperty("name") && call.hasOwnProperty("Expression"))
 }
 
 function parseExpression(expr: any) : BSL_AST.Cond | BSL_AST.Name | BSL_AST.Call | BSL_AST.v{
@@ -171,4 +174,4 @@ function parseProgram(json: any): BSL_AST.program | undefined {
    if (parseDefOrExpr(program) != undefined) {
       return [parseDefOrExpr(program)]; 
 }
-}
+} */
