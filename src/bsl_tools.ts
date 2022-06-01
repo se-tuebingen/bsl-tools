@@ -1,5 +1,6 @@
 import * as BSL_AST from './BSL_AST';
 import * as BSL_Tree from './BSL_Tree';
+import * as BSL_Tree_Quiz from './BSL_Tree_Quiz';
 import { parse } from './BSL_Parser';
 
 // add css
@@ -13,7 +14,11 @@ function processBslTrees() {
   Array.from(document.getElementsByTagName('bsl-tree')).map(el => {
     try {
       const program : BSL_AST.program = parse(el.innerHTML);
-      BSL_Tree.treeProgram(program,el as HTMLElement);
+      if(el.getAttribute('quiz')) {
+        BSL_Tree_Quiz.treeProgram(program, el as HTMLElement);
+      } else {        
+        BSL_Tree.treeProgram(program,el as HTMLElement);
+      }
     } catch(e) {
       el.innerHTML += `<br>${e}`;
     }
