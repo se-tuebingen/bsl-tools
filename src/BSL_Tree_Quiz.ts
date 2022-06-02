@@ -12,13 +12,6 @@ export function treeProgram(program: BSL_AST.program, target: HTMLElement){
   adjustAllConnectors(target);
   // add data where holes should move upon expanding
   addHoleTranslations(target);
-  // add collapsers
-  addCollapsers(target);
-  // start in collapsed state
-  // recursively close children
-  Array.from(target.getElementsByTagName('span')).map(s => {
-    s.setAttribute('data-collapsed', 'true');
-  });
 }
 
 // #### render helpers (textual html generators) ####
@@ -26,30 +19,66 @@ function treeDefOrExpr(root: BSL_AST.defOrExpr) {
   return `<ul class="tree ast"><li>${BSL_AST.isDefinition(root) ? treeDefinition(root): treeE(root)}</li></ul>`;
 }
 
+interface Hole {
+  pos?: number;
+  extra_classes?: string[];
+  code: string | string[];
+  placeholder: string;
+}
+function treeHole(h: Hole) {
+  if (typeof h.code === 'string') h.code = [h.code];
+  return `
+    <div class="hole ${h.pos ? 'hole-'+h.pos : ''} ${h.extra_classes?.join(' ')}">
+      ${h.code.map(c => `<div class="code">${c}</div>`).join(' ')}
+      <div class="placeholder">${h.placeholder}</div>
+    </div>
+  `;
+}
+interface TreeNode {
+  production: string;
+  code: (string|Hole)[];
+}
+
+function treeNode(n: TreeNode) {
+  return `
+    <span data-collapsed="true">
+      <div class="name">${n.production}</div>
+      <div>
+        ${n.code.map(c => typeof c === 'string' ? c : treeHole(c)).join(' ')}
+      </div>
+    </span>
+  `;
+}
+
 function treeDefinition(d: BSL_AST.definition) {
   if(BSL_AST.isFunDef(d)) {
+    const n = {
+      production: 'Function Definition',
+      code: [
+        '( define ( ',
+        {
+          pos: 1,
+          code: BSL_Print.pprint([d.name]),
+          placeholder: 'name',
+          extra_classes: ['hole-name']
+        },
+        {
+          pos: 2,
+          code: d.args.map(BSL_Print.printName),
+          placeholder: 'name+',
+          extra_classes: ['hole-names']
+        },
+        ') ',
+        {
+          pos: 3,
+          code: BSL_Print.pprint([d.body]),
+          placeholder: 'e'
+        },
+        ')'
+      ]
+    };
     return `
-      <span>
-        <div class="name">Function Definition</div>
-        <div>( define
-          (
-            <div class="hole hole-1 hole-name">
-              <div class="code">${BSL_Print.pprint([d.name])}</div>
-              <div class="placeholder">name</div>
-            </div>
-            <div class="hole hole-2 hole-names">
-              ${d.args.map(a =>
-                `<div class="code">${BSL_Print.printName(a)}</div>`
-              ).join(' ')}
-              <div class="placeholder">name+</div>
-            </div>
-          )
-          <div class="hole hole-3">
-            <div class="code">${BSL_Print.pprint([d.body])}</div>
-            <div class="placeholder">e</div>
-          </div>
-        )</div>
-      </span>
+      ${treeNode(n)}
       <ul>
         <li class="child-1">${treeName(d.name)}</li>
         ${d.args.map(a =>
@@ -57,9 +86,38 @@ function treeDefinition(d: BSL_AST.definition) {
         ).join('')}
         <li class="child-3">${treeE(d.body)}</li>
       </ul>`;
+    // return `
+    //   <span data-collapsed="true">
+    //     <div class="name">Function Definition</div>
+    //     <div>( define
+    //       (
+    //         <div class="hole hole-1 hole-name">
+    //           <div class="code">${BSL_Print.pprint([d.name])}</div>
+    //           <div class="placeholder">name</div>
+    //         </div>
+    //         <div class="hole hole-2 hole-names">
+    //           ${d.args.map(a =>
+    //             `<div class="code">${BSL_Print.printName(a)}</div>`
+    //           ).join(' ')}
+    //           <div class="placeholder">name+</div>
+    //         </div>
+    //       )
+    //       <div class="hole hole-3">
+    //         <div class="code">${BSL_Print.pprint([d.body])}</div>
+    //         <div class="placeholder">e</div>
+    //       </div>
+    //     )</div>
+    //   </span>
+    //   <ul>
+    //     <li class="child-1">${treeName(d.name)}</li>
+    //     ${d.args.map(a =>
+    //       `<li class="child-2">${treeName(a)}</li>`
+    //     ).join('')}
+    //     <li class="child-3">${treeE(d.body)}</li>
+    //   </ul>`;
   } else if(BSL_AST.isConstDef(d)) {
     return `
-      <span>
+      <span data-collapsed="true">
         <div class="name">Constant Definition</div>
         <div>( define
           <div class="hole hole-1 hole-name">
@@ -79,7 +137,7 @@ function treeDefinition(d: BSL_AST.definition) {
       </ul>`;
   } else if(BSL_AST.isStructDef(d)) {
     return `
-      <span>
+      <span data-collapsed="true">
         <div class="name">Struct Definition</div>
 
         <div>(define-struct
@@ -111,7 +169,7 @@ function treeDefinition(d: BSL_AST.definition) {
 function treeE(e: BSL_AST.expr): string {
   if(BSL_AST.isCall(e)) {
     return `
-      <span>
+      <span data-collapsed="true">
         <div class="name">Function Call</div>
 
         <div>(
@@ -136,7 +194,7 @@ function treeE(e: BSL_AST.expr): string {
       </ul>`;
   } else if(BSL_AST.isCond(e)) {
     return `
-      <span>
+      <span data-collapsed="true">
         <div class="name">Cond-Expression</div>
         <div>( cond
           <div class="hole hole-2">
@@ -168,7 +226,7 @@ function treeE(e: BSL_AST.expr): string {
 
 function treeOption(o: BSL_AST.Clause) {
   return `
-    <span>
+    <span data-collapsed="true">
       <div class="name">Cond-Option</div>
       <div>[
         <div class="hole hole-1">
@@ -314,21 +372,21 @@ function navigateDOM(positions: HTMLElement[], path: string): HTMLElement[] {
 }
 
 // collapse/expand nodes
-function addCollapsers(target: HTMLElement) {
-  Array.from(target.getElementsByTagName('span')).map(l => {
-    l.onclick = () => {
-      const li : HTMLElement  = l as HTMLElement;
-      if(li.getAttribute('data-collapsed')) {
-        li.removeAttribute('data-collapsed');
-      } else {
-        li.setAttribute('data-collapsed', 'true');
-        const ul = li.nextElementSibling as HTMLElement;
-        if(!ul) return;
-        // recursively close children
-        Array.from(ul.getElementsByTagName('span')).map(s => {
-          s.setAttribute('data-collapsed', 'true');
-        });
-      }
-    }
-  });
-}
+// function addCollapsers(target: HTMLElement) {
+//   Array.from(target.getElementsByTagName('span')).map(l => {
+//     l.onclick = () => {
+//       const li : HTMLElement  = l as HTMLElement;
+//       if(li.getAttribute('data-collapsed')) {
+//         li.removeAttribute('data-collapsed');
+//       } else {
+//         li.setAttribute('data-collapsed', 'true');
+//         const ul = li.nextElementSibling as HTMLElement;
+//         if(!ul) return;
+//         // recursively close children
+//         Array.from(ul.getElementsByTagName('span')).map(s => {
+//           s.setAttribute('data-collapsed', 'true');
+//         });
+//       }
+//     }
+//   });
+// }
