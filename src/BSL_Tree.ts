@@ -59,6 +59,10 @@ function treeNode(n: TreeNode): string {
   `;
 }
 
+function evenlySpace(s: string) {
+  return s.split(' ').filter(c => c).join(' ');
+}
+
 function quizNode(n: TreeNode): string {
   return `
     <span data-collapsed="true">
@@ -74,21 +78,21 @@ function quizNode(n: TreeNode): string {
          </div>
       </div>
       <div>
-        ${n.code.map(c => typeof c === 'string' ? c : treeHole(c)).join(' ')}
+        ${evenlySpace(n.code.map(c => typeof c === 'string' ? c : treeHole(c)).join(' '))}
       </div>
     </span>
   `;
 }
 function guessProduction(e: Event) {
   const sel = e.target as HTMLInputElement;
-  console.log('guessing ', sel.value);
+  // console.log('guessing ', sel.value);
   const solution = sel.getAttribute('data-solution') as string;
   const div = sel.parentElement as HTMLElement;
   const span = div.parentElement as HTMLElement;
 
   if (sel.value === solution) {
     div.innerHTML = solution;
-    span.removeAttribute('data-collapsed');
+    // span.removeAttribute('data-collapsed');
     span.removeAttribute('data-wrong');
   } else {
     span.setAttribute('data-wrong', 'true');
