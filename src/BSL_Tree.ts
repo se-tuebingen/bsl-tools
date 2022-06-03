@@ -83,11 +83,15 @@ function guessProduction(e: Event) {
   const sel = e.target as HTMLInputElement;
   console.log('guessing ', sel.value);
   const solution = sel.getAttribute('data-solution') as string;
+  const div = sel.parentElement as HTMLElement;
+  const span = div.parentElement as HTMLElement;
+
   if (sel.value === solution) {
-    const div = sel.parentElement as HTMLElement;
     div.innerHTML = solution;
-    const span = div.parentElement as HTMLElement;
     span.removeAttribute('data-collapsed');
+    span.removeAttribute('data-wrong');
+  } else {
+    span.setAttribute('data-wrong', 'true');
   }
 }
 
