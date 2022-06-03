@@ -69,6 +69,9 @@ function quizNode(n: TreeNode): string {
             <option>---</option>
             ${Object.values(BSL_AST.Production).map(k => `<option value="${k}">${k}</option>`)}
          </select>
+         <div class="tip">
+            Select the correct production to expand the node
+         </div>
       </div>
       <div>
         ${n.code.map(c => typeof c === 'string' ? c : treeHole(c)).join(' ')}
