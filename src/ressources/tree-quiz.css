@@ -5,6 +5,10 @@ bsl-tree[quiz="true"] .tree {
   --tooltip-border: var(--branch-color);
   --wrong-border: darkred;
   --correct-border: darkgreen;
+  --selection-tentative: yellow;
+  --selection-border: var(--branch-color);
+  --selection-correct: green;
+  --selection-wrong: red;
 }
 bsl-tree[quiz="true"] .tree {
   margin-top: 4em;
@@ -67,4 +71,80 @@ bsl-tree[quiz="true"] .tree > li > span[data-collapsed="true"] .name > .tip::aft
   background-color: var(--tooltip-bg);
   border-right: 1px solid var(--tooltip-border);
   border-bottom: 1px solid var(--tooltip-border);
+}
+
+/* showing/hiding code without holes */
+bsl-tree[quiz="true"] .tree .codeblock {
+  position: relative;
+  display: block;
+}
+bsl-tree[quiz="true"] .tree .actualcode {
+  display: none;
+}
+bsl-tree[quiz="true"] .tree span[data-collapsed="true"] .actualcode {
+  position: absolute;
+  display: block;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--node-background);
+}
+bsl-tree[quiz="true"] .tree .char {
+  display: inline;
+  margin: 0;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  background-color: transparent;
+  transition: background-color 1s ease-out;
+}
+bsl-tree[quiz="true"] .tree .char::before {
+  display: none;
+}
+bsl-tree[quiz="true"] .tree .selection-start {
+  background-color: var(--selection-tentative);
+  border: 1px solid var(--selection-border);
+  border-right: none;
+}
+bsl-tree[quiz="true"] .tree .selection-start ~ span {
+  background-color: var(--selection-tentative);
+  border-top: 1px solid var(--selection-border);
+  border-bottom: 1px solid var(--selection-border);
+}
+
+bsl-tree[quiz="true"] .tree .selection-end {
+  border: 1px solid var(--selection-border);
+  border-left: none;
+}
+bsl-tree[quiz="true"] .tree .selection-end ~ span {
+  border: none;
+  background-color: transparent;
+}
+
+bsl-tree[quiz="true"] .tree .correct-selection-start,
+bsl-tree[quiz="true"] .tree .correct-selection-middle,
+bsl-tree[quiz="true"] .tree .correct-selection-end {
+  user-select: none;
+  background-color: var(--selection-correct);
+  border: 1px solid var(--selection-border);
+}
+bsl-tree[quiz="true"] .tree .wrong-selection-start,
+bsl-tree[quiz="true"] .tree .wrong-selection-middle,
+bsl-tree[quiz="true"] .tree .wrong-selection-end {
+  user-select: none;
+  background-color: var(--selection-wrong);
+  border: 1px solid var(--selection-border);
+}
+bsl-tree[quiz="true"] .tree .correct-selection-start,
+bsl-tree[quiz="true"] .tree .correct-selection-middle,
+bsl-tree[quiz="true"] .tree .wrong-selection-start,
+bsl-tree[quiz="true"] .tree .wrong-selection-middle, {
+  border-right: none;
+}
+bsl-tree[quiz="true"] .tree .correct-selection-end,
+bsl-tree[quiz="true"] .tree .correct-selection-middle,
+bsl-tree[quiz="true"] .tree .wrong-selection-end,
+bsl-tree[quiz="true"] .tree .wrong-selection-middle, {
+  border-left: none;
 }

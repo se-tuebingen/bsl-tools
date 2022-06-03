@@ -42,6 +42,10 @@ function treeHole(h: Hole) {
     </div>
   `;
 }
+function extractCode(h: Hole): string {
+  if (typeof h.code === 'string') h.code = [h.code];
+  return evenlySpace(h.code.join(' '));
+}
 interface TreeNode {
   production: BSL_AST.Production;
   code: (string|Hole)[];
@@ -60,12 +64,20 @@ function treeNode(n: TreeNode): string {
 }
 
 function evenlySpace(s: string) {
-  return s.split(' ').filter(c => c).join(' ');
+  return s.split(' ')
+    .map(c => c.trim())
+    .filter(c => c.length > 0)
+    .join(' ')
+    .replaceAll('( ', '(')
+    .replaceAll(' )',')');
 }
 
 function quizNode(n: TreeNode): string {
+  const code = evenlySpace(n.code.map(c => typeof c === 'string' ? c : extractCode(c)).join(' '));
+  const holes = JSON.stringify(n.code.filter(c => typeof c !== 'string').map(c => extractCode(c as Hole))).replaceAll('"','&quot;');
   return `
-    <span data-collapsed="true">
+    <span data-collapsed="true"
+          data-holes="${holes}">
       <div class="name">
          ${n.production}
          <select data-solution="${n.production}"
@@ -77,8 +89,16 @@ function quizNode(n: TreeNode): string {
             Select the correct production to expand the node
          </div>
       </div>
-      <div>
+      <div class="codeblock">
         ${evenlySpace(n.code.map(c => typeof c === 'string' ? c : treeHole(c)).join(' '))}
+        <div class="actualcode">
+          ${code.split('').map((c,i) =>
+            `<span class="char"
+                   data-index="${i}"
+                   onmousedown="startSelection(event)"
+                   onmouseup="endSelection(event)">${c}</span>`
+          ).join('')}
+        </div>
       </div>
     </span>
   `;
@@ -98,15 +118,83 @@ function guessProduction(e: Event) {
     span.setAttribute('data-wrong', 'true');
   }
 }
-
 (window as any).guessProduction = guessProduction;
+
+function startSelection(e: Event) {
+  const span = e.target as HTMLElement;
+  const i = parseInt(span.getAttribute('data-index') as string);
+  span.classList.add('selection-start');
+  const div = span.parentElement as HTMLElement;
+  div.setAttribute('data-selection-start', `${i}`);
+}
+(window as any).startSelection = startSelection;
+function endSelection(e: Event) {
+  const span = e.target as HTMLElement;
+  const i = parseInt(span.getAttribute('data-index') as string);
+  span.classList.add('selection-end');
+  const div = span.parentElement as HTMLElement;
+  div.setAttribute('data-selection-end', `${i}`);
+
+  // evaluate if selection was correct
+  const start = parseInt(div.getAttribute('data-selection-start') as string);
+  const end = i;
+
+  const selectedSpans = Array.from(div.children).filter(
+    c => {
+      const i = parseInt(c.getAttribute('data-index') as string);
+      return i >= start && i <= end;
+    }
+  );
+  const selection = selectedSpans.map(s => s.innerHTML).join('');
+  const node = navigateDOM([div], '../..')[0];
+  let holes = JSON.parse((node.getAttribute('data-holes') as string).replaceAll('&quot;','"')) as string[];
+
+  if(holes.includes(selection)) {
+    holes = holes.filter(h => h === selection);
+    selectedSpans.map(s => s.classList.add('correct-selection-middle'));
+    const first = selectedSpans[0];
+    first.classList.remove('correct-selection-middle');
+    first.classList.remove('selection-start');
+    first.classList.add('correct-selection-start');
+    const last = selectedSpans[selectedSpans.length - 1];
+    last.classList.remove('correct-selection-middle');
+    last.classList.remove('selection-end');
+    last.classList.add('correct-selection-end');
+
+    if (holes.length <= 0) {
+      node.removeAttribute('data-holes');
+      node.removeAttribute('data-collapsed');
+    } else {
+      node.setAttribute('data-holes', JSON.stringify(holes).replaceAll('"', "&quot;"));
+    }
+  } else {
+    selectedSpans.map(s => s.classList.add('wrong-selection-middle'));
+    const first = selectedSpans[0];
+    first.classList.remove('wrong-selection-middle');
+    first.classList.remove('selection-start');
+    first.classList.add('wrong-selection-start');
+    const last = selectedSpans[selectedSpans.length - 1];
+    last.classList.remove('wrong-selection-middle');
+    last.classList.remove('selection-end');
+    last.classList.add('wrong-selection-end');
+
+    window.setTimeout(() => {
+      selectedSpans.map(s => s.classList.remove('wrong-selection-middle'));
+      first.classList.remove('wrong-selection-start');
+      last.classList.remove('wrong-selection-end');
+    }, 1000);
+  }
+  div.removeAttribute('data-selection-start');
+  div.removeAttribute('data-selection-end');
+}
+(window as any).endSelection = endSelection;
 
 function treeDefinition(d: BSL_AST.definition, nodeFn: treeNodeFn) {
   if(BSL_AST.isFunDef(d)) {
     const n = {
       production: d.type,
       code: [
-        '( define ( ',
+        '( define (',
         {
           pos: 1,
           code: BSL_Print.pprint([d.name]),
