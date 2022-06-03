@@ -6,96 +6,137 @@ import * as BSL_Print from "./BSL_Print";
 
 // #### main api #####
 // add forest of program expressions to html element
-export function treeProgram(program: BSL_AST.program, target: HTMLElement){
-  target.innerHTML = program.map(treeDefOrExpr).join('\n');
+export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=false){
+  const nodeFn = quiz ? quizNode : treeNode;
+  target.innerHTML = program.map(e => treeDefOrExpr(e, nodeFn)).join('\n');
   // align connectors horizontally
   adjustAllConnectors(target);
   // add data where holes should move upon expanding
   addHoleTranslations(target);
   // add collapsers
-  addCollapsers(target);
+  if (!quiz) addCollapsers(target);
 }
 
 // #### render helpers (textual html generators) ####
-function treeDefOrExpr(root: BSL_AST.defOrExpr) {
-  return `<ul class="tree ast"><li>${BSL_AST.isDefinition(root) ? treeDefinition(root): treeE(root)}</li></ul>`;
+function treeDefOrExpr(root: BSL_AST.defOrExpr, nodeFn: treeNodeFn) {
+  return `<ul class="tree ast"><li>${BSL_AST.isDefinition(root) ? treeDefinition(root, nodeFn): treeE(root, nodeFn)}</li></ul>`;
 }
 
-function treeDefinition(d: BSL_AST.definition) {
+interface Hole {
+  pos?: number;
+  code: string | string[];
+  placeholder: string;
+}
+function treeHole(h: Hole) {
+  if (typeof h.code === 'string') h.code = [h.code];
+  const classes = [
+    'hole',
+    (h.pos ? `hole-${h.pos}` : ''),
+    (h.placeholder === 'name' ? 'hole-name' : ''),
+    (['name+','name*'].includes(h.placeholder) ? 'hole-names' : '')
+  ].join(' ');
+  return `
+    <div class="${classes}">
+      ${h.code.map(c => `<div class="code">${c}</div>`).join(' ')}
+      <div class="placeholder">${h.placeholder}</div>
+    </div>
+  `;
+}
+interface TreeNode {
+  production: string;
+  code: (string|Hole)[];
+}
+type treeNodeFn = (n: TreeNode) => string;
+
+function treeNode(n: TreeNode): string {
+  return `
+    <span>
+      <div class="name">${n.production}</div>
+      <div>
+        ${n.code.map(c => typeof c === 'string' ? c : treeHole(c)).join(' ')}
+      </div>
+    </span>
+  `;
+}
+
+function quizNode(n: TreeNode): string {
+  return `
+    <span data-collapsed="true">
+      <div class="name">${n.production}</div>
+      <div>
+        ${n.code.map(c => typeof c === 'string' ? c : treeHole(c)).join(' ')}
+      </div>
+    </span>
+  `;
+}
+
+function treeDefinition(d: BSL_AST.definition, nodeFn: treeNodeFn) {
   if(BSL_AST.isFunDef(d)) {
+    const n = {
+      production: 'Function Definition',
+      code: [
+        '( define ( ',
+        {
+          pos: 1,
+          code: BSL_Print.pprint([d.name]),
+          placeholder: 'name'
+        },
+        {
+          pos: 2,
+          code: d.args.map(BSL_Print.printName),
+          placeholder: 'name+'
+        },
+        ') ',
+        {
+          pos: 3,
+          code: BSL_Print.pprint([d.body]),
+          placeholder: 'e'
+        },
+        ')'
+      ]
+    };
     return `
-      <span>
-        <div class="name">Function Definition</div>
-        <div>( define
-          (
-            <div class="hole hole-1 hole-name">
-              <div class="code">${BSL_Print.pprint([d.name])}</div>
-              <div class="placeholder">name</div>
-            </div>
-            <div class="hole hole-2 hole-names">
-              ${d.args.map(a =>
-                `<div class="code">${BSL_Print.printName(a)}</div>`
-              ).join(' ')}
-              <div class="placeholder">name+</div>
-            </div>
-          )
-          <div class="hole hole-3">
-            <div class="code">${BSL_Print.pprint([d.body])}</div>
-            <div class="placeholder">e</div>
-          </div>
-        )</div>
-      </span>
+      ${nodeFn(n)}
       <ul>
-        <li class="child-1">${treeName(d.name)}</li>
+        <li class="child-1">${treeName(d.name, nodeFn)}</li>
         ${d.args.map(a =>
-          `<li class="child-2">${treeName(a)}</li>`
+          `<li class="child-2">${treeName(a, nodeFn)}</li>`
         ).join('')}
-        <li class="child-3">${treeE(d.body)}</li>
+        <li class="child-3">${treeE(d.body, nodeFn)}</li>
       </ul>`;
   } else if(BSL_AST.isConstDef(d)) {
+    const n = {
+      production: 'Constant Definition',
+      code: [
+        '( define ',
+        {pos:1, code:BSL_Print.pprint([d.name]), placeholder: 'name'},
+        {pos:2, code:BSL_Print.pprint([d.value]), placeholder: 'e'},
+        ')'
+      ]
+    };
     return `
-      <span>
-        <div class="name">Constant Definition</div>
-        <div>( define
-          <div class="hole hole-1 hole-name">
-            <div class="code">${BSL_Print.pprint([d.name])}</div>
-            <div class="placeholder">name</div>
-          </div>
-
-          <div class="hole hole-2">
-            <div class="code">${BSL_Print.pprint([d.value])}</div>
-            <div class="placeholder">e</div>
-          </div>
-        )</div>
-      </span>
+      ${nodeFn(n)}
       <ul>
-        <li class="child-1">${treeName(d.name)}</li>
-        <li class="child-2">${treeE(d.value)}</li>
+        <li class="child-1">${treeName(d.name, nodeFn)}</li>
+        <li class="child-2">${treeE(d.value, nodeFn)}</li>
       </ul>`;
   } else if(BSL_AST.isStructDef(d)) {
+    const n = {
+      production: 'Struct Definition',
+      code: [
+        '( define-struct ',
+        {pos: 1, code: BSL_Print.pprint([d.binding]), placeholder: 'name'},
+        '(',
+        {pos: 2, code: d.properties.map(BSL_Print.printName), placeholder: 'name*'},
+        ') )'
+      ]
+    };
     return `
-      <span>
-        <div class="name">Struct Definition</div>
-
-        <div>(define-struct
-          <div class="hole hole-1 hole-name">
-            <div class="code">${BSL_Print.pprint([d.binding])}</div>
-            <div class="placeholder">name</div>
-          </div>
-          (
-            <div class="hole hole-2 hole-names">
-              ${d.properties.map(p =>
-                `<div class="code">${BSL_Print.printName(p)}</div>`
-              ).join(' ')}
-              <div class="placeholder">name*</div>
-            </div>
-          )
-        )</div>
-      </span>
+      ${nodeFn(n)}
       <ul>
-        <li class="child-1">${treeName(d.binding)}</li>
+        <li class="child-1">${treeName(d.binding, nodeFn)}</li>
         ${d.properties.map(p =>
-          `<li class="child-2">${treeName(p)}</li>`
+          `<li class="child-2">${treeName(p, nodeFn)}</li>`
         ).join('')}
       </ul>`;
   } else {
@@ -103,95 +144,88 @@ function treeDefinition(d: BSL_AST.definition) {
   }
 }
 
-function treeE(e: BSL_AST.expr): string {
+function treeE(e: BSL_AST.expr, nodeFn: treeNodeFn): string {
   if(BSL_AST.isCall(e)) {
+    const n = {
+      production: 'Function Call',
+      code: [
+        '( ',
+        {pos: 1, code: BSL_Print.pprint([e.name]), placeholder: 'name'},
+        ' ',
+        {pos: 2, code: e.args.map(BSL_Print.printE), placeholder: 'e*'},
+        ')'
+      ]
+    };
     return `
-      <span>
-        <div class="name">Function Call</div>
-
-        <div>(
-          <div class="hole hole-1 hole-name">
-            <div class="code">${BSL_Print.pprint([e.name])}</div>
-            <div class="placeholder">name</div>
-          </div>
-
-          <div class="hole hole-2">
-            ${e.args.map(a =>
-              `<div class="code">${BSL_Print.printE(a)}</div>`
-            ).join(' ')}
-            <div class="placeholder">e*</div>
-          </div>
-        )</div>
-      </span>
+      ${nodeFn(n)}
       <ul>
-        <li class="child-1">${treeName(e.name)}</li>
+        <li class="child-1">${treeName(e.name, nodeFn)}</li>
         ${e.args.map(a =>
-          `<li class="child-2">${treeE(a)}</li>`
+          `<li class="child-2">${treeE(a, nodeFn)}</li>`
         ).join('')}
       </ul>`;
   } else if(BSL_AST.isCond(e)) {
+    const n = {
+      production: 'Cond-Expression',
+      code: [
+        '( cond ',
+        {pos: 2, code: e.options.map(BSL_Print.printOption), placeholder: '[ e e ]+'},
+        ')'
+      ]
+    }
     return `
-      <span>
-        <div class="name">Cond-Expression</div>
-        <div>( cond
-          <div class="hole hole-2">
-            ${e.options.map(o =>
-              `<div class="code">${BSL_Print.printOption(o)}</div>`
-            ).join(' ')}
-            <div class="placeholder">[ e e ]+</div>
-          </div>
-         )</div>
-      </span>
+      ${nodeFn(n)}
       <ul>
         ${e.options.map(o =>
-          `<li class="child-2">${treeOption(o)}</li>`
+          `<li class="child-2">${treeOption(o, nodeFn)}</li>`
         ).join(' ')}
       </ul>`;
   } else if(BSL_AST.isName(e)) {
-    return treeName(e);
+    return treeName(e, nodeFn);
   } else if(BSL_AST.isV(e)) {
-    return `
-      <span>
-        <div class="name">Literal Value</div>
-        <div>${BSL_Print.pprint([e])}</div>
-      </span>`;
+    const n = {
+      production: 'Literal Value',
+      code: [BSL_Print.printE(e)]
+    }
+    return nodeFn(n);
   } else {
     console.error('Invalid input to treeE');
-    return `<span>${e}</span>`;
+    const n = {
+      production: 'Invalid input to treeE',
+      code: [`${e}`]
+    }
+    return nodeFn(n);
   }
 }
 
-function treeOption(o: BSL_AST.Clause) {
+function treeOption(o: BSL_AST.Clause, nodeFn: treeNodeFn) {
+  const n = {
+    production: 'Cond-Option',
+    code: [
+      '[',
+      {pos:1, code: BSL_Print.printE(o.condition), placeholder: 'e'},
+      ' ',
+      {pos:2, code: BSL_Print.printE(o.result), placeholder: 'e'},
+      ']'
+    ]
+  }
   return `
-    <span>
-      <div class="name">Cond-Option</div>
-      <div>[
-        <div class="hole hole-1">
-          <div class="code">${BSL_Print.pprint([o.condition])}</div>
-          <div class="placeholder">e</div>
-        </div>
-
-        <div class="hole hole-2">
-          <div class="code">${BSL_Print.pprint([o.result])}</div>
-          <div class="placeholder">e</div>
-        </div>
-       ]
-      </div>
-    </span>
+    ${nodeFn(n)}
     <ul>
-      <li class="child-1">${treeE(o.condition)}</li>
-      <li class="child-2">${treeE(o.result)}</li>
+      <li class="child-1">${treeE(o.condition, nodeFn)}</li>
+      <li class="child-2">${treeE(o.result, nodeFn)}</li>
     </ul>
   `;
 }
 
-function treeName(s: BSL_AST.Name): string {
-  return `
-    <span>
-      <div class="name">Symbol</div>
-      <div>${s.symbol}</div>
-    </span>`;
+function treeName(s: BSL_AST.Name, nodeFn: treeNodeFn): string {
+  const n = {
+    production: 'Symbol',
+    code: [BSL_Print.printName(s)]
+  }
+  return nodeFn(n);
 }
+
 
 // ###### layout helper ########
 // dynamically compute dimensions of connectors between nodes
