@@ -28,13 +28,13 @@ export function printE(e: BSL_AST.expr): string {
     return `(cond ${e.options.map(printOption).join(' ')})`;
   } else if(BSL_AST.isName(e)) {
     return printName(e);
-  } else if(BSL_AST.isV(e)) {
-    if(typeof(e) === 'string' && e !== `'()`) {
-      return `"${e}"`;
-    } else if(typeof(e) === 'boolean') {
-      return e ? '#true' : '#false';
+  } else if(BSL_AST.isLiteral(e)) {
+    if(typeof(e.value) === 'string' && e.value !== `'()`) {
+      return `"${e.value}"`;
+    } else if(typeof(e.value) === 'boolean') {
+      return e.value ? '#true' : '#false';
     } else {
-      return `${e}`;
+      return `${e.value}`;
     }
   } else {
     console.error('Invalid input to printE');
@@ -82,6 +82,7 @@ export const testprogram: BSL_AST.program = [
     type: BSL_AST.Production.CondExpression,
     options: [
       {
+        type: BSL_AST.Production.CondOption,
         condition: {
           type: BSL_AST.Production.FunctionCall,
           name: {
@@ -91,13 +92,27 @@ export const testprogram: BSL_AST.program = [
           args: [{
             type: BSL_AST.Production.Symbol,
             symbol: 'x'
-          }, 3]
+          },
+          {
+            type: BSL_AST.Production.Literal,
+            value: 3
+          }]
         },
-        result: 'isThree'
+        result: {
+          type: BSL_AST.Production.Literal,
+          value: 'isThree'
+        }
       },
       {
-        condition: false,
-        result: `'()`
+        type: BSL_AST.Production.CondOption,
+        condition: {
+          type: BSL_AST.Production.Literal,
+          value: false
+        },
+        result: {
+          type: BSL_AST.Production.Literal,
+          value: `'()`
+        }
       }
     ]
   },
@@ -107,7 +122,10 @@ export const testprogram: BSL_AST.program = [
       type: BSL_AST.Production.Symbol,
       symbol: 'x'
     },
-    value: 42
+    value: {
+      type: BSL_AST.Production.Literal,
+      value: 42
+    }
   },
   {
     type: BSL_AST.Production.StructDefinition,

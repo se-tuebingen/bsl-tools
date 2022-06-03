@@ -43,7 +43,7 @@ function treeHole(h: Hole) {
   `;
 }
 interface TreeNode {
-  production: string;
+  production: BSL_AST.Production;
   code: (string|Hole)[];
 }
 type treeNodeFn = (n: TreeNode) => string;
@@ -73,7 +73,7 @@ function quizNode(n: TreeNode): string {
 function treeDefinition(d: BSL_AST.definition, nodeFn: treeNodeFn) {
   if(BSL_AST.isFunDef(d)) {
     const n = {
-      production: 'Function Definition',
+      production: d.type,
       code: [
         '( define ( ',
         {
@@ -106,7 +106,7 @@ function treeDefinition(d: BSL_AST.definition, nodeFn: treeNodeFn) {
       </ul>`;
   } else if(BSL_AST.isConstDef(d)) {
     const n = {
-      production: 'Constant Definition',
+      production: d.type,
       code: [
         '( define ',
         {pos:1, code:BSL_Print.pprint([d.name]), placeholder: 'name'},
@@ -122,7 +122,7 @@ function treeDefinition(d: BSL_AST.definition, nodeFn: treeNodeFn) {
       </ul>`;
   } else if(BSL_AST.isStructDef(d)) {
     const n = {
-      production: 'Struct Definition',
+      production: d.type,
       code: [
         '( define-struct ',
         {pos: 1, code: BSL_Print.pprint([d.binding]), placeholder: 'name'},
@@ -147,7 +147,7 @@ function treeDefinition(d: BSL_AST.definition, nodeFn: treeNodeFn) {
 function treeE(e: BSL_AST.expr, nodeFn: treeNodeFn): string {
   if(BSL_AST.isCall(e)) {
     const n = {
-      production: 'Function Call',
+      production: e.type,
       code: [
         '( ',
         {pos: 1, code: BSL_Print.pprint([e.name]), placeholder: 'name'},
@@ -166,7 +166,7 @@ function treeE(e: BSL_AST.expr, nodeFn: treeNodeFn): string {
       </ul>`;
   } else if(BSL_AST.isCond(e)) {
     const n = {
-      production: 'Cond-Expression',
+      production: e.type,
       code: [
         '( cond ',
         {pos: 2, code: e.options.map(BSL_Print.printOption), placeholder: '[ e e ]+'},
@@ -182,25 +182,27 @@ function treeE(e: BSL_AST.expr, nodeFn: treeNodeFn): string {
       </ul>`;
   } else if(BSL_AST.isName(e)) {
     return treeName(e, nodeFn);
-  } else if(BSL_AST.isV(e)) {
+  } else if(BSL_AST.isLiteral(e)) {
     const n = {
-      production: 'Literal Value',
+      production: e.type,
       code: [BSL_Print.printE(e)]
     }
     return nodeFn(n);
   } else {
     console.error('Invalid input to treeE');
-    const n = {
-      production: 'Invalid input to treeE',
-      code: [`${e}`]
-    }
-    return nodeFn(n);
+    console.error(e);
+    return `
+      <span>
+        <div class="name">Invalid input to treeE</div>
+        <div>${e}</div>
+      </span>
+    `;
   }
 }
 
 function treeOption(o: BSL_AST.Clause, nodeFn: treeNodeFn) {
   const n = {
-    production: 'Cond-Option',
+    production: o.type,
     code: [
       '[',
       {pos:1, code: BSL_Print.printE(o.condition), placeholder: 'e'},
@@ -220,7 +222,7 @@ function treeOption(o: BSL_AST.Clause, nodeFn: treeNodeFn) {
 
 function treeName(s: BSL_AST.Name, nodeFn: treeNodeFn): string {
   const n = {
-    production: 'Symbol',
+    production: s.type,
     code: [BSL_Print.printName(s)]
   }
   return nodeFn(n);

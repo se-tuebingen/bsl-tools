@@ -4,7 +4,9 @@ export enum Production {
   StructDefinition = 'Struct Definition',
   FunctionCall = 'Function Call',
   CondExpression = 'Cond-Expression',
-  Symbol = 'Symbol'
+  CondOption = 'Cond-Option',
+  Symbol = 'Symbol',
+  Literal = 'Literal Value'
 }
 
 export type program = defOrExpr[];
@@ -28,7 +30,7 @@ export interface StructDef{
     binding: Name;
     properties: Name[];
 };
-export type expr = Call | Cond | Name | v;
+export type expr = Call | Cond | Name | Literal;
 
 export interface Call{
     type: Production.FunctionCall;
@@ -36,6 +38,7 @@ export interface Call{
     args: expr[];
 };
 export interface Clause{
+    type: Production.CondOption,
     condition: expr;
     result: expr;
 }
@@ -47,8 +50,10 @@ export interface Name{
     type: Production.Symbol;
     symbol:string;
 };
-export type v = boolean | string | number | `'()`;
-// export type empty = `'()`;
+export interface Literal {
+    type: Production.Literal,
+    value: boolean | string | number | `'()`;
+}
 
 // runtime type checking
 export function isDefinition(obj: any): obj is definition {
@@ -65,7 +70,7 @@ export function isStructDef(obj: any): obj is StructDef {
 }
 
 export function isExpr(obj: any): obj is expr {
-  return isCall(obj) || isCond(obj) || isName(obj) || isV(obj);
+  return isCall(obj) || isCond(obj) || isName(obj) || isLiteral(obj);
 }
 export function isCall(obj: any): obj is Call {
   return obj.type === Production.FunctionCall;
@@ -76,6 +81,6 @@ export function isCond(obj: any): obj is Cond {
 export function isName(obj: any): obj is Name {
   return obj.type === Production.Symbol;
 }
-export function isV(obj: any): obj is v {
-  return ['boolean', 'string', 'number'].includes(typeof(obj)) || obj == `'()`;
+export function isLiteral(obj: any): obj is Literal {
+  return obj.type === Production.Literal;
 }

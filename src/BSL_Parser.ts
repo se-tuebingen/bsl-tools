@@ -257,6 +257,7 @@ function peg$parse(input: string, options?: IParseOptions) {
   const peg$c22 = peg$literalExpectation("]", false);
   const peg$c23 = function(condition: any, result: any): any {
       return {
+        "type": "Cond-Option",
         "condition": condition,
         "result":result
       }
@@ -277,7 +278,11 @@ function peg$parse(input: string, options?: IParseOptions) {
       }
     };
   const peg$c28 = function(val: any): any {
-    return val };
+    return {
+      "type": "Literal Value",
+      "value": val
+      }
+    };
   const peg$c29 = /^[0-9]/;
   const peg$c30 = peg$classExpectation([["0", "9"]], false, false);
   const peg$c31 = function(): any {return parseInt(text(), 10)};

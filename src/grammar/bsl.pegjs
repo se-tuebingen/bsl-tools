@@ -49,6 +49,7 @@ Cond
 Option
   = _ "[" _ condition:Expression _ result:Expression "]" {
     return {
+      "type": "Cond-Option",
       "condition": condition,
       "result":result
     }
@@ -73,7 +74,11 @@ Name
 
 Value
   = val:(Number / Boolean / Empty / String){
-  return val }
+  return {
+    "type": "Literal Value",
+    "value": val
+    }
+  }
 
 Number
   = _ [0-9]+ {return parseInt(text(), 10)}
