@@ -1,4 +1,28 @@
 /* modifications for tree quiz */
+bsl-tree[quiz="true"] .tree {
+  --border-pending: orange;
+}
+bsl-tree[quiz="true"] .tree span {
+  cursor: auto;
+}
+bsl-tree[quiz="true"] .tree span[data-collapsed="true"] {  
+  border: 1px solid var(--border-pending);
+}
 bsl-tree[quiz="true"] .tree .name {
   font-size: inherit;
+}
+
+bsl-tree[quiz="true"] .tree .name {
+  position: relative;
+  display: block;
+  text-align: left;
+}
+
+bsl-tree[quiz="true"] .tree .name > select {
+  position: absolute;
+  display: inline-block;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
 }

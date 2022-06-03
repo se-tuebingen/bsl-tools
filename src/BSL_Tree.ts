@@ -62,13 +62,33 @@ function treeNode(n: TreeNode): string {
 function quizNode(n: TreeNode): string {
   return `
     <span data-collapsed="true">
-      <div class="name">${n.production}</div>
+      <div class="name">
+         ${n.production}
+         <select data-solution="${n.production}"
+                 onchange="guessProduction(event)">
+            <option>---</option>
+            ${Object.values(BSL_AST.Production).map(k => `<option value="${k}">${k}</option>`)}
+         </select>
+      </div>
       <div>
         ${n.code.map(c => typeof c === 'string' ? c : treeHole(c)).join(' ')}
       </div>
     </span>
   `;
 }
+function guessProduction(e: Event) {
+  const sel = e.target as HTMLInputElement;
+  console.log('guessing ', sel.value);
+  const solution = sel.getAttribute('data-solution') as string;
+  if (sel.value === solution) {
+    const div = sel.parentElement as HTMLElement;
+    div.innerHTML = solution;
+    const span = div.parentElement as HTMLElement;
+    span.removeAttribute('data-collapsed');
+  }
+}
+
+(window as any).guessProduction = guessProduction;
 
 function treeDefinition(d: BSL_AST.definition, nodeFn: treeNodeFn) {
   if(BSL_AST.isFunDef(d)) {
