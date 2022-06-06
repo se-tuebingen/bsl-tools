@@ -20,8 +20,7 @@ jobs:
       - name: Install nodejs 14
         uses: actions/setup-node@v3
         with:
-          node-version: 14
-          check-latest: true
+          node-version: 14.4
           cache: 'npm'
           cache-dependency-path: package-lock.json
       - run: npm ci
