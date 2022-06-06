@@ -17,10 +17,10 @@ jobs:
           variant: 'CS'
           version: 'stable'
       - run: raco pkg install --deps search-auto scribble-math
-      - name: Install nodejs 16
+      - name: Install nodejs 14.42
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 14.42
           cache: 'npm'
           cache-dependency-path: package-lock.json
       - run: npm install
@@ -36,5 +36,5 @@ jobs:
         with:
           branch: gh-pages
           folder: tests
-      #- name: Check that tests have been run locally before uploading
-      #  run: git diff --exit-code
+      - name: Check that tests have been run locally before uploading
+        run: git diff --exit-code
