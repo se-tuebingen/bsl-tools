@@ -35,7 +35,7 @@
 ; HTML
 (define
   bsl-tag-wrapper
-  (style "" (list (alt-tag "bsltree")))
+  (style "" (list (alt-tag "bsltree")(js-addition "bsl_tools.js")))
 )
 ; helper: add substring
 ; sexpr->string
@@ -61,3 +61,4 @@
   )]
   )
 )
+
