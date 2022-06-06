@@ -10,7 +10,7 @@
 (require scribble/latex-properties)
 (require scribble/base)
 
-(provide bsl-ast)
+(provide bsl-tree)
 
 ; predicate function sexpr
 (define (sexpr? sexpr)
@@ -52,14 +52,12 @@
 
 ; render bsl-string
 (define
-  (bsl-ast sexpr)
+  (bsl-tree sexpr)
   (cond
-  [(not (sexpr? sexpr)) (raise-argument-error 'bsl-ast "BSL-Tree only accepts S-Expressions" sexpr)]
+  [(not (sexpr? sexpr)) (raise-argument-error 'bsl-tree "BSL-Tree only accepts S-Expressions" sexpr)]
   [(cond-block
       [html (paragraph bsl-tag-wrapper (sexpr->string sexpr))]
       [latex (paragraph (style #f '()) (sexpr->string sexpr))]
   )]
   )
 )
-
-(~a 'just-a-noraml-name)

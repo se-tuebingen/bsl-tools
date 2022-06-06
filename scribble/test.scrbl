@@ -13,7 +13,7 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 
 @subsection{Constant Definition}
 
-@bsl-ast[
+@bsl-tree[
     '((define one 2)
  (define two 3)
  (+ one two))
@@ -21,19 +21,19 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 
 @subsection{Struct Definition}
 
-@bsl-ast[
+@bsl-tree[
 '((define-struct pool (people fish water))(make-pool (2 1 "a lot")))
 ]
 
 @subsection{Function Definition}
 
-@bsl-ast[
+@bsl-tree[
 '((define (swim-with-the-fish pool) 
 (string-append "Cool pool with a number of " (number->string (pool-fish pool)))))
 ]
 
 @subsection{Conditional Expression}
-@bsl-ast[
+@bsl-tree[
 '((cond
 [(< 1 0) "Chocolate is the best!"]
 [(< 0 0) "But Ice Cream is way better!"]
@@ -43,38 +43,42 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 ]
 
 @subsection{Function Call Expression}
-@bsl-ast[
+@bsl-tree[
 '((swim-with-the-fish (make-pool 2 20 "a little less than much, but still much")))
 ]
 
 @subsection{Name Expression}
-@bsl-ast[
+@bsl-tree[
 'just-a-normal-not-intriguing-name
 ]
 
 @subsection{List Expression}
-@bsl-ast[
+@bsl-tree[
     '((list 1 2 3 4 5))
 ]
 
 @subsection{Value Expressions}
 Boolean:
-@bsl-ast[
+
+@bsl-tree[
 #true
 ]
 
 Number:
-@bsl-ast[
+
+@bsl-tree[
 42
 ]
 
 String:
-@bsl-ast[
+
+@bsl-tree[
     "Hallo Welt"
 ]
 
 Empty-List:
-@bsl-ast[
+
+@bsl-tree[
 '()
 ]
 @subsection{Consecutive Program}
