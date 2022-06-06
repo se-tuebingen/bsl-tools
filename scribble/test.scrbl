@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "bsl_tree.rkt")
+@(require "BSL_AST.rkt")
 @; @(require scribble/eval)
 @title[#:version ""]{Questionnaire test manual}
 @author["Linus Szillat"]
@@ -10,6 +10,15 @@ In this manual we cover the functionality of BSL-Tools.
 @section{BSL-Syntax-Tree}
 Here is the Show Feature for the Abstract Syntax Tree.
 
-@bsl-tree[
-"((define me 2)(define two 3)(+ me two))"
+A simple bsl-tree example with Constants:
+
+@bsl-ast[
+    '((define one 2)
+ (define two 3)
+ (+ one two))
+]
+
+Now with Structs:
+@bsl-ast[
+'((define-struct pool (people fish water))(make-pool (2 1 "a lot")))
 ]
