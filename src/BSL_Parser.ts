@@ -286,10 +286,10 @@ function peg$parse(input: string, options?: IParseOptions) {
   const peg$c29 = /^[0-9]/;
   const peg$c30 = peg$classExpectation([["0", "9"]], false, false);
   const peg$c31 = function(): any {return parseInt(text(), 10)};
-  const peg$c32 = "#true";
-  const peg$c33 = peg$literalExpectation("#true", false);
-  const peg$c34 = "#false";
-  const peg$c35 = peg$literalExpectation("#false", false);
+  const peg$c32 = "#t";
+  const peg$c33 = peg$literalExpectation("#t", false);
+  const peg$c34 = "#f";
+  const peg$c35 = peg$literalExpectation("#f", false);
   const peg$c36 = function(bool: any): any { return bool === "#true" };
   const peg$c37 = "'()";
   const peg$c38 = peg$literalExpectation("'()", false);
@@ -1097,17 +1097,17 @@ function peg$parse(input: string, options?: IParseOptions) {
     s0 = peg$currPos;
     s1 = peg$parse_();
     if (s1 as any !== peg$FAILED) {
-      if (input.substr(peg$currPos, 5) === peg$c32) {
+      if (input.substr(peg$currPos, 2) === peg$c32) {
         s2 = peg$c32;
-        peg$currPos += 5;
+        peg$currPos += 2;
       } else {
         s2 = peg$FAILED;
         if (peg$silentFails === 0) { peg$fail(peg$c33); }
       }
       if (s2 as any === peg$FAILED) {
-        if (input.substr(peg$currPos, 6) === peg$c34) {
+        if (input.substr(peg$currPos, 2) === peg$c34) {
           s2 = peg$c34;
-          peg$currPos += 6;
+          peg$currPos += 2;
         } else {
           s2 = peg$FAILED;
           if (peg$silentFails === 0) { peg$fail(peg$c35); }
