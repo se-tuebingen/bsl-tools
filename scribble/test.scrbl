@@ -47,6 +47,34 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 #'((swim-with-the-fish (make-pool 2 20 "alittlelessthanmuchbutstillmuch")))
 ]
 
+@subsection{List Expression}
+@bsl-tree[
+    #'((list 1 2 3 4 5))
+]
+
+@subsection{Name Expression}
+@bsl-tree[
+'just-a-normal-name
+]
+
+@subsection{Value Expressions}
+
+@bsl-tree[
+#true
+]
+
+@bsl-tree[
+42
+]
+
+@bsl-tree[
+    "HalloWelt"
+]
+
+@bsl-tree[
+'()
+]
+
 
 @subsection{Consecutive Program}
 

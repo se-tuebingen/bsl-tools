@@ -13,6 +13,78 @@
 (require syntax/stx)
 (provide bsl-tree)
 
+
+(define value (or/c boolean? string? number? '()))
+(define name (or/c symbol?))
+(struct/contract bsl-string-container (
+  [bsl-content (or/c value syntax?)])
+  #:transparent)
+
+; predicate function value
+(define (value? value)
+  (cond
+    [(boolean? value) #t]
+    [(string? value) #t]
+    [(number? value) #t]
+    [(empty? value) #t]
+    [(symbol? value) #t]
+    [else #f]
+  )
+)
+; HTML
+(define
+  bsl-tag-wrapper
+  (style #f (list (alt-tag "bsltree")(js-addition "bsl_tools.js")
+  ))
+)
+
+; Either (List of Syntax) or (Value)-> Either (List of String) or (String)
+(define (synlst-or-val->strlist-or-str lst)
+  (cond
+    [(or (number? lst) (boolean? lst)(symbol? lst))
+    (string-append (~a lst) " \n")]
+    [(string? lst) (string-append "\"" lst "\" \n")]
+    [(empty? lst) " '() \n"]
+    [(stx-list? lst)(stx-map 
+      (lambda (x) 
+      (string-append "(" (syntax->string x) ") \n "))lst)]
+    [(syntax? lst) (syntax->string lst)]
+  )
+)
+
+;Either (List-of-String) or (String) -> String
+(define (strlist-or-str->str lst)
+  (cond
+    [(string? lst) lst]
+    [(empty? lst) ""]
+    [else (string-append (first lst) (strlist-or-str->str (rest lst)))]
+  )
+)
+
+
+
+; render bsl-string
+(define
+  (bsl-tree stx)
+  (cond
+  [(not (or (syntax? stx) (value? stx))) (raise-argument-error 'bsl-tree "BSL-Tree only accepts Syntax-Expressions or Values" stx)]
+  [(cond-block
+      [html (paragraph bsl-tag-wrapper 
+      (strlist-or-str->str
+        (synlst-or-val->strlist-or-str stx))
+      )]
+     ;[latex (paragraph (style #f '()) (strlist-or-str->str(synlst-or-val->strlist-or-str stx)))]
+  )]
+  )
+)
+
+
+
+
+
+; OLD
+
+
 ; predicate function sexpr
 ;;; (define (sexpr? sexpr)
 ;;;   (cond
@@ -29,16 +101,7 @@
 ;;;   )
 ;;; )
 
-(struct/contract bsl-string-container (
-  [bsl-content syntax?])
-  #:transparent)
 
-; HTML
-(define
-  bsl-tag-wrapper
-  (style #f (list (alt-tag "bsltree")(js-addition "bsl_tools.js")
-  ))
-)
 ; helper: add substring
 ; sexpr->string
 ;;; (define (sexpr->string sexpr)
@@ -52,95 +115,73 @@
 ;;;   )
 ;;; )
 
-;List of Syntax or syntax -> List of String
-(define (synlist->strlist lst)(cond
-[(stx-list? lst)(stx-map 
-  (lambda (x) 
-   (string-append "(" (syntax->string x) ") \n "))lst)]
-[(syntax? lst) (syntax->string lst)]
-))
 
-;List-of-String -> String
-(define (strlist->str lst)
-(cond
-[(empty? lst) ""]
-[else (string-append (first lst) (strlist->str (rest lst)))]
-)
-)
+;;; NOT USED
+;;;
+;;; #lang racket/base
+;;; (require racket/contract)
+;;; (require racket/list)
+;;; (require scribble/core
+;;;          scribble/html-properties
+;;;          (only-in xml cdata))
+;;; (require scribble/latex-properties)
+;;; (require scribble/base)
 
-
-
-; render bsl-string
-(define
-  (bsl-tree stx)
-  (cond
-  [(not (syntax? stx)) (raise-argument-error 'bsl-tree "BSL-Tree only accepts Syntax-Expressions" stx)]
-  [(cond-block
-      [html (paragraph bsl-tag-wrapper (strlist->str(synlist->strlist stx)))]
-      [latex (paragraph (style #f '()) (strlist->str(synlist->strlist stx)))]
-  )]
-  )
-)
-;;; ; RAM
-;;; @subsection{Name Expression}
-;;; @bsl-tree[
-;;; #'(just-a-normal-not-intriguing-name)
-;;; ]
-
-;;; @subsection{List Expression}
-;;; @bsl-tree[
-;;;     #'((list 1 2 3 4 5))
-;;; ]
-
-;;; @subsection{Value Expressions}
-;;; Boolean:
-
-;;; @bsl-tree[
-;;; #true
-;;; ]
+;;; ; 
+;;; ; <bsl-tree>
+;;; ; (expression-or-def)
+;;; ; (expression-or-def)
+;;; ; (expression-or-def)
+;;; ;<\bsl-tree>
 
 
-;;; Number:
-;;; @bsl-tree[
-;;; 42
-;;; ]
+;;; ; BSL-Tree data definitions
+
+;;; (define bsl-tree (
+;;;   flat-rec-contract tree-of()
+;;; ))
+;;; ; Value types
+;;; (define v (or/c boolean? string? number? '()))
+
+;;; ; name is a keyword
+;;; (define name (or/c string?))
+
+;;; ; Expr is call or cond or name or v
+;;; ;(define expr (or/c call cond name v))
+
+;;; (define expr (flat-rec-contract expr (or/c call cond name v)))
 
 
-;;; String:
-;;; @bsl-tree[
-;;;     "HalloWelt"
-;;; ]
+;;; ; clause is a pair of expr
+;;; (define clause (cons/c expr expr))
 
-;;; ; WORK TODO
-;;; Empty-List:
-;;; @bsl-tree[
-;;; #'((cons "hello" '()))
-;;; ]
+;;; ; Cond: List of clauses
+;;; (define cond (listof clause))
 
+;;; ; call is a name and list of expr
+;;; (define call (cons/c name (listof (or/c call cond name v))))
+
+;;; ; funDef is a name a list of names and a expr
+;;; (define funDef (cons/c name (cons/c (listof name) expr)))
+
+;;; ; constDef is a name and a expr
+;;; (define constDef (cons/c name expr))
+
+;;; ; structDef is a name and a list of names
+;;; (define structDef (cons/c name (listof name)))
+
+;;; ; definition is either a funDef or constDef or structDef
+;;; (define definition (or/c funDef constDef structDef))
+
+;;; ;defOrExpr
+;;; (define defOrExpr (or/c definition expr))
+
+;;; ; program type
+;;; (define program (listof defOrExpr))
 
 
 
-; Examples
-
-
-(strlist->str (synlist->strlist    #'((define one 2)
- (define two 3)
- (+ one two))))
-
- (strlist->str (synlist->strlist    
- #'((define (swim-with-the-fish pool) 
-(string-append "Coolpoolwithanumberof" (number->string (pool-fish pool)))))
-))
- 
- (strlist->str (synlist->strlist    #'((define one 2)
- (define two 3)
- (+ one two))))
- 
- (strlist->str (synlist->strlist    #'((define one 2)
- (define two 3)
- (+ one two))))
- 
- (strlist->str (synlist->strlist    #'((define one 2)
- (define two 3)
- (+ one two))))
- 
+;;; ; Example program
+;;; ;
+;;; (program (list (definition (funDef (cons (name "f") (list (name "x")) (expr (name ("x"))))))
+;;;                 ))
