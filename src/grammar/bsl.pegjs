@@ -84,7 +84,7 @@ Number
   = _ [0-9]+ {return parseInt(text(), 10)}
 
 Boolean
-  =_ bool:("#t" / "#f"){ return bool === "#true" }
+  =_ bool:("#true" / "#false" / "#t" / "#f"){ return (bool === "#true" || bool === "#t") }
 
 Empty
   = _ "'()"{ return "'()" }
