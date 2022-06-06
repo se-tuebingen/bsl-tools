@@ -2,13 +2,13 @@ name: GitHub Render Stuff
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install Racket
         uses: Bogdanp/setup-racket@v1.7
         with:
@@ -17,17 +17,23 @@ jobs:
           variant: 'CS'
           version: 'stable'
       - run: raco pkg install --deps search-auto scribble-math
+      - name: Install nodejs 14
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+      - run: npm ci
       # - name: Install TexLive
       #   run: sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
       - name: Install TypeScript
         run: npm install -g typescript
-      # - name: Compile
-      #   run: make all
-      # - name: Execute Tests
-      #   run: make test
-      # - uses: JamesIves/github-pages-deploy-action@4.1.7
-      #   with:
-      #     branch: gh-pages
-      #     folder: tests
-      # - name: Check that tests have been run locally before uploading
-      #   run: git diff --exit-code
+      - name: Compile
+        run: make build
+      - name: Execute Tests
+        run: make test
+      - uses: JamesIves/github-pages-deploy-action@4.1.7
+        with:
+          branch: gh-pages
+          folder: tests
+      - name: Check that tests have been run locally before uploading
+        run: git diff --exit-code

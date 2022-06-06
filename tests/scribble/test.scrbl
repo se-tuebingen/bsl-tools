@@ -37,7 +37,7 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 #'((cond
 [(< 1 0) "Chocolate is the best"]
 [(< 0 0) "But Ice Cream is way better!"]
-[(> 1000 200) "Still Pizza's the best!!!"]
+[(> 1000 200) "Still Pizza is the best!!!"]
 [else #false]
 ))
 ]
