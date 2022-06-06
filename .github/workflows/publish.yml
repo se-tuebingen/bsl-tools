@@ -36,5 +36,5 @@ jobs:
         with:
           branch: gh-pages
           folder: tests
-      - name: Check that tests have been run locally before uploading
-        run: git diff --exit-code
+      #- name: Check that tests have been run locally before uploading
+      #  run: git diff --exit-code
