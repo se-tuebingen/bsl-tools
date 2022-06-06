@@ -10,23 +10,23 @@
 
 <body>
   <h2>Standard collapsible AST</h2>
-  <bsltree>
+  <bsl-tree>
     (define f (x y) (+ x y))
     (cond [(= x 3) "isThree"] [#false '()])
     (define x 42)
     (define-struct name (firstName lastName))
-  </bsltree>
+  </bsl-tree>
 
   <h2>AST as a quiz</h2>
-  <bsltree quiz="true">
+  <bsl-tree quiz="true">
     (define f (x y) (+ x y))
     (cond [(= x 3) "isThree"] [#false '()])
     (define x 42)
     (define-struct name (firstName lastName))
-  </bsltree>
+  </bsl-tree>
 
   <h2>Handling of non-valid BSL code</h2>
-  <bsltree>nonvalid(code)</bsltree>
+  <bsl-tree>nonvalid(code)</bsl-tree>
 
 </body>
 

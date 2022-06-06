@@ -13,7 +13,7 @@ document.getElementsByTagName('head')[0].appendChild(styleNode);
 
 // parse and print bsl trees
 function processBslTrees() {
-  Array.from(document.getElementsByTagName('bsl-tree')).map(el => {
+  Array.from(document.getElementsByTagName('bsltree')).map(el => {
     try {
       const program : BSL_AST.program = parse(el.innerHTML);
       const quiz = el.getAttribute('quiz') ? true : false;
