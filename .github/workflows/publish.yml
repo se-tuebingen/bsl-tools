@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install Racket
         uses: Bogdanp/setup-racket@v1.7
         with:
@@ -17,13 +17,14 @@ jobs:
           variant: 'CS'
           version: 'stable'
       - run: raco pkg install --deps search-auto scribble-math
-      - name: Install nodejs 14.42
+      - name: Install nodejs 14
         uses: actions/setup-node@v3
         with:
-          node-version: 14.42
+          node-version: 14
+          check-latest: true
           cache: 'npm'
           cache-dependency-path: package-lock.json
-      - run: npm install
+      - run: npm ci
       # - name: Install TexLive
       #   run: sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
       - name: Install TypeScript
