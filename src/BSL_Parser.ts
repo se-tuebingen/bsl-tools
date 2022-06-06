@@ -269,8 +269,8 @@ function peg$parse(input: string, options?: IParseOptions) {
       "args": args
       }
     };
-  const peg$c25 = /^[A-Za-z+-\/*=]/;
-  const peg$c26 = peg$classExpectation([["A", "Z"], ["a", "z"], ["+", "/"], "*", "="], false, false);
+  const peg$c25 = /^[A-Za-z+\-\/*=<>]/;
+  const peg$c26 = peg$classExpectation([["A", "Z"], ["a", "z"], "+", "-", "/", "*", "=", "<", ">"], false, false);
   const peg$c27 = function(symbol: any): any {
     return {
       "type": "Symbol",
@@ -296,8 +296,8 @@ function peg$parse(input: string, options?: IParseOptions) {
   const peg$c39 = function(): any { return "'()" };
   const peg$c40 = "\"";
   const peg$c41 = peg$literalExpectation("\"", false);
-  const peg$c42 = /^[A-Za-z]/;
-  const peg$c43 = peg$classExpectation([["A", "Z"], ["a", "z"]], false, false);
+  const peg$c42 = /^[A-Za-z \r \t \n 0-9!()?,;.:\-']/;
+  const peg$c43 = peg$classExpectation([["A", "Z"], ["a", "z"], " ", "\r", " ", "\t", " ", "\n", " ", ["0", "9"], "!", "(", ")", "?", ",", ";", ".", ":", "-", "'"], false, false);
   const peg$c44 = function(str: any): any { return str.join("") };
   const peg$c45 = peg$otherExpectation("whitespace");
   const peg$c46 = function(): any {return undefined};

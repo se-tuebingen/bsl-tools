@@ -1,2 +1,2 @@
-scribble/output/**
+tests/scribble/output/**
 node_modules
