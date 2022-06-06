@@ -17,7 +17,7 @@ jobs:
           variant: 'CS'
           version: 'stable'
       - run: raco pkg install --deps search-auto scribble-math
-      - name: Install nodejs 14
+      - name: Install nodejs 16
         uses: actions/setup-node@v3
         with:
           node-version: 16
