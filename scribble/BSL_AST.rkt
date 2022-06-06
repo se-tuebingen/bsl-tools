@@ -1,6 +1,5 @@
 #lang racket/base
 (require racket/contract)
-(require 2htdp/universe)
 (require racket/list)
 (require racket/string)
 (require racket/format)
@@ -13,9 +12,24 @@
 
 (provide bsl-ast)
 
+; predicate function sexpr
+(define (sexpr? sexpr)
+  (cond
+    [(boolean? sexpr) #t]
+    [(string? sexpr) #t]
+    [(symbol? sexpr) #t]
+    [(number? sexpr) #t]
+    [(empty? sexpr) #t]
+    [(and (string? (~a sexpr))
+        (string-prefix? (~a sexpr) "((")
+        (string-suffix? (~a sexpr) "))")
+    )#t]
+    [else #f]
+  )
+)
 
 (struct/contract bsl-string-container (
-  [bsl-content sexp?])
+  [bsl-content sexpr?])
   #:transparent)
 
 ; HTML
@@ -23,17 +37,29 @@
   bsl-tag-wrapper
   (style "" (list (alt-tag "bsltree")))
 )
-; add substring
+; helper: add substring
 ; sexpr->string
 (define (sexpr->string sexpr)
-(substring (~a sexpr) 1 (- (string-length (~a sexpr)) 1))
+  (cond
+    [(boolean? sexpr) (~a sexpr)]
+    [(string? sexpr) (string-append "\"" sexpr "\"")]
+    [(number? sexpr) (~a sexpr)]
+    [(empty? sexpr) "empty"]
+    [(symbol? sexpr) (~a sexpr)]
+    [else (substring (~a sexpr) 1 (- (string-length (~a sexpr)) 1))]
+  )
 )
+
 ; render bsl-string
 (define
   (bsl-ast sexpr)
-           (cond-block
-           [html (paragraph bsl-tag-wrapper (sexpr->string sexpr))]
-           [latex (paragraph (style #f '()) (sexpr->string sexpr))]
-         )
+  (cond
+  [(not (sexpr? sexpr)) (raise-argument-error 'bsl-ast "BSL-Tree only accepts S-Expressions" sexpr)]
+  [(cond-block
+      [html (paragraph bsl-tag-wrapper (sexpr->string sexpr))]
+      [latex (paragraph (style #f '()) (sexpr->string sexpr))]
+  )]
+  )
 )
 
+(~a 'just-a-noraml-name)
