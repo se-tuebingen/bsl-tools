@@ -65,7 +65,7 @@ Call
   }
 
 Name
-  = _ symbol:([^\"\,\'\`\(\)\[\]\{\}\|\#] / "<" / ">")+ {
+  = _ symbol:[^\"\,\'\`\(\)\[\]\{\}\|\# \n \t \r]+ {
   return {
     "type": "Symbol",
   	"symbol":symbol.join("")
