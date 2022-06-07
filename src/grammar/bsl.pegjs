@@ -65,7 +65,7 @@ Call
   }
 
 Name
-  = _ symbol:([^\"\,\'\`\(\)\[\]\{\}\|\#] / "<" / ">")+ {
+  = _ symbol:[A-Za-z\+\-\/\*\=\<\>]+ {
   return {
     "type": "Symbol",
   	"symbol":symbol.join("")
@@ -90,7 +90,7 @@ Empty
   = _ "'()"{ return "'()" }
 
 String
-  = _ '"' str:[^\"]+ '"'{ return str.join("") }
+  = _ '"' str:[A-Za-z \r \t \n 0-9\!\(\)\?\,\;\.\:\-\']+ '"'{ return str.join("") }
 
 
 _ "whitespace"
