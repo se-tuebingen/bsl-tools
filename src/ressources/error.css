@@ -1,0 +1,10 @@
+.error-wrapper{
+    display:flex;
+    flex-direction:column;
+    margin:2vw;
+    font-size:1.2em;
+}
+
+.error{
+    font-size:1.3em;
+}

@@ -17,7 +17,7 @@ StructDef
   }
 
 FunDef
-  = "(define" name:Name _ "(" args:(Name)+ ")" body:Expression ")" {
+  = "(define"_ "(" name:Name _ args:(Name)+ ")" body:Expression ")" {
   return {
     "type": "Function Definition",
   	"name": name,
@@ -65,7 +65,7 @@ Call
   }
 
 Name
-  = _ symbol:[^\"\,\'\`\(\)\[\]\{\}\|\#\n\t\r0-9 ]+ {
+  = _ !"define" symbol: [^\"\,\'\`\(\)\[\]\{\}\|\#\n\t\r0-9 ]+ {
   return {
     "type": "Symbol",
   	"symbol":symbol.join("")

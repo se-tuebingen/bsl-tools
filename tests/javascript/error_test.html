@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>BSL Tools Error Test Page</title>
+  <!-- <link rel="stylesheet" href="../../dist/tree.css"> -->
+  <script src="bsl_tools.js"></script>
+</head>
+
+<body>
+  <h2>Parse Error</h2>
+  <bsltree>
+    (define (+ 2 3))
+  </bsltree>
+
+  <h2>Handling of non-valid BSL code</h2>
+  <bsltree>nonvalid(code)</bsltree>
+
+</body>
+
+</html>
