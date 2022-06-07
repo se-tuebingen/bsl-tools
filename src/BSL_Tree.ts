@@ -131,14 +131,33 @@ function guessProduction(e: Event) {
     if (span.getAttribute('data-holes') === '[]') {
       span.setAttribute('data-quiz', 'done');
       span.removeAttribute('data-collapsed');
-    } else {      
+    } else {
       span.setAttribute('data-quiz', 'holes');
+      demonstrateSelection(div.nextElementSibling as HTMLElement);
     }
   } else {
     span.setAttribute('data-wrong', 'true');
   }
 }
 (window as any).guessProduction = guessProduction;
+
+function demonstrateSelection(div: HTMLElement) {
+  // console.log('demonstrating selection');
+  const spans = navigateDOM([div], '.actualcode/span');
+  if (spans.length < 1) return;
+  const range = document.createRange();
+  range.setStart(spans[0],0);
+  const max = spans.length < 10 ? spans.length : 10;
+  const sel = window.getSelection() as Selection;
+  for (let i = 0; i < max; i++) {
+    window.setTimeout(() => {
+      range.setEnd(spans[i],0);
+      sel.addRange(range);
+    },i * 100 );
+  }
+  window.setTimeout(() => sel.empty(), 1500);
+
+}
 
 function endSelection(e: Event) {
   // ### get context
