@@ -52,6 +52,9 @@ interface TreeNode {
 }
 type treeNodeFn = (n: TreeNode) => string;
 
+// regular node. state:
+// span
+//  - data-collapsed: Whether children are visible
 function treeNode(n: TreeNode): string {
   return `
     <span>
@@ -72,12 +75,22 @@ function evenlySpace(s: string) {
     .replaceAll(' )',')');
 }
 
+// quiz node. state:
+// <span>
+//  - data-collapsed: whether children are visible
+//  - data-holes: subexpressions that have not yet been selected
+//  - data-quiz: state of the quiz:
+//     "production" (select correct production)
+//     -> "holes" (select subexpressions)
+//     -> "done" (all correctly answered)
+//  - data-wrong: quiz question has been answered wrong
 function quizNode(n: TreeNode): string {
   const code = evenlySpace(n.code.map(c => typeof c === 'string' ? c : extractCode(c)).join(' '));
   const holes = JSON.stringify(n.code.filter(c => typeof c !== 'string').map(c => extractCode(c as Hole))).replaceAll('"','&quot;');
   return `
     <span data-collapsed="true"
-          data-holes="${holes}">
+          data-holes="${holes}"
+          data-quiz="production">
       <div class="name">
          ${n.production}
          <select data-solution="${n.production}"
@@ -86,7 +99,7 @@ function quizNode(n: TreeNode): string {
             ${Object.values(BSL_AST.Production).map(k => `<option value="${k}">${k}</option>`)}
          </select>
          <div class="tip">
-            Select the correct production to expand the node
+            First, select the correct production...
          </div>
       </div>
       <div class="codeblock">
@@ -97,21 +110,30 @@ function quizNode(n: TreeNode): string {
                    onmouseup="endSelection(event)">${c}</span>`
           ).join('')}
         </div>
+        <div class="tip">
+           Second, select all subexpressions to expand the node!
+        </div>
       </div>
     </span>
   `;
 }
 function guessProduction(e: Event) {
+  // get context
   const sel = e.target as HTMLInputElement;
-  // console.log('guessing ', sel.value);
   const solution = sel.getAttribute('data-solution') as string;
   const div = sel.parentElement as HTMLElement;
   const span = div.parentElement as HTMLElement;
 
   if (sel.value === solution) {
     div.innerHTML = solution;
-    // span.removeAttribute('data-collapsed');
     span.removeAttribute('data-wrong');
+    // update global state
+    if (span.getAttribute('data-holes') === '[]') {
+      span.setAttribute('data-quiz', 'done');
+      span.removeAttribute('data-collapsed');
+    } else {      
+      span.setAttribute('data-quiz', 'holes');
+    }
   } else {
     span.setAttribute('data-wrong', 'true');
   }
@@ -119,22 +141,34 @@ function guessProduction(e: Event) {
 (window as any).guessProduction = guessProduction;
 
 function endSelection(e: Event) {
+  // ### get context
+  // current character
   const span = e.target as HTMLElement;
+  // all code text
   const div = span.parentElement as HTMLElement;
+  // node (span)
+  const node = navigateDOM([div], '../..')[0];
+
+  // ### only proceed if quiz is in right state
+  if(node.getAttribute('data-quiz') !== 'holes') return;
 
   const sel = window.getSelection()
+  // no selection? no need to worry
   if(!sel) return;
 
-  // evaluate if selection was correct
   const selectedSpans = Array.from(div.children).filter(c => sel.containsNode(c,true));
-  //console.log(selectedSpans);
-
   const selection = selectedSpans.map(s => s.innerHTML).join('');
-  const node = navigateDOM([div], '../..')[0];
   let holes = JSON.parse((node.getAttribute('data-holes') as string).replaceAll('&quot;','"')) as string[];
 
+  // no holes left? no need to worry
+  if(!holes.length || holes.length < 1) return;
+
+  // ### evaluate if selection is correct
   if(holes.includes(selection)) {
+    // remove from todo-list
     holes = holes.filter(h => h !== selection);
+
+    // style spans permanently
     selectedSpans.map(s => s.classList.add('correct-selection-middle'));
     const first = selectedSpans[0];
     first.classList.remove('correct-selection-middle');
@@ -145,13 +179,16 @@ function endSelection(e: Event) {
     last.classList.remove('selection-end');
     last.classList.add('correct-selection-end');
 
+    // update global state
     if (holes.length <= 0) {
       node.removeAttribute('data-holes');
-      node.removeAttribute('data-collapsed');
+      node.setAttribute('data-quiz','done');
+      window.setTimeout(() => node.removeAttribute('data-collapsed'), 1000);
     } else {
       node.setAttribute('data-holes', JSON.stringify(holes).replaceAll('"', "&quot;"));
     }
   } else {
+    // give feedback that selection was wrong by styling spans...
     selectedSpans.map(s => s.classList.add('wrong-selection-middle'));
     const first = selectedSpans[0];
     first.classList.remove('wrong-selection-middle');
@@ -162,13 +199,14 @@ function endSelection(e: Event) {
     last.classList.remove('selection-end');
     last.classList.add('wrong-selection-end');
 
+    // ... and then removing the styling again
     window.setTimeout(() => {
       selectedSpans.map(s => s.classList.remove('wrong-selection-middle'));
       first.classList.remove('wrong-selection-start');
       last.classList.remove('wrong-selection-end');
     }, 1000);
   }
-  // remove user selection to show own styling
+  // remove user selection by browser to show own styling
   sel.empty();
 }
 (window as any).endSelection = endSelection;

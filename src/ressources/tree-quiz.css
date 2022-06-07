@@ -45,12 +45,13 @@ bsl-tree[quiz="true"] .tree .name > select {
 }
 
 /* hide name tooltip by default */
-bsl-tree[quiz="true"] .tree .name > .tip {
+bsl-tree[quiz="true"] .tree .tip {
   display: none;
 }
 
 /* display tooltip over root */
-bsl-tree[quiz="true"] .tree > li > span[data-collapsed="true"] .name > .tip {
+bsl-tree[quiz="true"] .tree > li > span[data-quiz="production"] .name > .tip,
+bsl-tree[quiz="true"] .tree > li > span[data-quiz="holes"] .codeblock > .tip {
   display: block;
   position: absolute;
   left: 80%;
@@ -60,7 +61,8 @@ bsl-tree[quiz="true"] .tree > li > span[data-collapsed="true"] .name > .tip {
   border: 1px solid var(--tooltip-border);
   padding: .5em;
 }
-bsl-tree[quiz="true"] .tree > li > span[data-collapsed="true"] .name > .tip::after {
+bsl-tree[quiz="true"] .tree > li > span[data-quiz="production"] .name > .tip::after,
+bsl-tree[quiz="true"] .tree > li > span[data-quiz="holes"] .codeblock > .tip::after {
   content: "";
   position: absolute;
   width: 1em;
@@ -81,7 +83,8 @@ bsl-tree[quiz="true"] .tree .codeblock {
 bsl-tree[quiz="true"] .tree .actualcode {
   display: none;
 }
-bsl-tree[quiz="true"] .tree span[data-collapsed="true"] .actualcode {
+bsl-tree[quiz="true"] .tree span[data-quiz="production"] .actualcode,
+bsl-tree[quiz="true"] .tree span[data-quiz="holes"] .actualcode {
   position: absolute;
   display: block;
   left: 0;
