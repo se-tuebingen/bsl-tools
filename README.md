@@ -4,7 +4,9 @@ Beginning Student Language is a programming language in DrRacket. This repositor
 - Stepper (Auswertungskontext)
 - BSL "Try out" box (Interpreter)
 
-## How to use
+The current test build can be seen at <https://se-tuebingen.github.io/bsl-tools/>.
+
+## How to use: HTML
 
 Currently, the only implemented module is the collapsible AST tree view.
 The interface is as follows:
@@ -13,11 +15,28 @@ The interface is as follows:
 <script src="bsl_tools.js"></script>
 
 <!-- anywhere else in the document -->
-<bsl-tree>
+<bsltree>
   (valid bsl syntax)
-</bsl-tree>
+</bsltree>
 ```
-Anything inside the `<bsl-tree>` tag is parsed according to the  BSL Core Language as documented below.
+Anything inside the `<bsltree>` tag is parsed according to the  BSL Core Language as documented below.
+
+## How to use: Scribble
+
+For the implemented scribble module we use Rackets Syntax Objects, which have a similar structure as S-Expressions.
+The interface in scribble is as follows:
+
+```racket
+(require bsl_tools.rkt)
+
+@bsl-tree [
+  #'((valid bsl syntax))
+]
+```
+
+It is necessary to wrap the BSL-Syntax with a ``#'()``, especially when there are multiple `<def-or-expr>`,
+however literal values, such as ``2`` don't need to be wrapped. 
+The Scribble module parses the BSL-Syntax to a string in a ``<bsltree>`` and adds the javascript module as dependency.
 
 ## BSL Abstract Syntax Tree
 
@@ -53,11 +72,6 @@ This package installs a binary which compiles the grammar found in `src/grammar/
 
 The command to compile the parser is included in the `npm run build` script (see `package.json` for details), but will not automatically be compiled on save by esbuild.
 
-## ToDos
-
-[] Abstract Syntax Tree als Datentyp in TypeScript beschreiben
-[] Show Tree Structure BSL
-[] Transform Racket sexpr -> JSON / other datat structure
 
 # Meeting 19.05.22
 
