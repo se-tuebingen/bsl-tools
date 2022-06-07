@@ -1,2 +1,4 @@
 tests/scribble/output/**
 node_modules
+src/BSL_PARSER.ts
+tests/bsl_tools.js
