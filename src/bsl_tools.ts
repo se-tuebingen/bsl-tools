@@ -20,8 +20,8 @@ function processBslTrees() {
       const program : BSL_AST.program = parse(el.innerHTML);
       const quiz = el.getAttribute('quiz') ? true : false;
       BSL_Tree.treeProgram(program, el as HTMLElement, quiz);
-    } catch(e) {
-      renderError(el as HTMLElement, `${e}`)
+    } catch(e:any) {
+      renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
     }
   });
 }

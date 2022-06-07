@@ -74,3 +74,11 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 @bsltree[
 '()
 ]
+
+@section{BSL-Error-Tests}
+
+@subsection{Parsing Error}
+
+@bsltree[
+#'((define f (y x) (+ y x)))
+]

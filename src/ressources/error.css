@@ -2,9 +2,9 @@
     display:flex;
     flex-direction:column;
     margin:2vw;
-    font-size:1.2em;
+    font-size:inherit;
 }
 
 .error{
-    font-size:1.3em;
+    font-size:1.2em;
 }
