@@ -11,7 +11,7 @@
 (require scribble/base)
 (require syntax/to-string)
 (require syntax/stx)
-(provide bsl-tree)
+(provide bsltree)
 
 
 (define value (or/c boolean? string? number? '()))
@@ -65,9 +65,9 @@
 
 ; render bsl-string
 (define
-  (bsl-tree stx)
+  (bsltree stx)
   (cond
-  [(not (or (syntax? stx) (value? stx))) (raise-argument-error 'bsl-tree "BSL-Tree only accepts Syntax-Expressions or Values" stx)]
+  [(not (or (syntax? stx) (value? stx))) (raise-argument-error 'bsltree "BSL-Tree only accepts Syntax-Expressions or Values" stx)]
   [(cond-block
       [html (paragraph bsl-tag-wrapper 
       (strlist-or-str->str

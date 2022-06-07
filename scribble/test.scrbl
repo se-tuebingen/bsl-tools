@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "BSL_AST.rkt")
+@(require "bsl_tools.rkt")
 @; @(require scribble/eval)
 @title[#:version ""]{Abstract Syntax Tree}
 @author["Linus Szillat"]
@@ -13,7 +13,7 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 
 @subsection{Constant Definition}
 
-@bsl-tree[
+@bsltree[
     #'((define one 2)
  (define two 3)
  (+ one two))
@@ -21,19 +21,19 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 
 @subsection{Struct Definition}
 
-@bsl-tree[
+@bsltree[
 #'((define-struct pool (people fish water))(make-pool 2 1 "a lot"))
 ]
 
 @subsection{Function Definition}
 
-@bsl-tree[
+@bsltree[
 #'((define (swim-with-the-fish pool) 
 (string-append "Cool pool with a number of:" (number-string (pool-fish pool)))))
 ]
 
 @subsection{Conditional Expression}
-@bsl-tree[
+@bsltree[
 #'((cond
 [(< 1 0) "Chocolate is the best"]
 [(< 0 0) "But Ice Cream is way better!"]
@@ -43,34 +43,34 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 ]
 
 @subsection{Function Call Expression}
-@bsl-tree[
+@bsltree[
 #'((swim-with-the-fish (make-pool 2 20 "a little less than much, but still much")))
 ]
 
 @subsection{List Expression}
-@bsl-tree[
+@bsltree[
 #'((list 1 2 3 4 5))
 ]
 
 @subsection{Name Expression}
-@bsl-tree[
+@bsltree[
 'just-a-normal-name
 ]
 
 @subsection{Value Expressions}
 
-@bsl-tree[
+@bsltree[
 #true
 ]
 
-@bsl-tree[
+@bsltree[
 42
 ]
 
-@bsl-tree[
+@bsltree[
 "Hallo Welt"
 ]
 
-@bsl-tree[
+@bsltree[
 '()
 ]
