@@ -136,12 +136,14 @@ bsl-tree[quiz="true"] .tree .wrong-selection-end {
   background-color: var(--selection-wrong);
   border: 1px solid var(--selection-border);
 }
+
 bsl-tree[quiz="true"] .tree .correct-selection-start,
 bsl-tree[quiz="true"] .tree .correct-selection-middle,
 bsl-tree[quiz="true"] .tree .wrong-selection-start,
 bsl-tree[quiz="true"] .tree .wrong-selection-middle, {
   border-right: none;
 }
+
 bsl-tree[quiz="true"] .tree .correct-selection-end,
 bsl-tree[quiz="true"] .tree .correct-selection-middle,
 bsl-tree[quiz="true"] .tree .wrong-selection-end,

@@ -92,10 +92,8 @@ function quizNode(n: TreeNode): string {
       <div class="codeblock">
         ${evenlySpace(n.code.map(c => typeof c === 'string' ? c : treeHole(c)).join(' '))}
         <div class="actualcode">
-          ${code.split('').map((c,i) =>
+          ${code.split('').map(c =>
             `<span class="char"
-                   data-index="${i}"
-                   onmousedown="startSelection(event)"
                    onmouseup="endSelection(event)">${c}</span>`
           ).join('')}
         </div>
@@ -120,37 +118,23 @@ function guessProduction(e: Event) {
 }
 (window as any).guessProduction = guessProduction;
 
-function startSelection(e: Event) {
-  const span = e.target as HTMLElement;
-  const i = parseInt(span.getAttribute('data-index') as string);
-  span.classList.add('selection-start');
-  const div = span.parentElement as HTMLElement;
-  div.setAttribute('data-selection-start', `${i}`);
-}
-(window as any).startSelection = startSelection;
 function endSelection(e: Event) {
   const span = e.target as HTMLElement;
-  const i = parseInt(span.getAttribute('data-index') as string);
-  span.classList.add('selection-end');
   const div = span.parentElement as HTMLElement;
-  div.setAttribute('data-selection-end', `${i}`);
+
+  const sel = window.getSelection()
+  if(!sel) return;
 
   // evaluate if selection was correct
-  const start = parseInt(div.getAttribute('data-selection-start') as string);
-  const end = i;
+  const selectedSpans = Array.from(div.children).filter(c => sel.containsNode(c,true));
+  //console.log(selectedSpans);
 
-  const selectedSpans = Array.from(div.children).filter(
-    c => {
-      const i = parseInt(c.getAttribute('data-index') as string);
-      return i >= start && i <= end;
-    }
-  );
   const selection = selectedSpans.map(s => s.innerHTML).join('');
   const node = navigateDOM([div], '../..')[0];
   let holes = JSON.parse((node.getAttribute('data-holes') as string).replaceAll('&quot;','"')) as string[];
 
   if(holes.includes(selection)) {
-    holes = holes.filter(h => h === selection);
+    holes = holes.filter(h => h !== selection);
     selectedSpans.map(s => s.classList.add('correct-selection-middle'));
     const first = selectedSpans[0];
     first.classList.remove('correct-selection-middle');
@@ -184,8 +168,8 @@ function endSelection(e: Event) {
       last.classList.remove('wrong-selection-end');
     }, 1000);
   }
-  div.removeAttribute('data-selection-start');
-  div.removeAttribute('data-selection-end');
+  // remove user selection to show own styling
+  sel.empty();
 }
 (window as any).endSelection = endSelection;
 
