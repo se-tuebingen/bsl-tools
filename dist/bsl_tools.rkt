@@ -33,8 +33,11 @@
 )
 ; HTML
 (define
-  bsl-tag-wrapper
-  (style #f (list (alt-tag "bsltree")(js-addition "bsl_tools.js")
+  (bsl-tag-wrapper quiz)
+  (style #f (list
+    (alt-tag "bsltree")
+    (js-addition "bsl_tools.js")
+    (attributes (list (cons 'quiz (if quiz "true" "false"))))
   ))
 )
 
@@ -45,8 +48,8 @@
     (string-append (~a lst) " \n")]
     [(string? lst) (string-append "\"" lst "\" \n")]
     [(empty? lst) " '() \n"]
-    [(stx-list? lst)(stx-map 
-      (lambda (x) 
+    [(stx-list? lst)(stx-map
+      (lambda (x)
       (string-append "(" (syntax->string x) ") \n "))lst)]
     [(syntax? lst) (syntax->string lst)]
   )
@@ -65,11 +68,14 @@
 
 ; render bsl-string
 (define
-  (bsltree stx)
+  (bsltree stx #:quiz [quiz #f])
   (cond
-  [(not (or (syntax? stx) (value? stx))) (raise-argument-error 'bsltree "BSL-Tree only accepts Syntax-Expressions or Values" stx)]
+  [(not (or (syntax? stx) (value? stx)))
+   (raise-argument-error 'bsltree "BSL-Tree only accepts Syntax-Expressions or Values" stx)]
+  [(not (boolean? quiz))
+   (raise-argument-error 'quiz "BSL-Tree quiz toggle has to be a boolean!" stx)]
   [(cond-block
-      [html (paragraph bsl-tag-wrapper 
+      [html (paragraph (bsl-tag-wrapper quiz)
       (strlist-or-str->str
         (synlst-or-val->strlist-or-str stx))
       )]
@@ -124,7 +130,7 @@
 ;;; (require scribble/latex-properties)
 ;;; (require scribble/base)
 
-;;; ; 
+;;; ;
 ;;; ; <bsl-tree>
 ;;; ; (expression-or-def)
 ;;; ; (expression-or-def)

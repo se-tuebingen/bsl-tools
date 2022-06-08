@@ -8,7 +8,10 @@ The current test build can be seen at <https://se-tuebingen.github.io/bsl-tools/
 
 ## How to use: HTML
 
-Currently, the only implemented module is the collapsible AST tree view.
+Currently, the only implemented module is the collapsible AST tree view, with an
+optional "quiz" mode that starts the tree collapsed and expands if you select
+the correct production and mark all subexpressions.
+
 The interface is as follows:
 ```html
 <!-- import the bsl_tools script somewhere on the page, ideally in the head -->
@@ -16,6 +19,11 @@ The interface is as follows:
 
 <!-- anywhere else in the document -->
 <bsltree>
+  (valid bsl syntax)
+</bsltree>
+
+<!-- if you want to display it in quiz mode, do -->
+<bsltree quiz="true">
   (valid bsl syntax)
 </bsltree>
 ```
@@ -29,14 +37,15 @@ The interface in scribble is as follows:
 ```racket
 (require bsl_tools.rkt)
 
-@bsl-tree [
+@bsl-tree [ #:quiz #t @; optional keyword argument, default is #f
   #'((valid bsl syntax))
 ]
 ```
 
 It is necessary to wrap the BSL-Syntax with a ``#'()``, especially when there are multiple `<def-or-expr>`,
-however literal values, such as ``2`` don't need to be wrapped. 
+however literal values, such as ``2`` don't need to be wrapped.
 The Scribble module parses the BSL-Syntax to a string in a ``<bsltree>`` and adds the javascript module as dependency.
+If you set the optional keyword argument `#:quiz` to `#t`, it will add `quiz="true"`.
 
 ## BSL Abstract Syntax Tree
 

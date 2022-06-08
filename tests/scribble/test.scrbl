@@ -28,7 +28,7 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 @subsection{Function Definition}
 
 @bsltree[
-#'((define (swim-with-the-fish pool) 
+#'((define (swim-with-the-fish pool)
 (string-append "Cool pool with a number of:" (number-string (pool-fish pool)))))
 ]
 
@@ -81,4 +81,15 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 
 @bsltree[
 #'((define f (y x) (+ y x)))
+]
+
+@section{Quiz-Mode}
+
+@subsection{Quiz Mode}
+
+@bsltree[ #:quiz #t
+#'((define (f x y) (+ x y))
+(cond [(= x 3) "isThree"] [#false '()])
+(define x 42)
+(define-struct name (firstName lastName)))
 ]

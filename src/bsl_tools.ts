@@ -18,7 +18,7 @@ function processBslTrees() {
   Array.from(document.getElementsByTagName('bsltree')).map(el => {
     try {
       const program : BSL_AST.program = parse(el.innerHTML);
-      const quiz = el.getAttribute('quiz') ? true : false;
+      const quiz = el.getAttribute('quiz') === 'true' ? true : false;
       BSL_Tree.treeProgram(program, el as HTMLElement, quiz);
     } catch(e:any) {
       renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
