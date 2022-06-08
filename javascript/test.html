@@ -4,9 +4,17 @@
 
 <head>
   <title>BSL Tools Test Page</title>
-  <!-- uncomment for testing with live reload -->
-  <!--<script src="../../dist/bsl_tools.js"></script>-->
-  <script src="bsl_tools.js"></script>
+
+  <script>
+  let scriptNode = document.createElement('script');
+  if (window.location.href.startsWith('file://')) {
+    console.log('detected local dev testing, loading bsl_tools.js from dist');
+    scriptNode.src = '../../dist/bsl_tools.js';
+  } else {
+    scriptNode.src = 'bsl_tools.js';
+  }
+  document.getElementsByTagName('head')[0].appendChild(scriptNode);
+  </script>
 </head>
 
 <body>

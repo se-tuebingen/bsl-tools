@@ -4,8 +4,16 @@
 
 <head>
   <title>BSL Tools Error Test Page</title>
-  <!-- <link rel="stylesheet" href="../../dist/tree.css"> -->
-  <script src="bsl_tools.js"></script>
+  <script>
+  let scriptNode = document.createElement('script');
+  if (window.location.href.startsWith('file://')) {
+    console.log('detected local dev testing, loading bsl_tools.js from dist');
+    scriptNode.src = '../../dist/bsl_tools.js';
+  } else {
+    scriptNode.src = 'bsl_tools.js';
+  }
+  document.getElementsByTagName('head')[0].appendChild(scriptNode);
+  </script>
 </head>
 
 <body>
