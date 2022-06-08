@@ -179,13 +179,14 @@ https://www.cssscript.com/clean-tree-diagram/
   display: inline-block;
 }
 .tree .code {
-  /* color: transparent; */
+  color: transparent;
   transform: translate(var(--translate-x,0), var(--translate-y,0));
-  transition: transform 1s ease-out;
+  transition: transform 1s ease-out, color 1s steps(1,end);
 }
 .tree span[data-collapsed] .code {
   color: var(--text-grey);
   transform: translate(0,0);
+  transition: transform 1s ease-out, color 1s steps(1,start);
 }
 .tree .placeholder {
   color: var(--text-grey);
