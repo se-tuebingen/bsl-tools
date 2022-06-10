@@ -74,20 +74,20 @@ We are using [esbuild](https://esbuild.github.io/getting-started/#build-scripts)
 
 You need to have [NodeJS](nodejs.org) installed, on Ubuntu it is recommended to install it via [NodeSource](https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions).
 
-The first time you clone the project, and everytime you pull changes that might add new dependencies, you need to run `npm install` in the project.
+The first time you clone the project, and every time you pull changes that might add new dependencies, you need to run `npm install` in the project.
 
 To compile sources, run `make build` or `npm run build`. Notice that the command does not terminate: esbuild keeps watching your input files and recompiles if you save any changes.
 
 For generating a BSL parser, we are using the [`ts-pegjs`](https://github.com/metadevpro/ts-pegjs) package, which builds upon `pegjs`.
-This package installs a binary which compiles the grammar found in `src/grammar/bsl.pegjs` to a TypeScript parser module. The best way to test and edit the grammar is the [pegjs online version](https://pegjs.org/online), since it has syntax highlighting and live testing.
+This package installs a node script which compiles the grammar found in `src/grammar/bsl.pegjs` to a TypeScript parser module. The best way to test and edit the grammar is the [pegjs online version](https://pegjs.org/online), since it has syntax highlighting and live testing.
 
-The command to compile the parser is included in the `npm run build` script (see `package.json` for details), but will not automatically be compiled on save by esbuild.
+The command to compile the parser is included in the `npm run build` script (see `package.json` for details), but will not automatically be executed on save by esbuild.
 
 ### Testing
 
 Running `make test` copies the generated JavaScript file and the latest version of the Scribble Plugin to the test folders and renders the Scribble test.
 
-The HTML tests load the JavaScript plugin from the dist folder if tested locally (served via `file://`).
+The HTML test pages load the JavaScript plugin from the `dist` folder if opened locally (served via `file://`).
 
 ### Building from Source - Fallback
 
