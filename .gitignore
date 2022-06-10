@@ -1,6 +1,5 @@
 tests/scribble/output/**
 node_modules
-src/BSL_Parser.ts
 tests/javascript/bsl_tools.js
 tests/scribble/bsl_tools.js
 tests/scribble/bsl_tools.rkt

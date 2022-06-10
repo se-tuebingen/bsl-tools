@@ -90,3 +90,13 @@ The command to compile the parser is included in the `npm run build` script (see
 
 ## Nice to have
 - PNG Vollbild von Tree für PDF
+
+
+
+# Meeting 09.06.
+
+- Vergleich zu Vorlesung theorethische Informatik bei der Darstellung von Auswertungsbäumen
+- Small-Step-Interpreter nach Vorbild von der einen Bachelorarbeit
+- BSL-Grammatik ``&lt; &gt;`` escapen
+- Zwei Ansätze zu Darstellung des AST (Programmiernah / Skriptnah (Grammatiksyntaxnah))
+- backup skript für node_modules im Fall der Fälle

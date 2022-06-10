@@ -35,5 +35,3 @@ jobs:
         with:
           branch: gh-pages
           folder: tests
-      - name: Check that tests have been run locally before uploading
-        run: git diff -- . ':(exclude)src/BSL_PARSER.ts' ':(exclude)tests/*bsl_tools.js' --exit-code
