@@ -39,3 +39,22 @@ export function navigateDOM(positions: HTMLElement[], path: string): HTMLElement
     return navigateDOM(newPositions as HTMLElement[], restSteps);
   }
 }
+
+// getParentTagRecursive from a child element
+// if element has TagName
+// return;
+// else: retry with parentElement
+export function getParentTagRecursive(el: HTMLElement, tag: string) {
+  if (el.tagName == tag.toUpperCase()) {
+    return el;
+  }
+  else {
+    let parent = el.parentElement;
+    if (!parent) {
+      console.error('Could not find parent element with requested tag ', tag);
+      return null;
+    }
+    let result = getParentTagRecursive(parent, tag) as HTMLElement;
+    return result;
+  }
+}

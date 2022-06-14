@@ -1,7 +1,7 @@
 // ######### LAYOUT AST AS TREE DIAGRAM ########
 import * as BSL_AST from "./BSL_AST";
 import * as BSL_Print from "./BSL_Print";
-import {navigateDOM} from "./DOM_Helpers";
+import {navigateDOM, getParentTagRecursive} from "./DOM_Helpers";
 // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetLeft
 
@@ -406,10 +406,12 @@ function adjustConnectors(tree: HTMLElement, holeClass:string, childClass: strin
     if (xpos == 0) return;
 
     // navigate the DOM
-    const ul = navigateDOM([el], '../../+')[0];
+    const li = getParentTagRecursive(el, 'li');
+    // not inside a list node? probably wrong tag, return
+    if(!li) return;
 
     // process children
-    Array.from(ul.children).filter(c => c.classList.contains(childClass)).map(c => {
+    navigateDOM([li], `ul/.${childClass}`).map(c => {
       const child = c as HTMLElement;
       const xposChild = 0.5 * (child.getBoundingClientRect().x + child.getBoundingClientRect().right);
       const xdiff = xpos - xposChild;
