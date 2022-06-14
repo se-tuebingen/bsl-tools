@@ -8,12 +8,12 @@ import {navigateDOM, getParentTagRecursive} from "./DOM_Helpers";
 // #### main api #####
 // add forest of program expressions to html element
 export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=false){
-  const nodeFn = quiz ? quizNode : treeNode;
-  target.innerHTML = program.map(e => treeDefOrExpr(e, nodeFn)).join('\n');
+  // const nodeFn = quiz ? quizNode : treeNode;
+  target.innerHTML = renderProgram(program); //program.map(e => treeDefOrExpr(e, nodeFn)).join('\n');
   // align connectors horizontally
   adjustAllConnectors(target);
   // add data where holes should move upon expanding
-  addHoleTranslations(target);
+  // addHoleTranslations(target);
   // add collapsers
   if (!quiz) addCollapsers(target);
 }
@@ -485,7 +485,15 @@ function addCollapsers(target: HTMLElement) {
   });
 }
 
-
+// ##### generate HTML
+function renderProgram(p: BSL_AST.program):string {
+  const root = programToNode(p);
+  return `
+    <ul class="tree ast">
+      ${renderNode(root)}
+    </ul>
+  `;
+}
 
 // ##### simple helper structure representing a printed tree
 interface node {
@@ -496,6 +504,23 @@ interface node {
 
 function isLeafNode(n: node):boolean {
   return n.holes.length <= 0;
+}
+
+// ###### rendering a node/tree
+function renderNode(n: node, i:number=0):string {
+  // todo: add holes
+  return `
+    <li class="${i > 0 ? `child-${i}` : ''}">
+      <span data-collapsed="true">
+        <div class="name">${n.production.replaceAll('<', '&lt;').replaceAll('<','&gt;')}</div>
+        <div>${n.code}</div>
+      </span>
+      ${n.holes.length > 0 ?
+        `<ul>${n.holes.map((h, idx) => renderNode(h.content, idx)).join('')}</ul>`
+        : ''
+      }
+    </li>
+  `;
 }
 
 // ###### transform AST into helper structure
