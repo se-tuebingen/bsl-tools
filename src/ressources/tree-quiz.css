@@ -93,18 +93,7 @@ bsltree[quiz="true"] .tree span[data-quiz="holes"] .actualcode {
   height: 100%;
   background-color: var(--node-background);
 }
-bsltree[quiz="true"] .tree .char {
-  display: inline;
-  margin: 0;
-  border: none;
-  padding: 0;
-  border-radius: 0;
-  background-color: transparent;
-  transition: background-color 1s ease-out;
-}
-bsltree[quiz="true"] .tree .char::before {
-  display: none;
-}
+
 bsltree[quiz="true"] .tree .selection-start {
   background-color: var(--selection-tentative);
   border: 1px solid var(--selection-border);

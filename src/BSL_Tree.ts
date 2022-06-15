@@ -507,13 +507,29 @@ function isLeafNode(n: node):boolean {
 }
 
 // ###### rendering a node/tree
-function renderNode(n: node, i:number=0):string {
-  // todo: add holes
+function renderNode(n: node, i:number=-1):string {
+  // slice text into holes
+  const spans = [];
+  let position = 0;
+  for(let i = 0; i < n.holes.length; i++) {
+    if (n.holes[i].start > position) {
+      spans.push({pos: false, start:position, end:n.holes[i].start});
+    }
+    spans.push({pos: i+1, ...n.holes[i]});
+    position = n.holes[i].end;
+  }
+  if (position < n.code.length) {
+    spans.push({start:position, end:n.code.length});
+  }
   return `
-    <li class="${i > 0 ? `child-${i}` : ''}">
+    <li class="${i >= 0 ? `child-${i+1}` : ''}">
       <span data-collapsed="true">
         <div class="name">${n.production.replaceAll('<', '&lt;').replaceAll('<','&gt;')}</div>
-        <div>${n.code}</div>
+        <div>${spans.map(s => `
+          <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}">
+            ${n.code.slice(s.start, s.end)}
+          </span>`).join('')}
+        </div>
       </span>
       ${n.holes.length > 0 ?
         `<ul>${n.holes.map((h, idx) => renderNode(h.content, idx)).join('')}</ul>`

@@ -165,6 +165,19 @@ https://www.cssscript.com/clean-tree-diagram/
 }
 
 /* ######### holes ########## */
+.tree .char {
+  display: inline;
+  margin: 0;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  background-color: transparent;
+  transition: background-color 1s ease-out;
+}
+.tree .char::before {
+  display: none;
+}
+
 .tree .hole {
   display: inline-block;
   background-color: var(--hole-yellow);
