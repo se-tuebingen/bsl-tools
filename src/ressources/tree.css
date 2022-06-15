@@ -188,7 +188,7 @@ https://www.cssscript.com/clean-tree-diagram/
   position: relative;
 }
 /* show/hide parts/holes  and float them into place */
-.tree .code, .tree .placeholder {
+/* .tree .code, .tree .placeholder {
   display: inline-block;
 }
 .tree .code {
@@ -218,4 +218,4 @@ https://www.cssscript.com/clean-tree-diagram/
 }
 .tree .hole-names {
   min-width: 2.5em;
-}
+} */

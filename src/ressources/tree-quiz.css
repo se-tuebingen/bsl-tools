@@ -1,5 +1,5 @@
 /* modifications for tree quiz */
-bsltree[quiz="true"] .tree {
+/* bsltree[quiz="true"] .tree {
   --border-pending: orange;
   --tooltip-bg: var(--hole-yellow);
   --tooltip-border: var(--branch-color);
@@ -22,10 +22,10 @@ bsltree[quiz="true"] .tree span[data-collapsed="true"] {
 }
 bsltree[quiz="true"] .tree span[data-wrong="true"] {
   border: 1px solid var(--wrong-border);
-}
+} */
 
-/* style production and select */
-bsltree[quiz="true"] .tree .name {
+/* ######### style production and select */
+/* bsltree[quiz="true"] .tree .name {
   font-size: inherit;
 }
 
@@ -42,15 +42,15 @@ bsltree[quiz="true"] .tree .name > select {
   top: 0;
   width: 100%;
   height: 100%;
-}
+} */
 
-/* hide name tooltip by default */
-bsltree[quiz="true"] .tree .tip {
+/* ############ hide name tooltip by default */
+/* bsltree[quiz="true"] .tree .tip {
   display: none;
-}
+} */
 
-/* display tooltip over root */
-bsltree[quiz="true"] .tree > li > span[data-quiz="production"] .name > .tip,
+/* ############# display tooltip over root */
+/* bsltree[quiz="true"] .tree > li > span[data-quiz="production"] .name > .tip,
 bsltree[quiz="true"] .tree > li > span[data-quiz="holes"] .codeblock > .tip {
   display: block;
   position: absolute;
@@ -73,10 +73,10 @@ bsltree[quiz="true"] .tree > li > span[data-quiz="holes"] .codeblock > .tip::aft
   background-color: var(--tooltip-bg);
   border-right: 1px solid var(--tooltip-border);
   border-bottom: 1px solid var(--tooltip-border);
-}
+} */
 
-/* showing/hiding code without holes */
-bsltree[quiz="true"] .tree .codeblock {
+/* ########## showing/hiding code without holes */
+/* bsltree[quiz="true"] .tree .codeblock {
   position: relative;
   display: block;
 }
@@ -141,4 +141,4 @@ bsltree[quiz="true"] .tree .correct-selection-middle,
 bsltree[quiz="true"] .tree .wrong-selection-end,
 bsltree[quiz="true"] .tree .wrong-selection-middle, {
   border-left: none;
-}
+} */
