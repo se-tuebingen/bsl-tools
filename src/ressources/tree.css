@@ -33,7 +33,8 @@ https://www.cssscript.com/clean-tree-diagram/
 
 .tree li {
     display: table-cell;
-    padding: .5em 0;
+    padding: 0;
+    padding-top: 1.5em;
     vertical-align: top;
 }
 
@@ -42,7 +43,7 @@ https://www.cssscript.com/clean-tree-diagram/
     border: solid .1em var(--branch-color);
     border-radius: .2em;
     display: inline-block;
-    margin: 0 .2em .5em;
+    margin: 0 .2em 1.5em;
     padding: .2em .5em;
     position: relative;
 }
@@ -71,22 +72,23 @@ https://www.cssscript.com/clean-tree-diagram/
 .tree span:before {
     outline: solid 1px var(--branch-color);
     content: "";
-    height: .5em;
-    left: 50%;
+    width: var(--connector-width, 0px); /* overridden for some */
+    left: var(--connector-left, 50%);
     position: absolute;
-    top: calc(-.5em - 2px);
+    top: -1.5em; /*calc(-1.5em - 2px); /* overridden for some */
+    transform: var(--connector-transform);
 }
 /* horizontal part + part pointing to corresp. hole
    -> width etc will be set via JavaScript
       Javascript cannot style ::before elements directly
       (since they are not part of the DOM),
       the variables will be set on the parent li element */
-.tree li::before {
+/* .tree li::before {
   box-sizing: border-box;
   content: "";
   position: absolute;
-  height: .5em; /* overridden for some */
-  top: -.5em;
+  height: 1.5em; /* overridden for some *//*
+  top: -1.5em;
   left: var(--connector-left, auto);
   right: var(--connector-right, auto);
   width: var(--connector-width, 100%);
@@ -95,24 +97,24 @@ https://www.cssscript.com/clean-tree-diagram/
   border-top-style: none;
   border-left-style: var(--connector-border-left-style, none);
   border-right-style: var(--connector-border-right-style, none);
-}
+} */
 
 /* prevent up to 3 connectors from crossing */
-.tree li.child-1::before {
-  height: .3em;
+/* .tree li.child-1::before {
+  height: .9em;
 }
 .tree li.child-1 > span::before {
-  top: calc(-.7em - 2px);
-  height: 0.7em;
+  top: calc(-2.1em - 2px);
+  height: 2.1em;
 }
 
 .tree li.child-3::before {
-  height: .7em;
+  height: 2.1em;
 }
 .tree li.child-3 > span::before {
-  top: calc(-.3em - 2px);
-  height: 0.3em;
-}
+  top: calc(-.9em - 2px);
+  height: 0.9em;
+} */
 
 /* ####### highlight way back up from a node ###### */
 .tree li:hover > span {

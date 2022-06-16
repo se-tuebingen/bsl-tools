@@ -23,12 +23,13 @@ export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=
 // dynamically compute dimensions of connectors between nodes
 // such that they point to the correct "hole"
 function adjustConnectors(tree: HTMLElement) {
+  const ydiff = parseFloat(getComputedStyle(tree).fontSize) * 3; // 3em
   for(let i = 1; ;i++) {
     const holes = Array.from(tree.getElementsByClassName(`hole-${i}`));
     if (holes.length < 1) return;
     holes.map(h => {
       const el: HTMLElement = h as HTMLElement;
-      const xpos = 0.5 * (el.getBoundingClientRect().x + el.getBoundingClientRect().right) ;
+      const xpos = 0.5 * (el.getBoundingClientRect().x + el.getBoundingClientRect().right);
       // no layout effect if hole is invisible
       if (xpos == 0) return;
 
@@ -38,26 +39,18 @@ function adjustConnectors(tree: HTMLElement) {
       if(!li) return;
 
       // process children
-      navigateDOM([li], `ul/.child-${i}`).map(c => {
+      navigateDOM([li], `ul/.child-${i}/span`).map(c => {
         const child = c as HTMLElement;
         const xposChild = 0.5 * (child.getBoundingClientRect().x + child.getBoundingClientRect().right);
         const xdiff = xpos - xposChild;
-        let cssText = '';
-        if (xdiff < 0) {
-          cssText += `
-            --connector-left: auto;
-            --connector-right: 50%;
-            --connector-border-left-style: solid;
-            --connector-border-right-style: none;`;
-        } else {
-          cssText += `
-            --connector-left: 50%;
-            --connector-right: auto;
-            --connector-border-left-style: none;
-            --connector-border-right-style: solid;`;
-        }
-        cssText += `--connector-width: ${Math.abs(xdiff) + 1}px;`;
-        child.style.cssText = cssText;
+        const angle = - Math.atan2(ydiff, xdiff);
+        const amount = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
+        const left = (xdiff/2) - (amount/2);
+        child.style.cssText = `
+          --connector-width: ${amount}px;
+          --connector-left: calc(50% + ${left}px);
+          --connector-transform: rotate(${angle}rad);
+        `;
       });
 
     });

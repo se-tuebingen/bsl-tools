@@ -21,16 +21,28 @@
   <h2>Standard collapsible AST</h2>
   <bsltree>
     (define (f x y) (+ x y))
+  </bsltree>
+  <bsltree>
     (cond [(= x 3) "isThree"] [#false '()])
+  </bsltree>
+  <bsltree>
     (define x 42)
+  </bsltree>
+  <bsltree>
     (define-struct name (firstName lastName))
   </bsltree>
 
   <h2>AST as a quiz</h2>
   <bsltree quiz="true">
     (define (f x y) (+ x y))
+  </bsltree>
+  <bsltree quiz="true">
     (cond [(= x 3) "isThree"] [#false '()])
+  </bsltree>
+  <bsltree quiz="true">
     (define x 42)
+  </bsltree>
+  <bsltree quiz="true">
     (define-struct name (firstName lastName))
   </bsltree>
 
