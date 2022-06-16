@@ -15,6 +15,7 @@ https://www.cssscript.com/clean-tree-diagram/
     margin: 0;
     padding: 0;
     position: relative;
+    white-space: nowrap;
 }
 
 .tree {
