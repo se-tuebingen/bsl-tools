@@ -9,13 +9,9 @@ import {navigateDOM, getParentTagRecursive} from "./DOM_Helpers";
 // add forest of program expressions to html element
 export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=false){
   // const nodeFn = quiz ? quizNode : treeNode;
-  target.innerHTML = renderProgram(program); //program.map(e => treeDefOrExpr(e, nodeFn)).join('\n');
+  target.innerHTML = renderProgram(program);
   // align connectors horizontally
   adjustConnectors(target);
-  // add data where holes should move upon expanding
-  // addHoleTranslations(target);
-  // add collapsers
-  if (!quiz) addCollapsers(target);
 }
 
 
@@ -58,26 +54,6 @@ function adjustConnectors(tree: HTMLElement) {
   }
 }
 
-// collapse/expand nodes
-function addCollapsers(target: HTMLElement) {
-  Array.from(target.getElementsByTagName('span')).map(l => {
-    l.onclick = () => {
-      const li : HTMLElement  = l as HTMLElement;
-      if(li.getAttribute('data-collapsed')) {
-        li.removeAttribute('data-collapsed');
-      } else {
-        li.setAttribute('data-collapsed', 'true');
-        const ul = li.nextElementSibling as HTMLElement;
-        if(!ul) return;
-        // recursively close children
-        Array.from(ul.getElementsByTagName('span')).map(s => {
-          s.setAttribute('data-collapsed', 'true');
-        });
-      }
-    }
-  });
-}
-
 // ##### generate HTML
 function renderProgram(p: BSL_AST.program):string {
   const root = programToNode(p);
@@ -115,11 +91,13 @@ function renderNode(n: node, i:number=-1):string {
     spans.push({start:position, end:n.code.length});
   }
   return `
-    <li class="${i >= 0 ? `child-${i+1}` : ''}">
-      <span data-collapsed="true">
+    <li class="${i >= 0 ? `child-${i+1}` : ''}"
+        data-collapsed="${i >= 0 ? 'true' : 'false'}">
+      <span>
         <div class="name">${n.production.replaceAll('<', '&lt;').replaceAll('<','&gt;')}</div>
         <div>${spans.map(s => `
-          <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}">
+          <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
+                ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}>
             ${n.code.slice(s.start, s.end)}
           </span>`).join('')}
         </div>
@@ -131,6 +109,28 @@ function renderNode(n: node, i:number=-1):string {
     </li>
   `;
 }
+
+function toggleChild(e: Event,i:number) {
+  const hole = e.target as HTMLElement;
+  console.log(hole);
+  const li = getParentTagRecursive(hole, 'li');
+  console.log(li);
+  const tree = getParentTagRecursive(hole, 'bsltree');
+  console.log(tree);
+  if(!li || !tree) {
+    console.error('toggleChild called from .hole not in li/bsltree');
+    return;
+  };
+
+  navigateDOM([li],`ul/.child-${i}`).map(c => {
+    console.log('toggling:');
+    console.log(c);
+    c.setAttribute('data-collapsed', c.getAttribute('data-collapsed') === 'true' ? 'false' : 'true');
+    console.log(c);
+  });
+  adjustConnectors(tree);
+}
+(window as any).toggleChild = toggleChild;
 
 // ###### transform AST into helper structure
 function programToNode(p: BSL_AST.program): node {

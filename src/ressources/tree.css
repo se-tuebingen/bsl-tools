@@ -1,5 +1,10 @@
+/* ######## color variables ###### */
 .tree {
   --branch-color: #666;
+  --node-background: #ebf0f4; /* racket azure */
+  --text-grey: #444; /* like in scribble */
+  --hole-yellow: #fdf68d; /* pale yellow */
+  --highlight-border-connectors: lime;
 }
 /*
 CSS for tree by Ross Angus
@@ -52,15 +57,9 @@ https://www.cssscript.com/clean-tree-diagram/
 }
 
 /* ########### custom AST node  styles ######## */
-.tree {
-  --node-background: #ebf0f4; /* racket azure */
-  --text-grey: #444; /* like in scribble */
-  --hole-yellow: #fdf68d; /* pale yellow */
-  --highlight-border-connectors: lime;
-}
 .tree span {
   font-family: 'Fira-Mono', monospace;
-  background-color: var(--node-background); /* racket azure */
+  background-color: var(--node-background);
 }
 .tree .name {
   color: var(--text-grey);
@@ -70,7 +69,7 @@ https://www.cssscript.com/clean-tree-diagram/
 
   position: absolute;
   top: calc(-0.85em - 1.5em);
-  right: var(--edgetext-right, 50%);
+  right: var(--edgetext-right, 50%); /* to be set dynamically */
   margin-right: -1.5em;
   background-color: rgba(255,255,255,0.7);
 }
@@ -80,49 +79,12 @@ https://www.cssscript.com/clean-tree-diagram/
 .tree span:before {
     outline: solid 1px var(--branch-color);
     content: "";
-    width: var(--connector-width, 0px); /* overridden for some */
-    left: var(--connector-left, 50%);
+    width: var(--connector-width, 0px); /* to be set dynamically */
+    left: var(--connector-left, 50%); /* to be set dynamically */
     position: absolute;
-    top: -1.5em; /*calc(-1.5em - 2px); /* overridden for some */
-    transform: var(--connector-transform);
+    top: -1.5em;
+    transform: var(--connector-transform); /* to be set dynamically */
 }
-/* horizontal part + part pointing to corresp. hole
-   -> width etc will be set via JavaScript
-      Javascript cannot style ::before elements directly
-      (since they are not part of the DOM),
-      the variables will be set on the parent li element */
-/* .tree li::before {
-  box-sizing: border-box;
-  content: "";
-  position: absolute;
-  height: 1.5em; /* overridden for some *//*
-  top: -1.5em;
-  left: var(--connector-left, auto);
-  right: var(--connector-right, auto);
-  width: var(--connector-width, 100%);
-
-  border: solid 2px var(--branch-color);
-  border-top-style: none;
-  border-left-style: var(--connector-border-left-style, none);
-  border-right-style: var(--connector-border-right-style, none);
-} */
-
-/* prevent up to 3 connectors from crossing */
-/* .tree li.child-1::before {
-  height: .9em;
-}
-.tree li.child-1 > span::before {
-  top: calc(-2.1em - 2px);
-  height: 2.1em;
-}
-
-.tree li.child-3::before {
-  height: 2.1em;
-}
-.tree li.child-3 > span::before {
-  top: calc(-.9em - 2px);
-  height: 0.9em;
-} */
 
 /* ####### highlight way back up from a node ###### */
 .tree li:hover > span {
@@ -150,28 +112,12 @@ https://www.cssscript.com/clean-tree-diagram/
 
 /* ####### collapse nodes ######## */
 /* click on span to hide/show */
-.tree span:hover {
+.tree .hole:hover {
   cursor: pointer;
 }
 
-/* smooth transition between hiding and showing */
-/*@keyframes hide-delayed {
-  99% {
-    visibility: visible;
-  }
-  100% {
-    visibility: hidden;
-  }
-}*/
-.tree span[data-collapsed] ~ ul {
-  opacity: 0%;
-  visibility: hidden;
-  /*animation: hide-delayed 1s;
-  transition: opacity 0.5s ease-out 0.5s;*/
-}
-.tree ul {
-  opacity: 100%;
-  /* transition: opacity 1s ease-out; */
+.tree [data-collapsed="true"] {
+  display: none;
 }
 
 /* ######### holes ########## */
@@ -197,35 +143,3 @@ https://www.cssscript.com/clean-tree-diagram/
   padding-right: 0.25em;
   position: relative;
 }
-/* show/hide parts/holes  and float them into place */
-/* .tree .code, .tree .placeholder {
-  display: inline-block;
-}
-.tree .code {
-  color: transparent;
-  transform: translate(var(--translate-x,0), var(--translate-y,0));
-  transition: transform 1s ease-out, color 1s steps(1,end);
-}
-.tree span[data-collapsed] .code {
-  color: var(--text-grey);
-  transform: translate(0,0);
-  transition: transform 1s ease-out, color 1s steps(1,start);
-}
-.tree .placeholder {
-  color: var(--text-grey);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  text-align: center;
-}
-.tree span[data-collapsed] .placeholder {
-  display: none;
-}
-
-.tree .hole-name {
-  min-width: 2em;
-}
-.tree .hole-names {
-  min-width: 2.5em;
-} */
