@@ -329,17 +329,9 @@ function optionsToNode(os: BSL_AST.Clause[]):node {
   let code = '';
   const holes = [];
   for(let i = 0; i < os.length; i++) {
-    code = `${code}[ `;
-    let start = code.length;
-    code = `${code}${BSL_Print.printE(os[i].condition)}`;
-    holes.push({start:start, end:code.length, content:expToNode(os[i].condition)});
-
-    code = `${code} `;
-    start = code.length;
-    code = `${code}${BSL_Print.printE(os[i].result)}`;
-    holes.push({start:start, end:code.length, content:expToNode(os[i].result)});
-
-    code = `${code} ]`;
+    const start = code.length;
+    code = `${code}${BSL_Print.printOption(os[i])}`;
+    holes.push({start:start, end:code.length, content:optionToNode(os[i])});
 
     if(i < os.length - 1) code = `${code} `;
   }
@@ -348,6 +340,29 @@ function optionsToNode(os: BSL_AST.Clause[]):node {
     code: code,
     holes: holes
   }
+}
+
+function optionToNode(o: BSL_AST.Clause):node {
+  let code = '';
+  const holes = [];
+  code = `${code}[ `;
+  let start = code.length;
+  code = `${code}${BSL_Print.printE(o.condition)}`;
+  holes.push({start:start, end:code.length, content:expToNode(o.condition)});
+
+  code = `${code} `;
+  start = code.length;
+  code = `${code}${BSL_Print.printE(o.result)}`;
+  holes.push({start:start, end:code.length, content:expToNode(o.result)});
+
+  code = `${code} ]`;
+
+  return {
+    production: '[ <e> <e> ]',
+    code: code,
+    holes: holes
+  };
+
 }
 
 function literalToNode(v: BSL_AST.Literal):node {
