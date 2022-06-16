@@ -43,7 +43,9 @@ https://www.cssscript.com/clean-tree-diagram/
     border: solid .1em var(--branch-color);
     border-radius: .2em;
     display: inline-block;
-    margin: 0 .2em 1.5em;
+    margin-left: 1em;
+    margin-right: 1em;
+    margin-top: 1.5em;
     padding: .2em .5em;
     position: relative;
 }
@@ -62,9 +64,14 @@ https://www.cssscript.com/clean-tree-diagram/
 .tree .name {
   color: var(--text-grey);
   font-style: italic;
-  font-size: small;
-  text-align: left;
-  margin-bottom: 0.5em;
+  font-size: 0.85em;
+  text-align: right;
+
+  position: absolute;
+  top: calc(-0.85em - 1.5em);
+  right: var(--edgetext-right, 50%);
+  margin-right: -1.5em;
+  background-color: rgba(255,255,255,0.7);
 }
 
 /* ###### connectors ########### */
@@ -147,23 +154,23 @@ https://www.cssscript.com/clean-tree-diagram/
 }
 
 /* smooth transition between hiding and showing */
-@keyframes hide-delayed {
+/*@keyframes hide-delayed {
   99% {
     visibility: visible;
   }
   100% {
     visibility: hidden;
   }
-}
+}*/
 .tree span[data-collapsed] ~ ul {
   opacity: 0%;
   visibility: hidden;
-  animation: hide-delayed 1s;
-  transition: opacity 0.5s ease-out 0.5s;
+  /*animation: hide-delayed 1s;
+  transition: opacity 0.5s ease-out 0.5s;*/
 }
 .tree ul {
   opacity: 100%;
-  transition: opacity 1s ease-out;
+  /* transition: opacity 1s ease-out; */
 }
 
 /* ######### holes ########## */

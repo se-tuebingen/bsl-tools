@@ -49,6 +49,7 @@ function adjustConnectors(tree: HTMLElement) {
         child.style.cssText = `
           --connector-width: ${amount}px;
           --connector-left: calc(50% + ${left}px);
+          --edgetext-right: calc(50% - ${xdiff/2}px);
           --connector-transform: rotate(${angle}rad);
         `;
       });
