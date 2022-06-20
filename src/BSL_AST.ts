@@ -6,7 +6,8 @@ export enum Production {
   CondExpression = 'Cond-Expression',
   CondOption = 'Cond-Option',
   Symbol = 'Symbol',
-  Literal = 'Literal Value'
+  Literal = 'Literal Value',
+  Number = 'Number'
 }
 
 export type program = defOrExpr[];
@@ -83,4 +84,7 @@ export function isName(obj: any): obj is Name {
 }
 export function isLiteral(obj: any): obj is Literal {
   return obj.type === Production.Literal;
+}
+export function isNumber(obj: any): obj is number {
+  return obj.type === Production.Number;
 }

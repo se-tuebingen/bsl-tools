@@ -1,30 +1,37 @@
 import * as BSL_AST from "./BSL_AST";
 
 //Redex
-export interface AddRedex{
-    leftExpr: BSL_AST.expr;
-    rightExpr: BSL_AST.expr;
+// export interface AddRedex{
+//     type: "AddRedex";
+//     args: BSL_AST.expr[];
+// }
+// export interface MulRedex{
+//     type: "MulRedex";
+//     leftExpr: BSL_AST.expr;
+//     rightExpr: BSL_AST.expr;
+// }
+
+export interface Redex{
+    type: "Redex";
+    name: BSL_AST.Name;
+    args: BSL_AST.expr[];
 }
-export interface MulRedex{
-    leftExpr: BSL_AST.expr;
-    rightExpr: BSL_AST.expr;
-}
-export type Redex = AddRedex | MulRedex;
 
 //Context
 export interface Hole{
-symbol: "";
+    type: "Hole";
+    symbol: "";
 }
 
-export interface AddL {
-    context: Context;
-    expr: BSL_AST.expr;
+
+export type exprOrHole = BSL_AST.expr | Hole;
+
+export interface Context{
+    type: "Context";
+    name: BSL_AST.Name;
+    args: exprOrHole[];
+
 }
-export interface AddR {
-    context: Context;
-    expr: BSL_AST.expr;
-}
-export type Context = Hole | AddL | AddR
 
 // Split
 
@@ -32,3 +39,9 @@ export interface Split{
     redex: Redex;
     context: Context;
 }
+
+//SplitResult
+
+export type SplitResult = Split | BSL_AST.Literal;
+
+

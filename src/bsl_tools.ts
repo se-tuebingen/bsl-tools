@@ -25,10 +25,22 @@ function processBslTrees() {
     }
   });
 }
+// parse stepper
+function processStepper() {
+  Array.from(document.getElementsByTagName('stepper')).map(el => {
+    try {
+      const program : BSL_AST.program = parse(el.innerHTML);
+      console.log("program", program);
+    } catch(e:any) {
+      renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
+    }
+  });
+}
 
 // setup callbacks
 window.onload = () => {
   processBslTrees();
+  processStepper();
 }
 
 // error Render Function
