@@ -151,3 +151,13 @@ https://www.cssscript.com/clean-tree-diagram/
   padding-right: 0.25em;
   position: relative;
 }
+
+/* ########### quiz ########## */
+.tree span[data-quiz-state="production"] .name,
+.tree span[data-quiz-state="production"] .code {
+  display: none;
+}
+
+.tree span[data-quiz-state="done"] .selection {
+  display: none;
+}

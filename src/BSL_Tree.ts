@@ -1,7 +1,7 @@
 // ######### LAYOUT AST AS TREE DIAGRAM ########
 import * as BSL_AST from "./BSL_AST";
 import * as BSL_Print from "./BSL_Print";
-import {navigateDOM, getParentTagRecursive} from "./DOM_Helpers";
+import {navigateDOM, getParentTagRecursive, getParentClassRecursive} from "./DOM_Helpers";
 // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetLeft
 
@@ -9,7 +9,12 @@ import {navigateDOM, getParentTagRecursive} from "./DOM_Helpers";
 // add forest of program expressions to html element
 export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=false){
   // const nodeFn = quiz ? quizNode : treeNode;
-  target.innerHTML = renderProgram(program);
+  target.innerHTML = renderProgram(program, quiz);
+  if (quiz) {
+    // show first quiz node
+    navigateDOM([target],'ul/li/ul/li').map(c =>
+      c.setAttribute('data-collapsed','false'));
+  }
   // align connectors horizontally
   adjustConnectors(target);
 }
@@ -55,11 +60,11 @@ function adjustConnectors(tree: HTMLElement) {
 }
 
 // ##### generate HTML
-function renderProgram(p: BSL_AST.program):string {
+function renderProgram(p: BSL_AST.program, quiz: boolean = false):string {
   const root = programToNode(p);
   return `
     <ul class="tree ast">
-      ${renderNode(root)}
+      ${quiz ? renderQuizNode(root) : renderNode(root)}
     </ul>
   `;
 }
@@ -70,10 +75,6 @@ interface node {
   code: string;
   holes: {start:number, end:number, content:node}[];
 }
-
-// function isLeafNode(n: node):boolean {
-//   return n.holes.length <= 0;
-// }
 
 // ###### rendering a node/tree
 function renderNode(n: node, i:number=-1):string {
@@ -94,7 +95,7 @@ function renderNode(n: node, i:number=-1):string {
     <li class="${i >= 0 ? `child-${i+1}` : ''}"
         data-collapsed="${i >= 0 ? 'true' : 'false'}">
       <span class="${n.holes.length > 0 ? '' : 'terminal-symbol'}">
-        <div class="name">${n.production.replaceAll('<', '&lt;').replaceAll('<','&gt;')}</div>
+        <div class="name">${sanitize(n.production)}</div>
         <div>${spans.map(s => `
           <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
                 ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}>
@@ -112,25 +113,95 @@ function renderNode(n: node, i:number=-1):string {
 
 function toggleChild(e: Event,i:number) {
   const hole = e.target as HTMLElement;
-  console.log(hole);
   const li = getParentTagRecursive(hole, 'li');
-  console.log(li);
   const tree = getParentTagRecursive(hole, 'bsltree');
-  console.log(tree);
   if(!li || !tree) {
     console.error('toggleChild called from .hole not in li/bsltree');
     return;
   };
 
   navigateDOM([li],`ul/.child-${i}`).map(c => {
-    console.log('toggling:');
-    console.log(c);
     c.setAttribute('data-collapsed', c.getAttribute('data-collapsed') === 'true' ? 'false' : 'true');
-    console.log(c);
   });
   adjustConnectors(tree);
 }
 (window as any).toggleChild = toggleChild;
+
+function sanitize(s: string):string {
+  return s.replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+
+// ###### rendering a node/tree as a quiz
+const productions = [
+  '<program>',
+  '<def-or-expr>*',
+  '<def-or-expr>',
+  '<definition>',
+  '<e>',
+  '<e>*',
+  '{[<e>,<e>]}+',
+  '<name>*',
+  '<name>+',
+  '<name>',
+  '<v>'
+];
+function renderQuizNode(n: node, i:number=-1):string {
+  // slice text into holes
+  const spans = [];
+  let position = 0;
+  for(let i = 0; i < n.holes.length; i++) {
+    if (n.holes[i].start > position) {
+      spans.push({pos: false, start:position, end:n.holes[i].start});
+    }
+    spans.push({pos: i+1, ...n.holes[i]});
+    position = n.holes[i].end;
+  }
+  if (position < n.code.length) {
+    spans.push({start:position, end:n.code.length});
+  }
+  return `
+    <li class="${i >= 0 ? `child-${i+1}` : ''}"
+        data-collapsed="${i >= 0 ? 'true' : 'false'}">
+      <span class="${n.holes.length > 0 ? '' : 'terminal-symbol'}"
+            data-quiz-state="${i >= 0 ? 'production' : 'done'}">
+        <div class="selection">
+          <select onchange="checkProduction(event, '${n.production}')">
+            <option selected="true">Select production</option>
+            ${productions.map(p => `
+                <option value="${p}">${sanitize(p)}</option>
+              `).join('')}
+          </select>
+        </div>
+        <div class="name">
+          ${n.production.replaceAll('<', '&lt;').replaceAll('<','&gt;')}
+        </div>
+        <div class="code">${spans.map(s => `
+          <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
+                ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}>
+            ${n.code.slice(s.start, s.end)}
+          </span>`).join('')}
+        </div>
+      </span>
+      ${n.holes.length > 0 ?
+        `<ul>${n.holes.map((h, idx) => renderQuizNode(h.content, idx)).join('')}</ul>`
+        : ''
+      }
+    </li>
+  `;
+}
+
+function checkProduction(e: Event, p: string) {
+  const sel = e.target as HTMLSelectElement;
+  if (sel.value === p) {
+    const span = getParentTagRecursive(sel, 'span');
+    if (span) {
+      span.setAttribute('data-quiz-state', 'done');
+      const quiz = getParentClassRecursive(span, 'tree');
+      if (quiz) adjustConnectors(quiz);
+    }
+  }
+}
+(window as any).checkProduction = checkProduction;
 
 // ###### transform AST into helper structure
 function programToNode(p: BSL_AST.program): node {
