@@ -35,17 +35,7 @@ function processStepper() {
     try {
       //parse to AST
       const program : BSL_AST.program = parse(el.innerHTML);
-      const expr =  program[0] as BSL_AST.expr;
-      console.log("expression", expr);
-      //split to redex and context
-      const splitExpr = SI.split(expr) as SI_STRUCT.SplitResult;
-      console.log("splitExpr", splitExpr);
-      //step
-      const stepExpr = SI.step((splitExpr as SI_STRUCT.Split).redex);
-      console.log("stepExpr", stepExpr);
-      //plug
-      const plugExpr = SI.plug(stepExpr as BSL_AST.Literal, (splitExpr as SI_STRUCT.Split).context);
-      console.log("plugExpr", plugExpr);
+      SI.transformInput(program, el as HTMLElement);
     } catch(e:any) {
       renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
     }

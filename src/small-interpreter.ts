@@ -1,6 +1,24 @@
 import * as BSL_AST from "./BSL_AST";
 import * as SI_STRUCT from "./SI_STRUCT";
 
+
+//general input handling
+
+export function transformInput(program:BSL_AST.program, el: HTMLElement):void{
+    renderStepper(el);
+    const expr =  program[0] as BSL_AST.expr;
+    console.log("expression", expr);
+    //split to redex and context
+    const splitExpr = split(expr) as SI_STRUCT.SplitResult;
+    console.log("splitExpr", splitExpr);
+    renderSplitResult(el, splitExpr);
+    //step
+    const stepExpr = step((splitExpr as SI_STRUCT.Split).redex);
+    console.log("stepExpr", stepExpr);
+    //plug
+    const plugExpr = plug(stepExpr as BSL_AST.Literal, (splitExpr as SI_STRUCT.Split).context);
+    console.log("plugExpr", plugExpr);
+}
 //split
 
 export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
@@ -13,6 +31,7 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
                 const call = args[i] as BSL_AST.Call;
                 hole.index = i;
                 return {
+                    type: "Split",
                     redex: {
                         type: "Redex",
                         name: call.name,
@@ -28,6 +47,7 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
             }   
         }
         return {
+            type: "Split",
             redex: {
                 type: "Redex",
                 name: name,
@@ -90,3 +110,60 @@ export function plug(r_val:BSL_AST.Literal, c: SI_STRUCT.Context): BSL_AST.expr 
     console.error("error: no hole found");
     return undefined;
 }
+
+
+// ####### RENDER FUNCTIONS #######
+function renderStepper(el: HTMLElement){
+//render original expression
+const div = document.createElement("div");
+div.className = "origin";
+div.innerHTML = el.innerHTML;
+el.innerHTML = "";
+el.appendChild(div);
+
+// render splitted expression
+const split = document.createElement("div");
+split.className = "split";
+el.appendChild(split);
+
+// render context
+const context = document.createElement("div");
+context.className = "context";
+split.appendChild(context);
+
+// render redex
+const redex = document.createElement("div");
+redex.className = "redex";
+split.appendChild(redex);
+
+//render plugged expression
+const plug = document.createElement("div");
+plug.className = "plug";
+el.appendChild(plug);
+}
+
+
+function renderSplitResult(el: HTMLElement, split: SI_STRUCT.SplitResult){
+    const splitDiv = el.getElementsByClassName("split")[0] as HTMLElement;
+    if (SI_STRUCT.isSplit(split)){
+        //get context
+        splitDiv.children[0].innerHTML = 
+        `( ${split.context.name?.symbol} 
+            ${split.context.args.map(el => {if(BSL_AST.isLiteral(el)){
+               return el.value.toString();
+            }else{
+                return "[  ]";
+            }})} )`;
+        //get redex
+        splitDiv.children[1].innerHTML = 
+        `( ${split.redex.name.symbol} ${split.redex.args.map(el => {if(BSL_AST.isLiteral(el)){
+            return el.value;
+        }})} )`;
+    }else if (BSL_AST.isLiteral(split)){
+        splitDiv.innerHTML = split.value.toString();
+    }else{
+        console.error("error: split is neither Split nor Literal");
+    }
+
+}
+// ####### EVENT HANDLER FUNCTIONS #######
