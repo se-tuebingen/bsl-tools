@@ -33,11 +33,16 @@ function processBslTrees() {
 function processStepper() {
   Array.from(document.getElementsByTagName('stepper')).map(el => {
     try {
+      //parse to AST
       const program : BSL_AST.program = parse(el.innerHTML);
       const expr =  program[0] as BSL_AST.expr;
       console.log("expression", expr);
-      const splitExpr = SI.split(expr);
+      //split to redex and context
+      const splitExpr = SI.split(expr) as SI_STRUCT.SplitResult;
       console.log("splitExpr", splitExpr);
+      //step
+      const stepExpr = SI.step((splitExpr as SI_STRUCT.Split).redex);
+      console.log("stepExpr", stepExpr);
     } catch(e:any) {
       renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
     }

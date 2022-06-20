@@ -43,9 +43,9 @@ For example: ``(+ 2 (* 4 3))``splits up to context: ``(+ 2 Hole()))`` and redex:
 
 ## step
 
-Step consums a Redex and reduces the expression (to a value f.e.).
+Step consumes a Redex and reduces the expression (to a value f.e.).
 
-:: Redex -> RuleApplication
+:: Redex -> RuleApplication -> (Redex, Rule)
 
 ## plug
 
@@ -110,4 +110,42 @@ Expression ``(+ 2 (+ 4 6))`` parsed to:
   ]
 }
 
+```
+
+Split object:
+
+```ts
+{
+  "redex": {
+    "type": "Redex",
+    "name": {
+      "type": "Symbol",
+      "symbol": "+"
+    },
+    "args": [
+      {
+        "type": "Literal Value",
+        "value": 4
+      },
+      {
+        "type": "Literal Value",
+        "value": 6
+      }
+    ]
+  },
+  "context": {
+    "type": "Context",
+    "name": {
+      "type": "Symbol",
+      "symbol": "+"
+    },
+    "args": [
+      {
+        "type": "Literal Value",
+        "value": 2
+      },
+      {}
+    ]
+  }
+}
 ```

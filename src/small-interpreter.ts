@@ -51,15 +51,23 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
 
 // step
 
-// function step(r: SI_STRUCT.Redex): BSL_AST.expr{
-//     switch (r.type) {
-//         case "AddRedex":
-//             if (BSL_AST.isLiteral(r.leftExpr && BSL_AST.isLiteral(r.rightExpr))){
-//                 return r.leftExpr + r.rightExpr;
-//             }
-           
-//             }
-//         case "MulRedex":
-//             return r.leftExpr;
-//     }
-// }
+export function step(r: SI_STRUCT.Redex): BSL_AST.expr | undefined{
+    if (r.name.symbol == "+"){
+        // PRIM
+        let new_r = 0;
+        
+        r.args.forEach(el => {
+            if (BSL_AST.isLiteral(el)){
+                new_r += el.value as number;
+            }else{
+                console.error("error: argument is not a literal");
+                return undefined;
+            }
+        });
+        return {
+            value: new_r
+        } as BSL_AST.Literal
+    }
+}
+
+// plug

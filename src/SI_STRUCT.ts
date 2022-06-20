@@ -45,3 +45,19 @@ export interface Split{
 export type SplitResult = Split | BSL_AST.Literal;
 
 
+// runtime type checking
+export function isRedex(obj: any): obj is Redex {
+    return obj.type === "Redex";
+}
+export function isHole(obj: any): obj is Hole {
+    return obj.type === "Hole";
+}
+export function isContext(obj: any): obj is Context {
+    return obj.type === "Context";
+}
+export function isSplit(obj: any): obj is Split {
+    return obj.type === "Split";
+}
+export function isSplitResult(obj: any): obj is SplitResult {
+    return isSplit(obj) || BSL_AST.isLiteral(obj);
+}
