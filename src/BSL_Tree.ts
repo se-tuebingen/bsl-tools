@@ -93,7 +93,7 @@ function renderNode(n: node, i:number=-1):string {
   return `
     <li class="${i >= 0 ? `child-${i+1}` : ''}"
         data-collapsed="${i >= 0 ? 'true' : 'false'}">
-      <span>
+      <span class="${n.holes.length > 0 ? '' : 'terminal-symbol'}">
         <div class="name">${n.production.replaceAll('<', '&lt;').replaceAll('<','&gt;')}</div>
         <div>${spans.map(s => `
           <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"

@@ -54,6 +54,7 @@ https://www.cssscript.com/clean-tree-diagram/
     margin-top: 1.5em;
     padding: .2em .5em;
     position: relative;
+    box-sizing: border-box;
 }
 
 /* ########### custom AST node  styles ######## */
@@ -73,6 +74,10 @@ https://www.cssscript.com/clean-tree-diagram/
   margin-right: -1.5em;
   background-color: rgba(255,255,255,0.7);
 }
+.tree .terminal-symbol {
+  border-width: .2em;
+  border-style: double;
+}
 
 /* ###### connectors ########### */
 /* part above box */
@@ -84,6 +89,9 @@ https://www.cssscript.com/clean-tree-diagram/
     position: absolute;
     top: -1.5em;
     transform: var(--connector-transform); /* to be set dynamically */
+}
+.tree span.terminal-symbol:before {
+  top: calc(-1.5em - .2em);
 }
 
 /* ####### highlight way back up from a node ###### */
