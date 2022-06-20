@@ -164,13 +164,34 @@ function renderQuizNode(n: node, i:number=-1):string {
         data-collapsed="${i >= 0 ? 'true' : 'false'}">
       <span class="${n.holes.length > 0 ? '' : 'terminal-symbol'}"
             data-quiz-state="${i >= 0 ? 'production' : 'done'}">
-        <div class="selection">
+        <div class="production">
           <select onchange="checkProduction(event, '${n.production}')">
             <option selected="true">Select production</option>
             ${productions.map(p => `
                 <option value="${p}">${sanitize(p)}</option>
               `).join('')}
           </select>
+        </div>
+        <div class="hole-marking"
+             data-holes="${JSON.stringify(n.holes.map(h => [h.start,h.end, false]))}">
+          <div class="textarea-container">
+            <textarea autocorrect="off"
+                      spellcheck="false"
+                      cols="${n.code.length}"
+                      rows="1"
+                      readonly="true">${n.code}</textarea>
+            <div class="marker-container">
+              ${spans.map(s => `
+                <span class="char ${s.pos ? 'hole-marker' : ''} invisible"
+                      data-hole="${s.pos ? s.pos : ''}">
+                  ${n.code.slice(s.start, s.end)}
+                </span>`).join('')}
+            </div>
+
+          </div>
+          <button onclick="checkSelection(event)">
+            Mark selected text as hole
+          </button>
         </div>
         <div class="name">
           ${n.production.replaceAll('<', '&lt;').replaceAll('<','&gt;')}
@@ -195,13 +216,61 @@ function checkProduction(e: Event, p: string) {
   if (sel.value === p) {
     const span = getParentTagRecursive(sel, 'span');
     if (span) {
-      span.setAttribute('data-quiz-state', 'done');
+      span.setAttribute('data-quiz-state', 'hole-marking');
       const quiz = getParentClassRecursive(span, 'tree');
       if (quiz) adjustConnectors(quiz);
     }
   }
 }
 (window as any).checkProduction = checkProduction;
+function checkSelection(e: Event) {
+  // get context
+  const btn = e.target as HTMLElement;
+  const div = getParentClassRecursive(btn, 'hole-marking');
+  if (!div) {
+    console.error('checkProduction called from el. not wrapped in div.hole-marking');
+    return;
+  }
+  // get holes to find
+  const holes = JSON.parse(div.getAttribute('data-holes') as string) as [number,number,boolean][];
+  console.log(holes);
+
+  // get current selection
+  const textarea = div.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+
+  // check if hole is found
+  let found = -1;
+  holes.map((h,i) => {
+    if (h[0] === start && h[1] === end) {
+      console.log('found hole ', h);
+      h[2] = true;
+      found = i;
+    }
+  });
+
+  if (found >= 0) {
+    // save changed state, show hole marker
+    div.setAttribute('data-holes', JSON.stringify(holes));
+    navigateDOM([div],'.textarea-container/.marker-container/.hole-marker').map(m => {
+      if (m.getAttribute('data-hole') === `${found}`) {
+        m.classList.remove('invisible');
+      }
+    });
+  }
+  if(holes.every(h => h[2])) {
+    // move on to next phase == done
+    const span = getParentTagRecursive(div, 'span');
+    if (span) {
+      span.setAttribute('data-quiz-state', 'done');
+      const quiz = getParentClassRecursive(span, 'tree');
+      if (quiz) adjustConnectors(quiz);
+    }
+  }
+
+}
+(window as any).checkSelection = checkSelection;
 
 // ###### transform AST into helper structure
 function programToNode(p: BSL_AST.program): node {

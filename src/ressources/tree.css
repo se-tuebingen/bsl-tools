@@ -154,10 +154,52 @@ https://www.cssscript.com/clean-tree-diagram/
 
 /* ########### quiz ########## */
 .tree span[data-quiz-state="production"] .name,
-.tree span[data-quiz-state="production"] .code {
+.tree span[data-quiz-state="production"] .code,
+.tree span[data-quiz-state="production"] .hole-marking {
   display: none;
 }
 
-.tree span[data-quiz-state="done"] .selection {
+.tree span[data-quiz-state="hole-marking"] .name,
+.tree span[data-quiz-state="hole-marking"] .code,
+.tree span[data-quiz-state="hole-marking"] .production {
   display: none;
+}
+
+.tree span[data-quiz-state="done"] .production,
+.tree span[data-quiz-state="done"] .hole-marking {
+  display: none;
+}
+
+.tree textarea,
+.tree .marker-container {
+  resize: none;
+  font-size: calc(1em);
+  padding: 2px;
+  margin: .2em;
+  border: none;
+  box-sizing: border-box;
+}
+
+.tree .textarea-container {
+  position: relative;
+}
+.tree textarea {
+  background-color: transparent;
+}
+.tree .marker-container {
+  background-color: white;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+.tree .invisible {
+  visibility: hidden;
+  z-index: -1;
+}
+.tree .hole-marker {
+  background-color: lime;
+  border: 1px solid darkgreen;
+  padding: 1px;
+  z-index: 1;
 }
