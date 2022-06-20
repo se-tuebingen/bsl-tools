@@ -2,6 +2,10 @@ import * as BSL_AST from './BSL_AST';
 import * as BSL_Tree from './BSL_Tree';
 import { parse } from './BSL_Parser';
 
+// small-step-interpreter functionality
+import * as SI_STRUCT from './SI_STRUCT';
+import * as SI from './small-interpreter';
+
 // add css
 import {default as tree} from './ressources/tree.css';
 import {default as tree_quiz} from './ressources/tree-quiz.css';
@@ -30,7 +34,10 @@ function processStepper() {
   Array.from(document.getElementsByTagName('stepper')).map(el => {
     try {
       const program : BSL_AST.program = parse(el.innerHTML);
-      console.log("program", program);
+      const expr =  program[0] as BSL_AST.expr;
+      console.log("expression", expr);
+      const splitExpr = SI.split(expr);
+      console.log("splitExpr", splitExpr);
     } catch(e:any) {
       renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
     }

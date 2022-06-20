@@ -28,7 +28,7 @@ export type exprOrHole = BSL_AST.expr | Hole;
 
 export interface Context{
     type: "Context";
-    name: BSL_AST.Name;
+    name: BSL_AST.Name | null;
     args: exprOrHole[];
 
 }
