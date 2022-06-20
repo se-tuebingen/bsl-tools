@@ -1,16 +1,5 @@
 import * as BSL_AST from "./BSL_AST";
 
-//Redex
-// export interface AddRedex{
-//     type: "AddRedex";
-//     args: BSL_AST.expr[];
-// }
-// export interface MulRedex{
-//     type: "MulRedex";
-//     leftExpr: BSL_AST.expr;
-//     rightExpr: BSL_AST.expr;
-// }
-
 export interface Redex{
     type: "Redex";
     name: BSL_AST.Name;
@@ -20,7 +9,7 @@ export interface Redex{
 //Context
 export interface Hole{
     type: "Hole";
-    symbol: "";
+    index: number;
 }
 
 

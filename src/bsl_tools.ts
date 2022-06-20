@@ -43,6 +43,9 @@ function processStepper() {
       //step
       const stepExpr = SI.step((splitExpr as SI_STRUCT.Split).redex);
       console.log("stepExpr", stepExpr);
+      //plug
+      const plugExpr = SI.plug(stepExpr as BSL_AST.Literal, (splitExpr as SI_STRUCT.Split).context);
+      console.log("plugExpr", plugExpr);
     } catch(e:any) {
       renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
     }

@@ -7,10 +7,11 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
     if(BSL_AST.isCall(expr)){
         const name = expr.name;
         const args = expr.args;
-        const hole = {} as SI_STRUCT.Hole;
+        const hole = {type: "Hole", index: 0};
         for (let i = 0; i < args.length; i++){
             if (BSL_AST.isCall(args[i])){
                 const call = args[i] as BSL_AST.Call;
+                hole.index = i;
                 return {
                     redex: {
                         type: "Redex",
@@ -21,7 +22,7 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
                     type: "Context",
                     name: name,
                     //concat hole with args
-                    args: [...args.slice(0, i), hole, ...args.slice(i + 1)]
+                    args: [...args.slice(0, i), hole, ...args.slice(i + 1)] as SI_STRUCT.exprOrHole[]
                     }
                 } 
             }   
@@ -35,7 +36,7 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
             context: {
                 type: "Context",
                 name: null,
-                args:[hole]
+                args: [hole] as SI_STRUCT.exprOrHole[]
             }
         }
     }else if (BSL_AST.isLiteral(expr)){
@@ -71,3 +72,21 @@ export function step(r: SI_STRUCT.Redex): BSL_AST.expr | undefined{
 }
 
 // plug
+
+export function plug(r_val:BSL_AST.Literal, c: SI_STRUCT.Context): BSL_AST.expr | undefined{
+    const args = c.args;
+    const name = c.name;
+    for(let i=0; i < args.length; i++){
+        if (SI_STRUCT.isHole(args[i])){
+            const new_args = [...args.slice(0, i), r_val.value, ...args.slice(i + 1)] as BSL_AST.expr[];
+            console.log("new_args" + new_args);
+            return {
+                type: BSL_AST.Production.FunctionCall,
+                name: name as BSL_AST.Name,
+                args: new_args
+            }
+        }
+    }
+    console.error("error: no hole found");
+    return undefined;
+}
