@@ -10,11 +10,13 @@ import * as SI from './SI';
 import {default as tree} from './ressources/tree.css';
 import {default as tree_quiz} from './ressources/tree-quiz.css';
 import {default as error} from './ressources/error.css';
+import {default as small_interpreter} from './ressources/small-interpreter.css';
 
 const styleNode = document.createElement('style');
 styleNode.innerHTML = tree;
 styleNode.innerHTML += tree_quiz;
 styleNode.innerHTML += error;
+styleNode.innerHTML += small_interpreter;
 document.getElementsByTagName('head')[0].appendChild(styleNode);
 
 // parse and print bsl trees

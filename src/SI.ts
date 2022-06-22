@@ -186,23 +186,25 @@ function renderStepper(stepper: SI_STRUCT.Stepper): string{
     const str = 
     `<stepper>
         <div class="program-wrapper">
-            Original Expression:<br> 
-            ${renderExpr(originExpr)}
+            Original Expression:
+            <pre><code>${renderExpr(originExpr)}</code></pre>
         </div>
         <div class="eval-wrapper">
             <div class="program-overview">
+                <ul>
                 ${programExpr.map(expr => renderExpr(expr)).join("\n")}
+                </ul>
             </div>
             <div class="split-rule-plug">
                 <div class="split">
-                    Split: <br>
+                    Split:
                     ${renderSplitResult(splitResult)}
                 </div>
                 <div class="rule">
                     ${SI_STRUCT.isOneRule(rule) ? renderOneRule(rule) : renderProgStep(rule)}
                 </div>
                 <div class="plug">
-                    <i>Plug Result:</i><br>${renderExpr(pluggedExpr)}
+                    Plug Result: <pre><code>${renderExpr(pluggedExpr)}</code></pre>
                 </div>
             </div>
         </div>
@@ -248,18 +250,22 @@ function renderSplitResult(splitResult: SI_STRUCT.SplitResult): string{
 function renderRedex(redex: SI_STRUCT.Redex): string{
     const name = redex.name.symbol;
     const args = redex.args.map(arg => renderExpr(arg)).join(" ");
-    const str = `(${name} ${args})`;
+    const str = `<pre><code>(${name} ${args})</code></pre>`;
     return str;
 }
 function renderContext(context: SI_STRUCT.Context): string{
     const name = context.name ? context.name.symbol : "";
     const args = context.args.map(arg => (BSL_AST.isExpr(arg)) ? renderExpr(arg) : `<span class="hole">[    ]</span>`).join(" ");
-    const str = `(${name} ${args})`;
+    const str = `<pre><code>(${name} ${args})</code></pre>`;
     return str;
 }
 function renderOneRule(rule: SI_STRUCT.OneRule): string{
     const type = rule.type;
-    const str = `Rule Name: ${type}, Redex: ${renderRedex(rule.redex)} , Evaluated Redex: ${renderExpr(rule.literal)}`;
+    const str = `${type}
+                Redex:
+                ${renderRedex(rule.redex)}
+                Evaluated Redex:
+                <pre><code>${renderExpr(rule.literal)}</code></pre>`;
     console.log(str);
     return str;
 }
@@ -267,8 +273,8 @@ function renderProgStep(rule: SI_STRUCT.ProgStepRule): string{
     const type = rule.type;
     const context = rule.context;
     const redexRule = rule.redexRule;
-    const str = `${type} with ${redexRule.type}: <br> 
-                 ${renderContext(context)} <br>
+    const str = `<p>${type} with ${redexRule.type}:</p>
+                 ${renderContext(context)} 
                  ${renderOneRule(redexRule)} `; 
     return str;
 }

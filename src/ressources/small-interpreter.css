@@ -1,0 +1,37 @@
+stepper{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size: 1.2em;
+}
+/* .eval-wrapper{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: left;
+    max-width: 1200px;
+    margin: 2vh auto;
+} */
+.program-wrapper{
+margin:2vw;
+padding: 1vh 2vw; 
+font-size: 1.1em;
+font-weight: 600;
+border: 1px solid #000;
+}
+
+.split-rule-plug{
+    display: flex;
+    flex-direction: row;
+    max-width:1200px;
+    margin: 2vh auto;
+    padding: 1vw;
+}
+.split,.rule,.plug{
+    border: 2px solid #000;
+    padding: 1vh 1.3vw;
+}
+pre{
+    margin: 3vh 0;
+    font-size: 1.1em;
+}
