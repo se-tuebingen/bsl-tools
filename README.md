@@ -27,8 +27,15 @@ The interface is as follows:
 <bsltree quiz="true">
   (valid bsl syntax)
 </bsltree>
+
+<!-- for displaying user text in german, do -->
+<bsltree quiz="true" lang="de">
+  (valid bsl syntax)
+</bsltree>
 ```
 Anything inside the `<bsltree>` tag is parsed according to the  BSL Core Language as documented below.
+
+The `lang` attribute is only applicable for Quiz mode, since the regular tree does not display any text in natural language. Currently implemented codes are `en`(English, default) and `de`(German).
 
 ## How to use: Scribble
 
@@ -38,7 +45,9 @@ The interface in scribble is as follows:
 ```racket
 (require bsl_tools.rkt)
 
-@bsl-tree [ #:quiz #t @; optional keyword argument, default is #f
+@bsl-tree [
+  #:quiz #t   @; optional keyword argument, default is #f
+  #:lang "de" @; optional keyword argument, default is "en"
   #'((valid bsl syntax))
 ]
 ```
@@ -46,7 +55,10 @@ The interface in scribble is as follows:
 It is necessary to wrap the BSL-Syntax with a ``#'()``, especially when there are multiple `<def-or-expr>`,
 however literal values, such as ``2`` don't need to be wrapped.
 The Scribble module parses the BSL-Syntax to a string in a ``<bsltree>`` and adds the javascript module as dependency.
-If you set the optional keyword argument `#:quiz` to `#t`, it will add `quiz="true"`.
+
+If you set the optional keyword argument `#:quiz` to `#t`, it will add `quiz="true"` which displays the tree in quiz mode.
+
+Similarly, the `#:lang` keyword argument can be used to set the language code. This is only applicable for Quiz mode, since the regular tree does not display any text in natural language. Currently implemented codes are `en`(English, default) and `de`(German).
 
 ## BSL Abstract Syntax Tree
 
@@ -125,6 +137,5 @@ If your commit contains changes to `arch.txt` or `os.txt`, better double check i
 
 ## todos tree
 
-- Deutsch/Englisch (i18n)
 - Darstellung Skriptnah
 - Idee: Game-Like stats in Quiz Mode

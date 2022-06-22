@@ -93,3 +93,13 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 (define x 42)
 (define-struct name (firstName lastName)))
 ]
+
+@section{Internationalization}
+
+Internationalization currently only applies to quiz mode, since the regular tree does not contain any natural language elements.
+
+@subsection{German}
+
+@bsltree[ #:quiz #t #:lang "de"
+#'((define (f x y) (< x "42")))
+]

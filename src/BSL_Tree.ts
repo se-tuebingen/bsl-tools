@@ -7,9 +7,15 @@ import {navigateDOM, getParentTagRecursive, getParentClassRecursive} from "./DOM
 
 // #### main api #####
 // add forest of program expressions to html element
-export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=false){
-  // const nodeFn = quiz ? quizNode : treeNode;
-  target.innerHTML = renderProgram(program, quiz);
+export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=false, lang='en'){
+  if (!implementedLanguages.includes(lang)) {
+    console.error(`
+      Selected language "${lang}" is not implemented, defaulting to "en".
+      Available language codes: ${implementedLanguages.join(', ')}
+    `);
+    lang = 'en';
+  }
+  target.innerHTML = renderProgram(program, quiz, lang as implementedLanguage);
   if (quiz) {
     // show first quiz node
     navigateDOM([target],'ul/li/ul/li').map(c =>
@@ -19,7 +25,20 @@ export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=
   adjustConnectors(target);
 }
 
+// ###### internationalization for this module #####
+type implementedLanguage = 'en' | 'de';
+const implementedLanguages = ['en', 'de'];
 
+const dictionary = {
+  'en': {
+    'select production': 'Select production',
+    'mark selected text as hole': 'Mark selected text as hole',
+  },
+  'de': {
+    'select production': 'Produktion auswählen',
+    'mark selected text as hole': 'Auswahl als Loch markieren',
+  },
+};
 // ###### layout helper ########
 // dynamically compute dimensions of connectors between nodes
 // such that they point to the correct "hole"
@@ -60,11 +79,11 @@ function adjustConnectors(tree: HTMLElement) {
 }
 
 // ##### generate HTML
-function renderProgram(p: BSL_AST.program, quiz: boolean = false):string {
+function renderProgram(p: BSL_AST.program, quiz: boolean, lang: implementedLanguage):string {
   const root = programToNode(p);
   return `
     <ul class="tree ast">
-      ${quiz ? renderQuizNode(root) : renderNode(root)}
+      ${quiz ? renderQuizNode(root, lang) : renderNode(root)}
     </ul>
   `;
 }
@@ -150,7 +169,7 @@ const productions = [
   '<name>',
   '<v>'
 ];
-function renderQuizNode(n: node, i:number=-1):string {
+function renderQuizNode(n: node, lang: implementedLanguage, i:number=-1):string {
   // slice text into holes
   const spans = [];
   let position = 0;
@@ -173,7 +192,7 @@ function renderQuizNode(n: node, i:number=-1):string {
             data-is-trivial-hole="${n.holes.length === 1 && n.holes[0].start === 0 && n.holes[0].end === n.code.length}">
         <div class="production">
           <select onchange="checkProduction(event, '${n.production}')">
-            <option selected="true">Select production</option>
+            <option selected="true">${dictionary[lang]['select production']}</option>
             ${productions.map(p => `
                 <option value="${p}">${sanitize(p)}</option>
               `).join('')}
@@ -196,7 +215,7 @@ function renderQuizNode(n: node, i:number=-1):string {
                       readonly="true">${n.code}</textarea>
           </div><br>
           <button onclick="checkSelection(event)">
-            Mark selected text as hole
+            ${dictionary[lang]['mark selected text as hole']}
           </button>
         </div>
         <div class="name">
@@ -210,7 +229,7 @@ function renderQuizNode(n: node, i:number=-1):string {
         </div>
       </span>
       ${n.holes.length > 0 ?
-        `<ul>${n.holes.map((h, idx) => renderQuizNode(h.content, idx)).join('')}</ul>`
+        `<ul>${n.holes.map((h, idx) => renderQuizNode(h.content, lang, idx)).join('')}</ul>`
         : ''
       }
     </li>
