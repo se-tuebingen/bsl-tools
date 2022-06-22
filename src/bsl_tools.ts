@@ -4,7 +4,7 @@ import { parse } from './BSL_Parser';
 
 // small-step-interpreter functionality
 import * as SI_STRUCT from './SI_STRUCT';
-import * as SI from './small-interpreter';
+import * as SI from './SI';
 
 // add css
 import {default as tree} from './ressources/tree.css';
@@ -32,10 +32,10 @@ function processBslTrees() {
 // parse stepper
 function processStepper() {
   Array.from(document.getElementsByTagName('stepper')).map(el => {
-    try {
       //parse to AST
+    try{
       const program : BSL_AST.program = parse(el.innerHTML);
-      SI.transformInput(program, el as HTMLElement);
+      SI.constructStepper(program, el as HTMLElement);
     } catch(e:any) {
       renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
     }
