@@ -7,6 +7,7 @@
   --highlight-border-connectors: lime;
   --wrong-background: red;
   --correct-background: lime;
+  --hole-selection-background: white;
 }
 /*
 CSS for tree by Ross Angus
@@ -178,6 +179,7 @@ https://www.cssscript.com/clean-tree-diagram/
 /* highlighting text by putting a div behind a textarea */
 .tree textarea,
 .tree .marker-container {
+  font-family: inherit;
   resize: none;
   font-size: calc(1em);
   padding: 2px;
@@ -196,7 +198,8 @@ https://www.cssscript.com/clean-tree-diagram/
   z-index: 2;
 }
 .tree .marker-container {
-  background-color: white;
+  text-align: left;
+  background-color: var(--hole-selection-background);
   position: absolute;
   top: 0;
   left: 0;

@@ -183,14 +183,16 @@ function renderQuizNode(n: node, i:number=-1):string {
              data-holes="${JSON.stringify(n.holes.map(h => [h.start,h.end, false]))}">
           <div class="textarea-container">
             <div class="marker-container">
-              ${n.code.split('').map(c =>
-                `<span class="char marker">${c}</span>`
-              ).join('')}
+              ${n.code.split('\n')
+                  .map(l => l.split('').map(c =>
+                    `<span class="char marker">${c}</span>`
+                  ).join(''))
+                  .join('<span class="char marker"></span><br>')}
             </div>
             <textarea autocorrect="off"
                       spellcheck="false"
-                      cols="${n.code.length}"
-                      rows="1"
+                      cols="${n.code.split('\n').map(l => l.length).reduce((x,y) => x > y ? x : y)}"
+                      rows="${n.code.split('\n').length}"
                       readonly="true">${n.code}</textarea>
           </div><br>
           <button onclick="checkSelection(event)">
@@ -203,7 +205,8 @@ function renderQuizNode(n: node, i:number=-1):string {
         <div class="code">${spans.map(s => `
           <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
                 ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}
-                >${n.code.slice(s.start, s.end)}</span>`).join('')}
+                >${n.code.slice(s.start, s.end)}</span>`)
+                .join('')}
         </div>
       </span>
       ${n.holes.length > 0 ?
