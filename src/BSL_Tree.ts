@@ -127,8 +127,12 @@ function toggleChild(e: Event,i:number) {
 }
 (window as any).toggleChild = toggleChild;
 
+// preventing problems with brackets
 function sanitize(s: string):string {
   return s.replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+export function dirtify(s: string):string {
+  return s.replaceAll('&lt;', '<').replaceAll('&gt;','>');
 }
 
 // ###### rendering a node/tree as a quiz
@@ -139,7 +143,8 @@ const productions = [
   '<definition>',
   '<e>',
   '<e>*',
-  '{[<e>,<e>]}+',
+  '{[ <e> <e> ]}+',
+  '[ <e> <e> ]',
   '<name>*',
   '<name>+',
   '<name>',
@@ -175,19 +180,18 @@ function renderQuizNode(n: node, i:number=-1):string {
         <div class="hole-marking"
              data-holes="${JSON.stringify(n.holes.map(h => [h.start,h.end, false]))}">
           <div class="textarea-container">
-            <textarea autocorrect="off"
-                      spellcheck="false"
-                      cols="${n.code.length}"
-                      rows="1"
-                      readonly="true">${n.code}</textarea>
             <div class="marker-container">
               ${spans.map(s => `
                 <span class="char ${s.pos ? 'hole-marker' : ''} invisible"
                       data-hole="${s.pos ? s.pos : ''}"
                       >${n.code.slice(s.start, s.end)}</span>`).join('')}
             </div>
-
-          </div>
+            <textarea autocorrect="off"
+                      spellcheck="false"
+                      cols="${n.code.length}"
+                      rows="1"
+                      readonly="true">${n.code}</textarea>
+          </div><br>
           <button onclick="checkSelection(event)">
             Mark selected text as hole
           </button>
@@ -212,9 +216,22 @@ function renderQuizNode(n: node, i:number=-1):string {
 function checkProduction(e: Event, p: string) {
   const sel = e.target as HTMLSelectElement;
   if (sel.value === p) {
+    // answer correct
     const span = getParentTagRecursive(sel, 'span');
     if (span) {
-      span.setAttribute('data-quiz-state', 'hole-marking');
+      if (span.getElementsByClassName('hole').length > 0) {
+        // move on to selecting holes
+        span.setAttribute('data-quiz-state', 'hole-marking');
+      } else {
+        // we're done
+        span.setAttribute('data-quiz-state', 'done');
+      }
+
+      // expand next sibling
+      navigateDOM([span], '../+').map(l =>
+        l.setAttribute('data-collapsed', 'false'));
+
+      // adjust connectors
       const quiz = getParentClassRecursive(span, 'tree');
       if (quiz) adjustConnectors(quiz);
     }
@@ -231,18 +248,18 @@ function checkSelection(e: Event) {
   }
   // get holes to find
   const holes = JSON.parse(div.getAttribute('data-holes') as string) as [number,number,boolean][];
-  console.log(holes);
 
   // get current selection
   const textarea = div.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
+  const selStart = textarea.selectionStart;
+  const selEnd = textarea.selectionEnd;
+  const start = selStart < selEnd ? selStart : selEnd;
+  const end = selStart < selEnd ? selEnd : selStart;
 
   // check if hole is found
   let found = -1;
   holes.map((h,i) => {
     if (h[0] === start && h[1] === end) {
-      console.log('found hole ', h);
       h[2] = true;
       found = i;
     }
@@ -252,7 +269,7 @@ function checkSelection(e: Event) {
     // save changed state, show hole marker
     div.setAttribute('data-holes', JSON.stringify(holes));
     navigateDOM([div],'.textarea-container/.marker-container/.hole-marker').map(m => {
-      if (m.getAttribute('data-hole') === `${found}`) {
+      if (m.getAttribute('data-hole') === `${found+1}`) {
         m.classList.remove('invisible');
       }
     });
@@ -262,6 +279,11 @@ function checkSelection(e: Event) {
     const span = getParentTagRecursive(div, 'span');
     if (span) {
       span.setAttribute('data-quiz-state', 'done');
+      // expand first child
+      navigateDOM([span], '../ul/.child-1').map(c =>
+        c.setAttribute('data-collapsed', 'false'));
+
+      // adjust connectors for width change
       const quiz = getParentClassRecursive(span, 'tree');
       if (quiz) adjustConnectors(quiz);
     }
@@ -276,11 +298,11 @@ function programToNode(p: BSL_AST.program): node {
   const indices = [];
   let program = '';
   for(let i = 0; i < expressions.length; i++) {
+    if (i > 0) program = `${program}\n`;
     const start = program.length;
     program = `${program}${expressions[i]}`;
     const end = program.length;
     indices.push({start:start,end:end});
-    program = `${program}\n`;
   }
   return {
     production: '<program>',

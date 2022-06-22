@@ -4,40 +4,32 @@
 // .class -> all children with a class
 // tag -> all children of a certain tag
 // divided by /
-export function navigateDOM(positions: HTMLElement[], path: string): HTMLElement[] {
+export function navigateDOM(positions: HTMLElement[], path: string, strict: boolean = false): HTMLElement[] {
+  if (positions.length === 0) return [];
   const steps = path.split('/');
   const currStep = steps.shift() as string;
   if (currStep == '') return positions;
   const restSteps = steps.join('/');
 
+  let newPositions = [];
   if (currStep == '..') {
     // navigate up
-    const newPositions = positions.map(p => p.parentElement);
-    if (newPositions.every(p => p)) {
-      return navigateDOM(newPositions as HTMLElement[], restSteps);
-    } else {
-      console.error(`Error traversing ${path}: Missing parentElement`, positions);
-      return [];
-    }
+    newPositions = positions.map(p => p.parentElement).filter(p => p);
   } else if (currStep == '+') {
     // navigate sideways
-    const newPositions = positions.map(p => p.nextElementSibling);
-    if (newPositions.every(p => p)) {
-      return navigateDOM(newPositions as HTMLElement[], restSteps);
-    } else {
-      console.error(`Error traversing ${path}: Missing nextElementSibling`, positions);
-      return [];
-    }
+    newPositions = positions.map(p => p.nextElementSibling).filter(p => p);
   } else if (currStep.startsWith('.')) {
     // navigate down + filter for class
     const className = currStep.slice(1);
-    const newPositions = positions.flatMap(p => Array.from(p.children).filter(c => c.classList.contains(className)));
-    return navigateDOM(newPositions as HTMLElement[], restSteps);
+    newPositions = positions.flatMap(p => Array.from(p.children).filter(c => c.classList.contains(className)));
   } else {
     // navigate down + filter for tag
-    const newPositions = positions.flatMap(p => Array.from(p.children).filter(c => c.tagName == currStep.toUpperCase()));
-    return navigateDOM(newPositions as HTMLElement[], restSteps);
+    newPositions = positions.flatMap(p => Array.from(p.children).filter(c => c.tagName == currStep.toUpperCase()));
   }
+  if (newPositions.length === 0 && strict) {
+    console.error(`Error traversing ${path}: No element found`);
+  }
+  return navigateDOM(newPositions as HTMLElement[], restSteps);
 }
 
 // getParentTagRecursive from a child element

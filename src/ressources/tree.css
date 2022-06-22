@@ -182,24 +182,23 @@ https://www.cssscript.com/clean-tree-diagram/
 
 .tree .textarea-container {
   position: relative;
+  display: inline-block;
 }
 .tree textarea {
+  position: relative;
   background-color: transparent;
+  z-index: 2;
 }
 .tree .marker-container {
   background-color: white;
   position: absolute;
   top: 0;
   left: 0;
-  z-index: -1;
+  z-index: 1;
 }
 .tree .invisible {
   visibility: hidden;
-  z-index: -1;
 }
 .tree .hole-marker {
   background-color: lime;
-  border: 1px solid darkgreen;
-  padding: 1px;
-  z-index: 1;
 }

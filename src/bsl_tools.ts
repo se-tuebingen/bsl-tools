@@ -17,7 +17,7 @@ document.getElementsByTagName('head')[0].appendChild(styleNode);
 function processBslTrees() {
   Array.from(document.getElementsByTagName('bsltree')).map(el => {
     try {
-      const program : BSL_AST.program = parse(el.innerHTML);
+      const program : BSL_AST.program = parse(BSL_Tree.dirtify(el.innerHTML));
       const quiz = el.getAttribute('quiz') === 'true' ? true : false;
       BSL_Tree.treeProgram(program, el as HTMLElement, quiz);
     } catch(e:any) {
