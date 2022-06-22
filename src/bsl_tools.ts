@@ -4,12 +4,10 @@ import { parse } from './BSL_Parser';
 
 // add css
 import {default as tree} from './ressources/tree.css';
-import {default as tree_quiz} from './ressources/tree-quiz.css';
 import {default as error} from './ressources/error.css';
 
 const styleNode = document.createElement('style');
 styleNode.innerHTML = tree;
-styleNode.innerHTML += tree_quiz;
 styleNode.innerHTML += error;
 document.getElementsByTagName('head')[0].appendChild(styleNode);
 
