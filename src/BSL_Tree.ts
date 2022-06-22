@@ -79,6 +79,9 @@ function adjustConnectors(tree: HTMLElement) {
 }
 
 // ##### generate HTML
+// render functions and their helpers
+
+// top level (program)
 function renderProgram(p: BSL_AST.program, quiz: boolean, lang: implementedLanguage):string {
   const root = programToNode(p);
   return `
@@ -88,15 +91,46 @@ function renderProgram(p: BSL_AST.program, quiz: boolean, lang: implementedLangu
   `;
 }
 
-// ##### simple helper structure representing a printed tree
+// simple helper structure representing a printed tree
+// also used further down by transform function
 interface node {
   production: string;
   code: string;
   holes: {start:number, end:number, content:node}[];
 }
 
-// ###### rendering a node/tree
+// regular node/tree
 function renderNode(n: node, i:number=-1):string {
+  // slice text into holes
+  const spans = getSpans(n);
+  return `
+    <li class="${i >= 0 ? `child-${i+1}` : ''}"
+        data-collapsed="${i >= 0 ? 'true' : 'false'}">
+      <span class="${n.holes.length > 0 ? '' : 'terminal-symbol'}">
+
+        <div class="name">${sanitize(n.production)}</div>
+
+        ${renderCode(spans, n)}
+
+      </span>
+      ${n.holes.length > 0 ?
+        `<ul>${
+          n.holes.map((h, idx) =>
+            renderNode(h.content, idx))
+          .join('')
+        }</ul>`
+        : ''
+      }
+    </li>
+  `;
+}
+
+interface span {
+  pos: boolean | number;
+  start: number;
+  end: number;
+}
+function getSpans(n: node):span[] {
   // slice text into holes
   const spans = [];
   let position = 0;
@@ -108,28 +142,23 @@ function renderNode(n: node, i:number=-1):string {
     position = n.holes[i].end;
   }
   if (position < n.code.length) {
-    spans.push({start:position, end:n.code.length});
+    spans.push({pos: false, start:position, end:n.code.length});
   }
-  return `
-    <li class="${i >= 0 ? `child-${i+1}` : ''}"
-        data-collapsed="${i >= 0 ? 'true' : 'false'}">
-      <span class="${n.holes.length > 0 ? '' : 'terminal-symbol'}">
-        <div class="name">${sanitize(n.production)}</div>
-        <div>${spans.map(s => `
-          <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
-                ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}>
-            ${n.code.slice(s.start, s.end)}
-          </span>`).join('')}
-        </div>
-      </span>
-      ${n.holes.length > 0 ?
-        `<ul>${n.holes.map((h, idx) => renderNode(h.content, idx)).join('')}</ul>`
-        : ''
-      }
-    </li>
-  `;
+  return spans;
 }
 
+// code from spans
+function renderCode(spans: span[], n: node):string {
+  return `
+  <div class="code">${
+    spans.map(s =>
+      `<span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
+             ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}
+             >${n.code.slice(s.start, s.end)}</span>`)
+    .join('')}
+  </div>
+  `;
+}
 function toggleChild(e: Event,i:number) {
   const hole = e.target as HTMLElement;
   const li = getParentTagRecursive(hole, 'li');
@@ -171,18 +200,7 @@ const productions = [
 ];
 function renderQuizNode(n: node, lang: implementedLanguage, i:number=-1):string {
   // slice text into holes
-  const spans = [];
-  let position = 0;
-  for(let i = 0; i < n.holes.length; i++) {
-    if (n.holes[i].start > position) {
-      spans.push({pos: false, start:position, end:n.holes[i].start});
-    }
-    spans.push({pos: i+1, ...n.holes[i]});
-    position = n.holes[i].end;
-  }
-  if (position < n.code.length) {
-    spans.push({start:position, end:n.code.length});
-  }
+  const spans = getSpans(n);
   return `
     <li class="${i >= 0 ? `child-${i+1}` : ''}"
         data-collapsed="${i >= 0 ? 'true' : 'false'}">
@@ -190,49 +208,39 @@ function renderQuizNode(n: node, lang: implementedLanguage, i:number=-1):string 
             data-quiz-state="${i >= 0 ? 'production' : 'done'}"
             data-is-terminal="${n.holes.length <= 0}"
             data-is-trivial-hole="${n.holes.length === 1 && n.holes[0].start === 0 && n.holes[0].end === n.code.length}">
-        <div class="production">
-          <select onchange="checkProduction(event, '${n.production}')">
-            <option selected="true">${dictionary[lang]['select production']}</option>
-            ${productions.map(p => `
-                <option value="${p}">${sanitize(p)}</option>
-              `).join('')}
-          </select>
-        </div>
-        <div class="hole-marking"
-             data-holes="${JSON.stringify(n.holes.map(h => [h.start,h.end, false]))}">
-          <div class="textarea-container">
-            <div class="marker-container">
-              ${n.code.split('\n')
-                  .map(l => l.split('').map(c =>
-                    `<span class="char marker">${c}</span>`
-                  ).join(''))
-                  .join('<span class="char marker"></span><br>')}
-            </div>
-            <textarea autocorrect="off"
-                      spellcheck="false"
-                      cols="${n.code.split('\n').map(l => l.length).reduce((x,y) => x > y ? x : y)}"
-                      rows="${n.code.split('\n').length}"
-                      readonly="true">${n.code}</textarea>
-          </div><br>
-          <button onclick="checkSelection(event)">
-            ${dictionary[lang]['mark selected text as hole']}
-          </button>
-        </div>
+
+        ${renderProductionQuiz(n, lang)}
+
+        ${renderHoleQuiz(n, lang)}
+
         <div class="name">
-          ${n.production.replaceAll('<', '&lt;').replaceAll('<','&gt;')}
+          ${sanitize(n.production)}
         </div>
-        <div class="code">${spans.map(s => `
-          <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
-                ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}
-                >${n.code.slice(s.start, s.end)}</span>`)
-                .join('')}
-        </div>
+        ${renderCode(spans, n)}
       </span>
       ${n.holes.length > 0 ?
-        `<ul>${n.holes.map((h, idx) => renderQuizNode(h.content, lang, idx)).join('')}</ul>`
+        `<ul>${
+          n.holes.map((h, idx) =>
+            renderQuizNode(h.content, lang, idx))
+            .join('')
+         }</ul>`
         : ''
       }
     </li>
+  `;
+}
+
+// first part of the quiz
+function renderProductionQuiz(n: node, lang: implementedLanguage):string {
+  return `
+  <div class="production">
+    <select onchange="checkProduction(event, '${n.production}')">
+      <option selected="true">${dictionary[lang]['select production']}</option>
+      ${productions.map(p => `
+          <option value="${p}">${sanitize(p)}</option>
+        `).join('')}
+    </select>
+  </div>
   `;
 }
 
@@ -279,6 +287,32 @@ function checkProduction(e: Event, p: string) {
   }
 }
 (window as any).checkProduction = checkProduction;
+
+// second part of the quiz
+function renderHoleQuiz(n: node, lang: implementedLanguage):string {
+  return `
+  <div class="hole-marking"
+       data-holes="${JSON.stringify(n.holes.map(h => [h.start,h.end, false]))}">
+    <div class="textarea-container">
+      <div class="marker-container">
+        ${n.code.split('\n')
+            .map(l => l.split('').map(c =>
+              `<span class="char marker">${c}</span>`
+            ).join(''))
+            .join('<span class="char marker"></span><br>')}
+      </div>
+      <textarea autocorrect="off"
+                spellcheck="false"
+                cols="${n.code.split('\n').map(l => l.length).reduce((x,y) => x > y ? x : y)}"
+                rows="${n.code.split('\n').length}"
+                readonly="true">${n.code}</textarea>
+    </div><br>
+    <button onclick="checkSelection(event)">
+      ${dictionary[lang]['mark selected text as hole']}
+    </button>
+  </div>
+  `;
+}
 function checkSelection(e: Event) {
   // get context
   const btn = e.target as HTMLElement;
@@ -337,7 +371,6 @@ function checkSelection(e: Event) {
       if (quiz) adjustConnectors(quiz);
     }
   }
-
 }
 (window as any).checkSelection = checkSelection;
 
