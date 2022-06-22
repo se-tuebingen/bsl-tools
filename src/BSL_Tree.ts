@@ -183,10 +183,9 @@ function renderQuizNode(n: node, i:number=-1):string {
              data-holes="${JSON.stringify(n.holes.map(h => [h.start,h.end, false]))}">
           <div class="textarea-container">
             <div class="marker-container">
-              ${spans.map(s => `
-                <span class="char ${s.pos ? 'hole-marker' : ''} invisible"
-                      data-hole="${s.pos ? s.pos : ''}"
-                      >${n.code.slice(s.start, s.end)}</span>`).join('')}
+              ${n.code.split('').map(c =>
+                `<span class="char marker">${c}</span>`
+              ).join('')}
             </div>
             <textarea autocorrect="off"
                       spellcheck="false"
@@ -243,6 +242,18 @@ function checkProduction(e: Event, p: string) {
       const quiz = getParentClassRecursive(span, 'tree');
       if (quiz) adjustConnectors(quiz);
     }
+  } else {
+    // mark option as tried-and-wrong
+    Array.from(sel.selectedOptions).map(o =>
+      o.remove());
+    // give visual feedback
+    const span = getParentTagRecursive(sel, 'span');
+    if (span) {
+      span.classList.add('wrong');
+      window.setTimeout(() => {
+        span.classList.remove('wrong');
+      }, 100);
+    }
   }
 }
 (window as any).checkProduction = checkProduction;
@@ -274,13 +285,21 @@ function checkSelection(e: Event) {
   });
 
   if (found >= 0) {
-    // save changed state, show hole marker
+    // save changed state
     div.setAttribute('data-holes', JSON.stringify(holes));
-    navigateDOM([div],'.textarea-container/.marker-container/.hole-marker').map(m => {
-      if (m.getAttribute('data-hole') === `${found+1}`) {
-        m.classList.remove('invisible');
-      }
-    });
+    // mark hole as correct
+    navigateDOM([div], '.textarea-container/.marker-container/.marker', true)
+      .slice(start, end)
+      .map(m => m.classList.add('correct'));
+  } else {
+    // give feedback about wrong selection
+    const markers = navigateDOM([div], '.textarea-container/.marker-container/.marker', true)
+      .slice(start, end);
+
+    markers.map(m => m.classList.add('wrong'));
+    window.setTimeout(() => {
+      markers.map(m => m.classList.remove('wrong'));
+    }, 100);
   }
   if(holes.every(h => h[2])) {
     // move on to next phase == done

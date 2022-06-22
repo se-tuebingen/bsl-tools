@@ -5,6 +5,8 @@
   --text-grey: #444; /* like in scribble */
   --hole-yellow: #fdf68d; /* pale yellow */
   --highlight-border-connectors: lime;
+  --wrong-background: red;
+  --correct-background: lime;
 }
 /*
 CSS for tree by Ross Angus
@@ -61,6 +63,7 @@ https://www.cssscript.com/clean-tree-diagram/
 .tree span {
   font-family: 'Fira-Mono', monospace;
   background-color: var(--node-background);
+  transition: 1s background-color ease-out;
 }
 .tree .name {
   color: var(--text-grey);
@@ -95,7 +98,7 @@ https://www.cssscript.com/clean-tree-diagram/
 }
 
 /* ####### highlight way back up from a node ###### */
-.tree li:hover > span {
+/* .tree li:hover > span {
   border-color: var(--highlight-border-connectors);
 }
 .tree li:hover::before {
@@ -104,7 +107,7 @@ https://www.cssscript.com/clean-tree-diagram/
 }
 .tree li:hover > span::before {
   outline-color: var(--highlight-border-connectors);
-}
+} */
 
 /* ######## hide connectors over root ######## */
 .tree>li:before,
@@ -153,6 +156,8 @@ https://www.cssscript.com/clean-tree-diagram/
 }
 
 /* ########### quiz ########## */
+
+/* quiz stages */
 .tree span[data-quiz-state="production"] .name,
 .tree span[data-quiz-state="production"] .code,
 .tree span[data-quiz-state="production"] .hole-marking {
@@ -170,6 +175,7 @@ https://www.cssscript.com/clean-tree-diagram/
   display: none;
 }
 
+/* highlighting text by putting a div behind a textarea */
 .tree textarea,
 .tree .marker-container {
   resize: none;
@@ -196,9 +202,18 @@ https://www.cssscript.com/clean-tree-diagram/
   left: 0;
   z-index: 1;
 }
-.tree .invisible {
-  visibility: hidden;
+.tree .marker {
+  color: transparent;
+  background-color: transparent;
+  transition: 1s background-color ease-out;
 }
-.tree .hole-marker {
-  background-color: lime;
+
+/* feedback for wrong answer */
+.tree .wrong {
+  background-color: var(--wrong-background);
+  transition: none;
+}
+.tree .correct {
+  background-color: var(--correct-background);
+  transition: none;
 }
