@@ -2,23 +2,20 @@ import * as BSL_AST from "./BSL_AST";
 import * as SI_STRUCT from "./SI_STRUCT";
 
 
-// ####### PARSE FUNCTIONS #######
-
-
 // ParseStepper
-export function constructStepper(program:BSL_AST.program, el: HTMLElement):void{
-    renderStepper(el);
+export function parseStepper(program:BSL_AST.program, el: HTMLElement):void{
     const expr =  program[0] as BSL_AST.expr;
     console.log("expression", expr);
     const emptyStepper = {
         type: SI_STRUCT.Production.Stepper, 
         root: el, 
         originExpr: expr, 
-        stepperTree: []
+        stepperTree: [],
+        currentStep: 0
     } as SI_STRUCT.Stepper;
     const stepper = calculateAllSteps(expr, emptyStepper);
     console.log("stepper", stepper);
-   
+    el.innerHTML = renderStepper(stepper);
 }
 // calculateAllSteps
 // Literal | Expression, Stepper => Stepper
@@ -32,7 +29,8 @@ export function calculateAllSteps(litOrExpr: BSL_AST.Literal | BSL_AST.expr, ste
             type: SI_STRUCT.Production.Stepper,
             root: stepper.root,
             originExpr: stepper.originExpr,
-            stepperTree: [...stepper.stepperTree, stepResult]
+            stepperTree: [...stepper.stepperTree, stepResult],
+            currentStep: stepper.currentStep
         } as SI_STRUCT.Stepper;
         return calculateAllSteps(newExpr, newStepper);
     }
@@ -172,9 +170,110 @@ export function plug(pRule: SI_STRUCT.OneRule, c: SI_STRUCT.Context): SI_STRUCT.
     return undefined;
 }
 
+
+
 // ####### RENDER FUNCTIONS #######
-function renderStepper(el: HTMLElement){
-//render original expression
+
+
+function renderStepper(stepper: SI_STRUCT.Stepper): string{
+    const stepperTree = stepper.stepperTree;
+    const originExpr = stepper.originExpr;
+    const currentStep = stepper.currentStep;
+    const programExpr = stepperTree.slice(0, currentStep).map(stepResult => stepResult.plugResult.expr); //renderExprs
+    const splitResult = stepperTree[currentStep].splitResult; //renderSplitResult
+    const rule = stepperTree[currentStep].plugResult.rule; //renderRule
+    const pluggedExpr = stepperTree[currentStep].plugResult.expr;
+    const str = 
+    `<stepper>
+        <div class="program-wrapper">
+            Original Expression:<br> 
+            ${renderExpr(originExpr)}
+        </div>
+        <div class="eval-wrapper">
+            <div class="program-overview">
+                ${programExpr.map(expr => renderExpr(expr)).join("\n")}
+            </div>
+            <div class="split-rule-plug">
+                <div class="split">
+                    Split: <br>
+                    ${renderSplitResult(splitResult)}
+                </div>
+                <div class="rule">
+                    ${SI_STRUCT.isOneRule(rule) ? renderOneRule(rule) : renderProgStep(rule)}
+                </div>
+                <div class="plug">
+                    <i>Plug Result:</i><br>${renderExpr(pluggedExpr)}
+                </div>
+            </div>
+        </div>
+    </stepper>`;
+    return str;
+}
+
+function renderExpr(expr: BSL_AST.expr):string{
+    if(BSL_AST.isCall(expr)){
+        const name = expr.name.symbol;
+        const args = expr.args.map(arg => renderExpr(arg)).join(" ");
+        const str = `(${name} ${args})`;
+        return str;
+    }else if(BSL_AST.isLiteral(expr)){
+        const value = expr.value;
+        const str = `${value}`;
+        return str;
+    }else{
+        console.error("error: expr is neither Call nor Literal");
+        return "Neither Call nor Literal";
+    }
+}
+
+function renderSplitResult(splitResult: SI_STRUCT.SplitResult): string{
+    if (SI_STRUCT.isSplit(splitResult)){
+        const redex = splitResult.redex;
+        const context = splitResult.context;
+        const redexStr = renderRedex(redex);
+        const contextStr = renderContext(context);
+        const str = `
+        <div class="context">
+            Context: ${contextStr}
+        </div>
+        <div class="redex">
+            Redex: ${redexStr}
+        </div>`;
+        return str;
+    } else{
+        return `${splitResult}`;
+    }
+}
+
+function renderRedex(redex: SI_STRUCT.Redex): string{
+    const name = redex.name.symbol;
+    const args = redex.args.map(arg => renderExpr(arg)).join(" ");
+    const str = `(${name} ${args})`;
+    return str;
+}
+function renderContext(context: SI_STRUCT.Context): string{
+    const name = context.name ? context.name.symbol : "";
+    const args = context.args.map(arg => (BSL_AST.isExpr(arg)) ? renderExpr(arg) : `<span class="hole">[    ]</span>`).join(" ");
+    const str = `(${name} ${args})`;
+    return str;
+}
+function renderOneRule(rule: SI_STRUCT.OneRule): string{
+    const type = rule.type;
+    const str = `Rule Name: ${type}, Redex: ${renderRedex(rule.redex)} , Evaluated Redex: ${renderExpr(rule.literal)}`;
+    console.log(str);
+    return str;
+}
+function renderProgStep(rule: SI_STRUCT.ProgStepRule): string{
+    const type = rule.type;
+    const context = rule.context;
+    const redexRule = rule.redexRule;
+    const str = `${type} with ${redexRule.type}: <br> 
+                 ${renderContext(context)} <br>
+                 ${renderOneRule(redexRule)} `; 
+    return str;
+}
+
+/* //render original expression
 const div = document.createElement("div");
 div.className = "origin";
 div.innerHTML = el.innerHTML;
@@ -199,31 +298,7 @@ split.appendChild(redex);
 //render plugged expression
 const plug = document.createElement("div");
 plug.className = "plug";
-el.appendChild(plug);
-}
+el.appendChild(plug); */
 
 
-function renderSplitResult(el: HTMLElement, split: SI_STRUCT.SplitResult){
-    const splitDiv = el.getElementsByClassName("split")[0] as HTMLElement;
-    if (SI_STRUCT.isSplit(split)){
-        //get context
-        splitDiv.children[0].innerHTML = 
-        `( ${split.context.name?.symbol} 
-            ${split.context.args.map(el => {if(BSL_AST.isLiteral(el)){
-               return el.value.toString();
-            }else{
-                return "[  ]";
-            }})} )`;
-        //get redex
-        splitDiv.children[1].innerHTML = 
-        `( ${split.redex.name.symbol} ${split.redex.args.map(el => {if(BSL_AST.isLiteral(el)){
-            return el.value;
-        }})} )`;
-    }else if (BSL_AST.isLiteral(split)){
-        splitDiv.innerHTML = split.value.toString();
-    }else{
-        console.error("error: split is neither Split nor Literal");
-    }
-
-}
 // ####### EVENT HANDLER FUNCTIONS #######

@@ -35,7 +35,7 @@ function processStepper() {
       //parse to AST
     try{
       const program : BSL_AST.program = parse(el.innerHTML);
-      SI.constructStepper(program, el as HTMLElement);
+      SI.parseStepper(program, el as HTMLElement);
     } catch(e:any) {
       renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
     }
