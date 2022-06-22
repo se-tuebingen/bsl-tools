@@ -391,7 +391,7 @@ function defToNode(d: BSL_AST.definition):node {
   let code = '';
   const holes = [];
   if (BSL_AST.isFunDef(d)) {
-    code = '( define ( ';
+    code = '(define (';
     let start = code.length;
     code = `${code}${BSL_Print.printName(d.name)}`;
     holes.push({start:start, end:code.length, content:nameToNode(d.name)});
@@ -401,14 +401,14 @@ function defToNode(d: BSL_AST.definition):node {
     code = `${code}${d.args.map(BSL_Print.printName).join(' ')}`;
     holes.push({start:start, end:code.length, content:namePlusToNode(d.args)});
 
-    code = `${code} ) `;
+    code = `${code}) `;
     start = code.length;
     code = `${code}${BSL_Print.printE(d.body)}`;
     holes.push({start:start, end:code.length, content:expToNode(d.body)});
 
-    code = `${code} )`;
+    code = `${code})`;
   } else if (BSL_AST.isConstDef(d)) {
-    code = '( define ';
+    code = '(define ';
     let start = code.length;
     code = `${code}${BSL_Print.printName(d.name)}`;
     holes.push({start:start, end:code.length, content:nameToNode(d.name)});
@@ -418,19 +418,19 @@ function defToNode(d: BSL_AST.definition):node {
     code = `${code}${BSL_Print.printE(d.value)}`;
     holes.push({start:start, end:code.length, content:expToNode(d.value)});
 
-    code = `${code} )`;
+    code = `${code})`;
   } else {
-    code = '( define-struct ';
+    code = '(define-struct ';
     let start = code.length;
     code = `${code}${BSL_Print.printName(d.binding)}`;
     holes.push({start:start, end:code.length, content:nameToNode(d.binding)});
 
-    code = `${code} ( `;
+    code = `${code} (`;
     start = code.length;
     code = `${code}${d.properties.map(BSL_Print.printName).join(' ')}`;
     holes.push({start:start, end:code.length, content:nameStarToNode(d.properties)});
 
-    code = `${code} ) )`;
+    code = `${code}))`;
   }
   return {
     production: `<definition>`,
@@ -443,7 +443,7 @@ function expToNode(e: BSL_AST.expr):node {
   let code = '';
   const holes = [];
   if(BSL_AST.isCall(e)) {
-    code = '( ';
+    code = '(';
     let start = code.length;
     code = `${code}${BSL_Print.printName(e.name)}`;
     holes.push({start:start, end:code.length, content:nameToNode(e.name)});
@@ -453,13 +453,13 @@ function expToNode(e: BSL_AST.expr):node {
     code = `${code}${e.args.map(BSL_Print.printE).join(' ')}`;
     holes.push({start:start, end:code.length, content:eStarToNode(e.args)});
 
-    code = `${code} )`;
+    code = `${code})`;
   } else if (BSL_AST.isCond(e)) {
-    code = '( cond ';
+    code = '(cond ';
     let start = code.length;
     code = `${code}${e.options.map(BSL_Print.printOption).join(' ')}`;
     holes.push({start:start, end:code.length, content:optionsToNode(e.options)});
-    code = `${code} )`;
+    code = `${code})`;
   } else if (BSL_AST.isName(e)) {
     code = BSL_Print.printName(e);
     holes.push({start:0, end:code.length, content:nameToNode(e)});
@@ -554,7 +554,7 @@ function optionsToNode(os: BSL_AST.Clause[]):node {
 function optionToNode(o: BSL_AST.Clause):node {
   let code = '';
   const holes = [];
-  code = `${code}[ `;
+  code = `${code}[`;
   let start = code.length;
   code = `${code}${BSL_Print.printE(o.condition)}`;
   holes.push({start:start, end:code.length, content:expToNode(o.condition)});
@@ -564,7 +564,7 @@ function optionToNode(o: BSL_AST.Clause):node {
   code = `${code}${BSL_Print.printE(o.result)}`;
   holes.push({start:start, end:code.length, content:expToNode(o.result)});
 
-  code = `${code} ]`;
+  code = `${code}]`;
 
   return {
     production: '[ <e> <e> ]',
