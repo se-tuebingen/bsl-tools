@@ -12,7 +12,7 @@ export function printDefOrExpr(eod: BSL_AST.defOrExpr) {
 }
 export function printDefinition(d: BSL_AST.definition) {
   if(BSL_AST.isFunDef(d)) {
-    return `(define ${printName(d.name)} (${d.args.map(printName).join(' ')}) ${printE(d.body)})`;
+    return `(define (${printName(d.name)} ${d.args.map(printName).join(' ')}) ${printE(d.body)})`;
   } else if(BSL_AST.isConstDef(d)) {
     return `(define ${printName(d.name)} ${printE(d.value)})`;
   } else if(BSL_AST.isStructDef(d)) {

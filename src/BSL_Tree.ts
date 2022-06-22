@@ -183,9 +183,8 @@ function renderQuizNode(n: node, i:number=-1):string {
             <div class="marker-container">
               ${spans.map(s => `
                 <span class="char ${s.pos ? 'hole-marker' : ''} invisible"
-                      data-hole="${s.pos ? s.pos : ''}">
-                  ${n.code.slice(s.start, s.end)}
-                </span>`).join('')}
+                      data-hole="${s.pos ? s.pos : ''}"
+                      >${n.code.slice(s.start, s.end)}</span>`).join('')}
             </div>
 
           </div>
@@ -198,9 +197,8 @@ function renderQuizNode(n: node, i:number=-1):string {
         </div>
         <div class="code">${spans.map(s => `
           <span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
-                ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}>
-            ${n.code.slice(s.start, s.end)}
-          </span>`).join('')}
+                ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}
+                >${n.code.slice(s.start, s.end)}</span>`).join('')}
         </div>
       </span>
       ${n.holes.length > 0 ?
@@ -334,7 +332,7 @@ function defToNode(d: BSL_AST.definition):node {
 
     code = `${code} ) `;
     start = code.length;
-    code = `${code} ${BSL_Print.printE(d.body)}`;
+    code = `${code}${BSL_Print.printE(d.body)}`;
     holes.push({start:start, end:code.length, content:expToNode(d.body)});
 
     code = `${code} )`;
