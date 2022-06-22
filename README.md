@@ -1,16 +1,17 @@
 # BSL Tools
+
 Beginning Student Language is a programming language in DrRacket. This repository provides some useful BSL-Tools, such as
 - Abstract Syntax Tree
 - Stepper (Auswertungskontext)
 - BSL "Try out" box (Interpreter)
 
-The current test build can be seen at <https://se-tuebingen.github.io/bsl-tools/>.
+The current test build can be seen at <https://se-tuebingen.github.io/bsl-tools/>. [![Compile and Publish Test Pages](https://github.com/se-tuebingen/bsl-tools/actions/workflows/publish.yml/badge.svg)](https://github.com/se-tuebingen/bsl-tools/actions/workflows/publish.yml)
 
 ## How to use: HTML
 
 Currently, the only implemented module is the collapsible AST tree view, with an
 optional "quiz" mode that starts the tree collapsed and expands if you select
-the correct production and mark all subexpressions.
+the correct production and mark all subexpressions ('holes').
 
 The interface is as follows:
 ```html
@@ -118,6 +119,12 @@ If your commit contains changes to `arch.txt` or `os.txt`, better double check i
 
 - Vergleich zu Vorlesung theorethische Informatik bei der Darstellung von Auswertungsbäumen
 - Small-Step-Interpreter nach Vorbild von der einen Bachelorarbeit
-- BSL-Grammatik ``&lt; &gt;`` escapen
-- Zwei Ansätze zu Darstellung des AST (Programmiernah / Skriptnah (Grammatiksyntaxnah))
-- backup skript für node_modules im Fall der Fälle
+- (done in front-end) BSL-Grammatik ``&lt; &gt;`` escapen
+- (mvp steht) Zwei Ansätze zu Darstellung des AST (Programmiernah / Skriptnah (Grammatiksyntaxnah))
+- (done) backup skript für node_modules im Fall der Fälle
+
+## todos tree
+
+- Deutsch/Englisch (i18n)
+- Darstellung Skriptnah
+- Idee: Game-Like stats in Quiz Mode
