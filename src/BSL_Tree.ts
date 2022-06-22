@@ -168,7 +168,9 @@ function renderQuizNode(n: node, i:number=-1):string {
     <li class="${i >= 0 ? `child-${i+1}` : ''}"
         data-collapsed="${i >= 0 ? 'true' : 'false'}">
       <span class="${n.holes.length > 0 ? '' : 'terminal-symbol'}"
-            data-quiz-state="${i >= 0 ? 'production' : 'done'}">
+            data-quiz-state="${i >= 0 ? 'production' : 'done'}"
+            data-is-terminal="${n.holes.length <= 0}"
+            data-is-trivial-hole="${n.holes.length === 1 && n.holes[0].start === 0 && n.holes[0].end === n.code.length}">
         <div class="production">
           <select onchange="checkProduction(event, '${n.production}')">
             <option selected="true">Select production</option>
@@ -219,15 +221,21 @@ function checkProduction(e: Event, p: string) {
     // answer correct
     const span = getParentTagRecursive(sel, 'span');
     if (span) {
-      if (span.getElementsByClassName('hole').length > 0) {
-        // move on to selecting holes
-        span.setAttribute('data-quiz-state', 'hole-marking');
-      } else {
+      if (span.getAttribute('data-is-terminal') === 'true') {
         // we're done
         span.setAttribute('data-quiz-state', 'done');
+      } else if (span.getAttribute('data-is-trivial-hole') === 'true') {
+        // we're done
+        span.setAttribute('data-quiz-state', 'done');
+        // but we also need to expand the child
+        navigateDOM([span],'+/li',true).map(c =>
+          c.setAttribute('data-collapsed', 'false'));
+      } else {
+        // move on to selecting holes
+        span.setAttribute('data-quiz-state', 'hole-marking');
       }
 
-      // expand next sibling
+      // expand next sibling (if present)
       navigateDOM([span], '../+').map(l =>
         l.setAttribute('data-collapsed', 'false'));
 
