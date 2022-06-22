@@ -13,7 +13,7 @@
 (require syntax/stx)
 (provide bsltree)
 
-
+(define implemented-language (or/c "en" "de"))
 (define value (or/c boolean? string? number? '()))
 (define name (or/c symbol?))
 (struct/contract bsl-string-container (
@@ -33,11 +33,12 @@
 )
 ; HTML
 (define
-  (bsl-tag-wrapper quiz)
+  (bsl-tag-wrapper quiz lang)
   (style #f (list
     (alt-tag "bsltree")
     (js-addition "bsl_tools.js")
-    (attributes (list (cons 'quiz (if quiz "true" "false"))))
+    (attributes (list (cons 'quiz (if quiz "true" "false"))
+                      (cons 'lang lang)))
   ))
 )
 
@@ -68,14 +69,16 @@
 
 ; render bsl-string
 (define
-  (bsltree stx #:quiz [quiz #f])
+  (bsltree stx #:quiz [quiz #f] #:lang [lang "en"])
   (cond
   [(not (or (syntax? stx) (value? stx)))
    (raise-argument-error 'bsltree "BSL-Tree only accepts Syntax-Expressions or Values" stx)]
   [(not (boolean? quiz))
-   (raise-argument-error 'quiz "BSL-Tree quiz toggle has to be a boolean!" stx)]
+   (raise-argument-error 'quiz "BSL-Tree #:quiz toggle has to be a boolean!" quiz)]
+  [(not (implemented-language lang))
+   (raise-argument-error 'lang "BSL-Tree #:lang needs to be an implemented language, currently either 'en' or 'de'" lang)]
   [(cond-block
-      [html (paragraph (bsl-tag-wrapper quiz)
+      [html (paragraph (bsl-tag-wrapper quiz lang)
       (strlist-or-str->str
         (synlst-or-val->strlist-or-str stx))
       )]
