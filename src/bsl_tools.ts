@@ -39,7 +39,7 @@ function processStepper() {
       const program : BSL_AST.program = parse(el.innerHTML);
       SI.parseStepper(program, el as HTMLElement);
     } catch(e:any) {
-      renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
+
     }
   });
 }

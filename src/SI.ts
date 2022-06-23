@@ -11,34 +11,36 @@ export function parseStepper(program:BSL_AST.program, el: HTMLElement):void{
         root: el, 
         originExpr: expr, 
         stepperTree: [],
-        currentStep: 0
     } as SI_STRUCT.Stepper;
-    const stepper = calculateAllSteps(expr, emptyStepper);
+    const stepper = calculateAllSteps(expr, emptyStepper, 0);
     console.log("stepper", stepper);
     el.innerHTML = renderStepper(stepper);
+    const prevButton = el.querySelector("#prevButton") as HTMLButtonElement;
+    const nextButton = el.querySelector("#nextButton") as HTMLButtonElement;
+    prevButton.addEventListener("click", buttonClick);
+    nextButton.addEventListener("click", buttonClick);
 }
 // calculateAllSteps
 // Literal | Expression, Stepper => Stepper
-export function calculateAllSteps(litOrExpr: BSL_AST.Literal | BSL_AST.expr, stepper: SI_STRUCT.Stepper):SI_STRUCT.Stepper{
+export function calculateAllSteps(litOrExpr: BSL_AST.Literal | BSL_AST.expr, stepper: SI_STRUCT.Stepper, currentStep: number):SI_STRUCT.Stepper{
     if(BSL_AST.isLiteral(litOrExpr)){
         return stepper;
     }else{
-        const stepResult = calculateStep(litOrExpr);
+        const stepResult = calculateStep(litOrExpr, currentStep);
         const newExpr = BSL_AST.isLiteral(stepResult) ? stepResult as BSL_AST.Literal : stepResult.plugResult.expr as BSL_AST.expr;
         const newStepper = {
             type: SI_STRUCT.Production.Stepper,
             root: stepper.root,
             originExpr: stepper.originExpr,
             stepperTree: [...stepper.stepperTree, stepResult],
-            currentStep: stepper.currentStep
         } as SI_STRUCT.Stepper;
-        return calculateAllSteps(newExpr, newStepper);
+        return calculateAllSteps(newExpr, newStepper, currentStep + 1);
     }
     
 }
 // calculateStep
 // Expression => StepResult
-export function calculateStep(expr: BSL_AST.expr):SI_STRUCT.StepResult | BSL_AST.Literal{
+export function calculateStep(expr: BSL_AST.expr, currentStep: number):SI_STRUCT.StepResult | BSL_AST.Literal{
     const splitExpr = split(expr) as SI_STRUCT.SplitResult;
     if(SI_STRUCT.isSplit(splitExpr)){
         const stepExpr = step(splitExpr.redex) as SI_STRUCT.OneRule;
@@ -46,7 +48,8 @@ export function calculateStep(expr: BSL_AST.expr):SI_STRUCT.StepResult | BSL_AST
         const stepResult = {
             type: SI_STRUCT.Production.StepResult,
             splitResult: splitExpr,
-            plugResult: plugExpr
+            plugResult: plugExpr,
+            currentStep: currentStep
         } as SI_STRUCT.StepResult;
         return stepResult;
     }else{
@@ -114,6 +117,8 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | undefined{
         r.args.forEach(el => {
             if (BSL_AST.isLiteral(el)){
                 n += el.value as number;
+            }else if (BSL_AST.isCall(el)){
+                
             }else{
                 console.error("error: argument is not a literal: " + el);
                 return undefined;
@@ -178,38 +183,50 @@ export function plug(pRule: SI_STRUCT.OneRule, c: SI_STRUCT.Context): SI_STRUCT.
 function renderStepper(stepper: SI_STRUCT.Stepper): string{
     const stepperTree = stepper.stepperTree;
     const originExpr = stepper.originExpr;
-    const currentStep = stepper.currentStep;
-    const programExpr = stepperTree.slice(0, currentStep).map(stepResult => stepResult.plugResult.expr); //renderExprs
-    const splitResult = stepperTree[currentStep].splitResult; //renderSplitResult
-    const rule = stepperTree[currentStep].plugResult.rule; //renderRule
-    const pluggedExpr = stepperTree[currentStep].plugResult.expr;
+
     const str = 
     `<stepper>
         <div class="program-wrapper">
             Original Expression:
             <pre><code>${renderExpr(originExpr)}</code></pre>
         </div>
-        <div class="eval-wrapper">
-            <div class="program-overview">
-                <ul>
-                ${programExpr.map(expr => renderExpr(expr)).join("\n")}
-                </ul>
-            </div>
-            <div class="split-rule-plug">
-                <div class="split">
-                    Split:
-                    ${renderSplitResult(splitResult)}
-                </div>
-                <div class="rule">
-                    ${SI_STRUCT.isOneRule(rule) ? renderOneRule(rule) : renderProgStep(rule)}
-                </div>
-                <div class="plug">
-                    Plug Result: <pre><code>${renderExpr(pluggedExpr)}</code></pre>
-                </div>
-            </div>
+        <div class="step-result-wrapper">
+        ${stepperTree.map(el => renderStepResult(stepperTree, el as SI_STRUCT.StepResult)).join("")}
+        </div>
+        <div class="buttons">
+            <button class="step-button" id="prevButton" style="visibility: hidden">Previous Step</button>
+            <button class="step-button" id="nextButton">Next Step</button>
         </div>
     </stepper>`;
     return str;
+}
+function renderStepResult(stepperTree: SI_STRUCT.StepResult[], stepResult: SI_STRUCT.StepResult): string{
+    const currentStep = stepResult.currentStep;
+    const programExpr = stepperTree.slice(0, currentStep).map(stepResult => stepResult.plugResult.expr); //renderExprs
+    const splitResult = stepResult.splitResult; //renderSplitResult
+    const rule = stepResult.plugResult.rule; //renderRule
+    const pluggedExpr = stepResult.plugResult.expr;
+    const str = `<div class="step-result" currentStep="${currentStep}" visible=${(currentStep == 0) ? "true" : "false"}>
+                    <div class="program-overview">
+                        Program Overview:
+                        <ul>
+                        ${programExpr.map(expr => renderExpr(expr)).join("\n")}
+                        </ul>
+                    </div>
+                    <div class="split-rule-plug">
+                        <div class="split">
+                            Split:
+                            ${renderSplitResult(splitResult)}
+                        </div>
+                        <div class="rule">
+                            ${SI_STRUCT.isOneRule(rule) ? renderOneRule(rule) : renderProgStep(rule)}
+                        </div>
+                        <div class="plug">
+                            Plug Result: <pre><code>${renderExpr(pluggedExpr)}</code></pre>
+                        </div>
+                    </div>
+                </div>`;
+        return str;
 }
 
 function renderExpr(expr: BSL_AST.expr):string{
@@ -273,38 +290,48 @@ function renderProgStep(rule: SI_STRUCT.ProgStepRule): string{
     const type = rule.type;
     const context = rule.context;
     const redexRule = rule.redexRule;
-    const str = `<p>${type} with ${redexRule.type}:</p>
+    const str = `${type} with ${redexRule.type}:
                  ${renderContext(context)} 
                  ${renderOneRule(redexRule)} `; 
     return str;
 }
 
-/* //render original expression
-const div = document.createElement("div");
-div.className = "origin";
-div.innerHTML = el.innerHTML;
-el.innerHTML = "";
-el.appendChild(div);
-
-// render splitted expression
-const split = document.createElement("div");
-split.className = "split";
-el.appendChild(split);
-
-// render context
-const context = document.createElement("div");
-context.className = "context";
-split.appendChild(context);
-
-// render redex
-const redex = document.createElement("div");
-redex.className = "redex";
-split.appendChild(redex);
-
-//render plugged expression
-const plug = document.createElement("div");
-plug.className = "plug";
-el.appendChild(plug); */
-
-
 // ####### EVENT HANDLER FUNCTIONS #######
+
+function buttonClick(e: Event): void{
+    const button = e.target as HTMLButtonElement;
+    const id = button.id;
+    if(id == "prevButton"){
+        const wrapper = button.parentElement?.parentElement?.getElementsByClassName("step-result-wrapper")[0];
+        const visibleResult = wrapper?.querySelector(".step-result[visible=true]") as HTMLDivElement;
+        const prevVisibleResult = visibleResult?.previousElementSibling as HTMLDivElement;
+        // change Visibility
+        visibleResult?.setAttribute("visible", "false");
+        prevVisibleResult?.setAttribute("visible", "true");
+        // show next button if hidden
+        const nextButton = button.parentElement?.querySelector("#nextButton") as HTMLButtonElement;
+        if(nextButton.style.visibility == "hidden"){
+            nextButton.setAttribute("style","visibility: visible");
+        }
+        if (prevVisibleResult?.getAttribute("currentStep") == "0"){
+            button.setAttribute("style","visibility: hidden");
+        }
+    }
+    else if(id == "nextButton"){
+        const wrapper = button.parentElement?.parentElement?.getElementsByClassName("step-result-wrapper")[0];
+        const visibleResult = wrapper?.querySelector(".step-result[visible=true]") as HTMLDivElement;
+        const nextVisibleResult = visibleResult?.nextElementSibling as HTMLDivElement;
+        const max = wrapper?.getElementsByClassName("step-result").length as number;
+        // change Visibility
+        visibleResult?.setAttribute("visible", "false");
+        nextVisibleResult?.setAttribute("visible", "true");
+        // show prev button if hidden
+        const prevButton = button.parentElement?.querySelector("#prevButton") as HTMLButtonElement;
+        if(prevButton.style.visibility == "hidden"){
+            prevButton.setAttribute("style","visibility: visible");
+        }
+        if (nextVisibleResult?.getAttribute("currentStep") == (max - 1).toString()){
+            button.setAttribute("style","visibility: hidden");
+        }
+    }
+}

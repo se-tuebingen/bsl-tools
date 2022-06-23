@@ -17,13 +17,13 @@ export interface Stepper{
     root: HTMLElement;
     originExpr: BSL_AST.expr;
     stepperTree: StepResult[];
-    currentStep: number;
 }
 
 export interface StepResult{
     type: Production.StepResult;
     splitResult: SplitResult;
     plugResult: PlugResult;
+    currentStep: number;
 }
 
 export type SplitResult = Split | BSL_AST.Literal;
