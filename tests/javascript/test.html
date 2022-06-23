@@ -32,6 +32,20 @@
     (define-struct name (firstName lastName))
   </bsltree>
 
+  <h2>Script versions of collapsible AST</h2>
+  <bsltree nodestyle="script">
+    (define (f x y) (+ x y))
+  </bsltree>
+  <bsltree nodestyle="script">
+    (cond [(= x 3) "isThree"] [#false '()])
+  </bsltree>
+  <bsltree nodestyle="script">
+    (define x 42)
+  </bsltree>
+  <bsltree nodestyle="script">
+    (define-struct name (firstName lastName))
+  </bsltree>
+
   <h2>AST as a quiz</h2>
   <bsltree quiz="true">
     (define (f x y) (+ x y))

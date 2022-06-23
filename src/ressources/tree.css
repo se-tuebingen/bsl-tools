@@ -78,6 +78,9 @@ https://www.cssscript.com/clean-tree-diagram/
   margin-right: -1.5em;
   background-color: rgba(255,255,255,0.7);
 }
+bsltree[nodestyle="script"] .tree .name {
+  display: none;
+}
 .tree .terminal-symbol {
   border-width: .2em;
   border-style: double;
@@ -125,6 +128,9 @@ https://www.cssscript.com/clean-tree-diagram/
 /* ####### collapse nodes ######## */
 /* click on span to hide/show */
 .tree .hole:hover {
+  cursor: pointer;
+}
+.tree .clickable:hover {
   cursor: pointer;
 }
 

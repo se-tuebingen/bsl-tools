@@ -18,7 +18,8 @@ function processBslTrees() {
       const program : BSL_AST.program = parse(BSL_Tree.dirtify(el.innerHTML));
       const quiz = el.getAttribute('quiz') === 'true' ? true : false;
       const lang = (el.getAttribute('lang') ? el.getAttribute('lang') : undefined) as string | undefined;
-      BSL_Tree.treeProgram(program, el as HTMLElement, quiz, lang);
+      const style = (el.getAttribute('nodestyle') ? el.getAttribute('nodestyle') : undefined) as string | undefined;
+      BSL_Tree.treeProgram(program, el as HTMLElement, quiz, lang, style);
     } catch(e:any) {
       renderError(el as HTMLElement, `${e.location.start.line}:${e.location.start.column} ${e}`);
     }

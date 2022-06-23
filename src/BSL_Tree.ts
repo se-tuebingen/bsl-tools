@@ -7,15 +7,22 @@ import {navigateDOM, getParentTagRecursive, getParentClassRecursive} from "./DOM
 
 // #### main api #####
 // add forest of program expressions to html element
-export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=false, lang='en'){
-  if (!implementedLanguages.includes(lang)) {
+export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=false, lang='en', style='program'){
+  if (!implementedLanguages.includes(lang as implementedLanguage)) {
     console.error(`
       Selected language "${lang}" is not implemented, defaulting to "en".
       Available language codes: ${implementedLanguages.join(', ')}
     `);
     lang = 'en';
   }
-  target.innerHTML = renderProgram(program, quiz, lang as implementedLanguage);
+  if (!nodeStyles.includes(style as nodeStyle)) {
+    console.error(`
+      Selected style "${style}" is not implemented, defaulting to "program".
+      Available styles: ${nodeStyles.join(', ')}
+    `);
+    style = 'program';
+  }
+  target.innerHTML = renderProgram(program, quiz, lang as implementedLanguage, style as nodeStyle);
   if (quiz) {
     // show first quiz node
     navigateDOM([target],'ul/li/ul/li').map(c =>
@@ -27,7 +34,7 @@ export function treeProgram(program: BSL_AST.program, target: HTMLElement, quiz=
 
 // ###### internationalization for this module #####
 type implementedLanguage = 'en' | 'de';
-const implementedLanguages = ['en', 'de'];
+const implementedLanguages: implementedLanguage[] = ['en', 'de'];
 
 const dictionary = {
   'en': {
@@ -82,11 +89,11 @@ function adjustConnectors(tree: HTMLElement) {
 // render functions and their helpers
 
 // top level (program)
-function renderProgram(p: BSL_AST.program, quiz: boolean, lang: implementedLanguage):string {
+function renderProgram(p: BSL_AST.program, quiz: boolean, lang: implementedLanguage, style: nodeStyle):string {
   const root = programToNode(p);
   return `
     <ul class="tree ast">
-      ${quiz ? renderQuizNode(root, lang) : renderNode(root)}
+      ${quiz ? renderQuizNode(root, lang, style) : renderNode(root, style)}
     </ul>
   `;
 }
@@ -99,8 +106,12 @@ interface node {
   holes: {start:number, end:number, content:node}[];
 }
 
+// render options
+type nodeStyle = 'script' | 'program';
+const nodeStyles: nodeStyle[] = ['script', 'program'];
+
 // regular node/tree
-function renderNode(n: node, i:number=-1):string {
+function renderNode(n: node, style: nodeStyle, i:number=-1):string {
   // slice text into holes
   const spans = getSpans(n);
   return `
@@ -110,13 +121,13 @@ function renderNode(n: node, i:number=-1):string {
 
         <div class="name">${sanitize(n.production)}</div>
 
-        ${renderCode(spans, n)}
+        ${renderCode(spans, n, style)}
 
       </span>
       ${n.holes.length > 0 ?
         `<ul>${
           n.holes.map((h, idx) =>
-            renderNode(h.content, idx))
+            renderNode(h.content, style, idx))
           .join('')
         }</ul>`
         : ''
@@ -129,6 +140,7 @@ interface span {
   pos: boolean | number;
   start: number;
   end: number;
+  content?: node;
 }
 function getSpans(n: node):span[] {
   // slice text into holes
@@ -148,16 +160,33 @@ function getSpans(n: node):span[] {
 }
 
 // code from spans
-function renderCode(spans: span[], n: node):string {
-  return `
-  <div class="code">${
-    spans.map(s =>
-      `<span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
-             ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}
-             >${n.code.slice(s.start, s.end)}</span>`)
-    .join('')}
-  </div>
-  `;
+function renderCode(spans: span[], n: node, style: nodeStyle):string {
+  switch(style) {
+    case 'script':
+      return `
+        <div class="code">${
+          spans.map(s =>
+            `<span class="char ${s.pos ? `hole clickable hole-${s.pos}` : ''}"
+                   ${s.pos ? `onclick="toggleChildAndHole(event,${s.pos})"` : ''}
+                   ${s.content ? `
+                     data-production="${sanitize(s.content.production)}"
+                     data-code="${sanitize(n.code.slice(s.start, s.end))}"
+                     ` : ''}
+                   >${sanitize(n.code.slice(s.start, s.end))}</span>`)
+          .join('')}
+        </div>`;
+
+    case 'program':
+    default:
+      return `
+        <div class="code">${
+          spans.map(s =>
+            `<span class="char ${s.pos ? `hole hole-${s.pos}` : ''}"
+                   ${s.pos ? `onclick="toggleChild(event,${s.pos})"` : ''}
+                   >${n.code.slice(s.start, s.end)}</span>`)
+          .join('')}
+        </div>`;
+  }
 }
 function toggleChild(e: Event,i:number) {
   const hole = e.target as HTMLElement;
@@ -174,6 +203,20 @@ function toggleChild(e: Event,i:number) {
   adjustConnectors(tree);
 }
 (window as any).toggleChild = toggleChild;
+
+function toggleChildAndHole(e: Event,i:number) {
+  const hole = e.target as HTMLElement;
+  if(hole.classList.contains('hole')) {
+    hole.classList.remove('hole');
+    console.log(hole.getAttribute('data-production'));
+    hole.innerHTML = sanitize(hole.getAttribute('data-production') as string);
+  } else {
+    hole.classList.add('hole');
+    hole.innerHTML = sanitize(hole.getAttribute('data-code') as string);
+  }
+  toggleChild(e, i);
+}
+(window as any).toggleChildAndHole = toggleChildAndHole;
 
 // preventing problems with brackets
 function sanitize(s: string):string {
@@ -198,7 +241,7 @@ const productions = [
   '<name>',
   '<v>'
 ];
-function renderQuizNode(n: node, lang: implementedLanguage, i:number=-1):string {
+function renderQuizNode(n: node, lang: implementedLanguage, style: nodeStyle, i:number=-1):string {
   // slice text into holes
   const spans = getSpans(n);
   return `
@@ -216,12 +259,12 @@ function renderQuizNode(n: node, lang: implementedLanguage, i:number=-1):string 
         <div class="name">
           ${sanitize(n.production)}
         </div>
-        ${renderCode(spans, n)}
+        ${renderCode(spans, n, style)}
       </span>
       ${n.holes.length > 0 ?
         `<ul>${
           n.holes.map((h, idx) =>
-            renderQuizNode(h.content, lang, idx))
+            renderQuizNode(h.content, lang, style, idx))
             .join('')
          }</ul>`
         : ''
