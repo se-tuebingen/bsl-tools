@@ -62,13 +62,13 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
     if(BSL_AST.isCall(expr)){
         const name = expr.name;
         const args = expr.args;
-        const hole = {type: "Hole", index: 0};
-        console.log("split", expr);
+        const hole = {type: "Hole", index: 0} as SI_STRUCT.Hole; 
+        // multiple level call      
         for (let i = 0; i < args.length; i++){
             if (BSL_AST.isCall(args[i])){
                 const call = args[i] as BSL_AST.Call;
                 hole.index = i;
-                return {
+                const splitResult ={
                     type: SI_STRUCT.Production.Split,
                     redex: {
                         type: SI_STRUCT.Production.Redex,
@@ -82,8 +82,12 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
                     args: [...args.slice(0, i), hole, ...args.slice(i + 1)] as SI_STRUCT.exprOrHole[]
                     }
                 } 
+                //console.log("searchRedex", searchRedex(expr, expr, hole));
+                console.log("splitResult", splitResult);
+                return splitResult as SI_STRUCT.SplitResult;
             }   
         }
+        // one level call
         return {
             type: SI_STRUCT.Production.Split,
             redex: {
@@ -104,9 +108,68 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
         return undefined;
     }
 }
+/* 
+function searchRedex(originExpr:BSL_AST.expr, expr:BSL_AST.expr, hole: SI_STRUCT.Hole): SI_STRUCT.SplitResult | undefined {
+    if(BSL_AST.isCall(expr)){
+        const name = expr.name;
+        const args = expr.args;
+        const isCallArr = args.map(arg => (BSL_AST.isCall(arg) ? true : false));
+        const anyCall = isCallArr.reduce((a, b) => a || b, false);
+        console.log("anyCall",anyCall);
+        //multiple level call
+        if(anyCall){
+            //where was the first call
+            const firstCallIndex = isCallArr.indexOf(true);
+            hole.index.push(firstCallIndex);
+            console.log("hole", hole);
+            //recursive call
+            searchRedex(originExpr, args[firstCallIndex] as BSL_AST.expr, hole);
+        //single level call
+        }else{
+            const split ={
+                type: SI_STRUCT.Production.Split,
+                redex: {
+                    type: SI_STRUCT.Production.Redex,
+                    name: name,
+                    args: args
+            },
+            context: {
+                type: SI_STRUCT.Production.Context,
+                name: (originExpr as BSL_AST.Call).name,
+                //concat hole with args
+                args: setHolePosition(hole, originExpr as BSL_AST.Call, (originExpr as BSL_AST.Call).args)
+                }
+            } as SI_STRUCT.Split;
+            console.log("split", split);
+            return split;
+        }
+    }else if(BSL_AST.isLiteral(expr)){
+        return expr;
+    }
+/*             return {
+                type: SI_STRUCT.Production.Split,
+                redex: {
+                    type: SI_STRUCT.Production.Redex,
+                    name: name,
+                    args: args
+                },
+                context: {
+                    type: SI_STRUCT.Production.Context,
+                    name: null,
+                    args: [hole] as SI_STRUCT.exprOrHole[]
+                }
+            } as SI_STRUCT.SplitResult; 
+}
+ */
+/* function setHolePosition(hole: SI_STRUCT.Hole, originExpr: BSL_AST.Call, argList: BSL_AST.expr[]): SI_STRUCT.exprOrHole[]{
+    // find hole in expr
+    const newExpr = argList[hole.index.shift() as number]
+    if (hole.index.length > 0){
 
-
-
+        return setHolePosition(hole, originExpr, ;
+    }else{
+    }
+} */
 
 // step
 
