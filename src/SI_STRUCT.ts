@@ -18,7 +18,7 @@ export interface Stepper{
     originExpr: BSL_AST.expr;
     stepperTree: StepResult[];
 }
-
+// StepResult is type = StepResult | Error
 export interface StepResult{
     type: Production.StepResult;
     splitResult: SplitResult;
@@ -39,13 +39,17 @@ export interface PlugResult{
     rule: ProgStepRule | OneRule;
     expr: BSL_AST.expr;
 }
-
+// Redex ist Summentyp: CallRedex | CondRedex, etc.
 export interface Redex{
     type: Production.Redex;
     name: BSL_AST.Name;
     args: BSL_AST.expr[];
 }
 
+// App value[] Context expr[]
+// interface App {op: string; values: value[]; ctx: Context; args: expr[] }
+// type Context = AppContext | Hole
+// interface AppContext { operator: String; values: value[]; ctx: Context; args: expr[] }
 export interface Context{
     type: Production.Context;
     name: BSL_AST.Name | null;

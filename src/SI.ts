@@ -3,7 +3,7 @@ import * as SI_STRUCT from "./SI_STRUCT";
 
 
 // ParseStepper
-export function parseStepper(program:BSL_AST.program, el: HTMLElement):void{
+export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
     const expr =  program[0] as BSL_AST.expr;
     console.log("expression", expr);
     const emptyStepper = {
@@ -22,11 +22,11 @@ export function parseStepper(program:BSL_AST.program, el: HTMLElement):void{
 }
 // calculateAllSteps
 // Literal | Expression, Stepper => Stepper
-export function calculateAllSteps(litOrExpr: BSL_AST.Literal | BSL_AST.expr, stepper: SI_STRUCT.Stepper, currentStep: number):SI_STRUCT.Stepper{
-    if(BSL_AST.isLiteral(litOrExpr)){
+export function calculateAllSteps(expr: BSL_AST.expr, stepper: SI_STRUCT.Stepper, currentStep: number):SI_STRUCT.Stepper{
+    if(BSL_AST.isLiteral(expr)){
         return stepper;
     }else{
-        const stepResult = calculateStep(litOrExpr, currentStep);
+        const stepResult = calculateStep(expr, currentStep);
         const newExpr = BSL_AST.isLiteral(stepResult) ? stepResult as BSL_AST.Literal : stepResult.plugResult.expr as BSL_AST.expr;
         const newStepper = {
             type: SI_STRUCT.Production.Stepper,
@@ -39,11 +39,18 @@ export function calculateAllSteps(litOrExpr: BSL_AST.Literal | BSL_AST.expr, ste
     
 }
 // calculateStep
-// Expression => StepResult
+// Expression => OneRule | KongRule | Done | Error
+
 export function calculateStep(expr: BSL_AST.expr, currentStep: number):SI_STRUCT.StepResult | BSL_AST.Literal{
     const splitExpr = split(expr) as SI_STRUCT.SplitResult;
     if(SI_STRUCT.isSplit(splitExpr)){
         const stepExpr = step(splitExpr.redex) as SI_STRUCT.OneRule;
+                // if context is Hole, 
+        // no KONG RULE => no plug
+        // return StepExpr
+        // else 
+        // Kong Rule => plug 
+        // return (context, stepExpr, PlugExpr) => KongExpr
         const plugExpr = plug(stepExpr, splitExpr.context) as SI_STRUCT.PlugResult;
         const stepResult = {
             type: SI_STRUCT.Production.StepResult,
@@ -161,16 +168,20 @@ function searchRedex(originExpr:BSL_AST.expr, expr:BSL_AST.expr, hole: SI_STRUCT
             } as SI_STRUCT.SplitResult; 
 }
  */
-/* function setHolePosition(hole: SI_STRUCT.Hole, originExpr: BSL_AST.Call, argList: BSL_AST.expr[]): SI_STRUCT.exprOrHole[]{
+/*  function setHolePosition(hole: SI_STRUCT.Hole, originExpr: BSL_AST.Call, argList: BSL_AST.expr[]): SI_STRUCT.exprOrHole[]{
+    for(let i=0; i<argList.length; i++){
+        let expr = argList[hole.index[i]];
+        let argList = (expr as BSL_AST.Call).args;
+    }
+
+    
     // find hole in expr
     const newExpr = argList[hole.index.shift() as number]
-    if (hole.index.length > 0){
+    hole.index.length > 0;
 
         return setHolePosition(hole, originExpr, ;
-    }else{
     }
-} */
-
+ */
 // step
 
 export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | undefined{
@@ -202,11 +213,11 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | undefined{
 }
 
 // plug
-
+// plug(expr: Expr, c: Context): PlugResult
 export function plug(pRule: SI_STRUCT.OneRule, c: SI_STRUCT.Context): SI_STRUCT.PlugResult | undefined{
     const args = c.args;
     const name = c.name;
-    const r_val = pRule.literal;
+    const r_val = pRule.result;
     for(let i=0; i < args.length; i++){
         if(name == null){
             return{
@@ -361,6 +372,7 @@ function renderProgStep(rule: SI_STRUCT.ProgStepRule): string{
 
 // ####### EVENT HANDLER FUNCTIONS #######
 
+//previous step und nextstep function (nicht zusammenfassen in einer function)
 function buttonClick(e: Event): void{
     const button = e.target as HTMLButtonElement;
     const id = button.id;
