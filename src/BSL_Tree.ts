@@ -159,7 +159,7 @@ function renderCode(spans: span[], n: node):string {
   </div>
   `;
 }
-function toggleChild(e: Event,i:number) {
+(window as any).toggleChild = (e: Event,i:number) => {
   const hole = e.target as HTMLElement;
   const li = getParentTagRecursive(hole, 'li');
   const tree = getParentTagRecursive(hole, 'bsltree');
@@ -173,7 +173,6 @@ function toggleChild(e: Event,i:number) {
   });
   adjustConnectors(tree);
 }
-(window as any).toggleChild = toggleChild;
 
 // preventing problems with brackets
 function sanitize(s: string):string {
@@ -244,7 +243,7 @@ function renderProductionQuiz(n: node, lang: implementedLanguage):string {
   `;
 }
 
-function checkProduction(e: Event, p: string) {
+(window as any).checkProduction = (e: Event, p: string) => {
   const sel = e.target as HTMLSelectElement;
   if (sel.value === p) {
     // answer correct
@@ -286,13 +285,12 @@ function checkProduction(e: Event, p: string) {
     }
   }
 }
-(window as any).checkProduction = checkProduction;
 
 // second part of the quiz
 function renderHoleQuiz(n: node, lang: implementedLanguage):string {
   return `
   <div class="hole-marking"
-       data-holes="${JSON.stringify(n.holes.map(h => [h.start,h.end, false]))}">
+       data-holes="${btoa(JSON.stringify(n.holes.map(h => [h.start,h.end, false])))}">
     <div class="textarea-container">
       <div class="marker-container">
         ${n.code.split('\n')
@@ -305,7 +303,7 @@ function renderHoleQuiz(n: node, lang: implementedLanguage):string {
                 spellcheck="false"
                 cols="${n.code.split('\n').map(l => l.length).reduce((x,y) => x > y ? x : y)}"
                 rows="${n.code.split('\n').length}"
-                readonly="true">${n.code}</textarea>
+                oninput="stopInput(event, '${btoa(n.code)}')">${n.code}</textarea>
     </div><br>
     <button onclick="checkSelection(event)">
       ${dictionary[lang]['mark selected text as hole']}
@@ -313,7 +311,10 @@ function renderHoleQuiz(n: node, lang: implementedLanguage):string {
   </div>
   `;
 }
-function checkSelection(e: Event) {
+(window as any).stopInput = (e: Event, oldVal: string) => {
+  (e.target as HTMLTextAreaElement).value = atob(oldVal);
+}
+(window as any).checkSelection = (e: Event) => {
   // get context
   const btn = e.target as HTMLElement;
   const div = getParentClassRecursive(btn, 'hole-marking');
@@ -322,7 +323,7 @@ function checkSelection(e: Event) {
     return;
   }
   // get holes to find
-  const holes = JSON.parse(div.getAttribute('data-holes') as string) as [number,number,boolean][];
+  const holes = JSON.parse(atob(div.getAttribute('data-holes') as string)) as [number,number,boolean][];
 
   // get current selection
   const textarea = div.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
@@ -342,7 +343,7 @@ function checkSelection(e: Event) {
 
   if (found >= 0) {
     // save changed state
-    div.setAttribute('data-holes', JSON.stringify(holes));
+    div.setAttribute('data-holes', btoa(JSON.stringify(holes)));
     // mark hole as correct
     navigateDOM([div], '.textarea-container/.marker-container/.marker', true)
       .slice(start, end)
@@ -372,7 +373,6 @@ function checkSelection(e: Event) {
     }
   }
 }
-(window as any).checkSelection = checkSelection;
 
 // ###### transform AST into helper structure
 function programToNode(p: BSL_AST.program): node {
