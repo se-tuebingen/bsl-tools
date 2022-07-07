@@ -6,7 +6,7 @@ export enum Production{
     Split = "Split",
     PlugResult = "PlugResult",
     Redex = "Redex",
-    Context = "Context",
+    AppContext = "AppContext",
     Hole = "Hole",
     Prim = "Prim",
     Kong = "Kong"
@@ -40,7 +40,9 @@ export interface PlugResult{
     expr: BSL_AST.expr;
 }
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
-export interface Redex{
+export type Redex = CallRedex;
+
+export interface CallRedex{
     type: Production.Redex;
     name: BSL_AST.Name;
     args: BSL_AST.expr[];
@@ -50,16 +52,28 @@ export interface Redex{
 // interface App {op: string; values: value[]; ctx: Context; args: expr[] }
 // type Context = AppContext | Hole
 // interface AppContext { operator: String; values: value[]; ctx: Context; args: expr[] }
-export interface Context{
+
+
+type Context = AppContext | Hole;
+
+export interface AppContext{
+    type: Production.AppContext;
+    op: string;
+    values: BSL_AST.Literal[];
+    ctx: Context;
+    args: BSL_AST.expr[];
+}
+
+/* export interface Context{
     type: Production.Context;
     name: BSL_AST.Name | null;
     args: exprOrHole[];
 
-}
+} */
 
 export interface Hole{
     type: Production.Hole;
-    index: number //number[];
+    //index: number //number[];
 }
 
 export type exprOrHole = BSL_AST.expr | Hole;

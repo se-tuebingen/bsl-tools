@@ -17,8 +17,8 @@ export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
     el.innerHTML = renderStepper(stepper);
     const prevButton = el.querySelector("#prevButton") as HTMLButtonElement;
     const nextButton = el.querySelector("#nextButton") as HTMLButtonElement;
-    prevButton.addEventListener("click", buttonClick);
-    nextButton.addEventListener("click", buttonClick);
+    prevButton.addEventListener("click", previousStep);
+    nextButton.addEventListener("click", nextStep);
 }
 // calculateAllSteps
 // Literal | Expression, Stepper => Stepper
@@ -65,16 +65,56 @@ export function calculateStep(expr: BSL_AST.expr, currentStep: number):SI_STRUCT
 }
 
 //split
-export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
+// Expression => SplitResult | Error
+export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
     if(BSL_AST.isCall(expr)){
-        const name = expr.name;
+        const name = expr.name.symbol;
         const args = expr.args;
-        const hole = {type: "Hole", index: 0} as SI_STRUCT.Hole; 
+        const hole = {type: "Hole"/*, index: 0*/} as SI_STRUCT.Hole; 
+        // three separator variables
+        const exprRight = false;
+        let count = 0;
+        
+        const valueLst = [] as BSL_AST.Literal[];
+        const exprLst = [] as BSL_AST.expr[];
+        // get all values from the left side
+        for (let i = 0; i < args.length; i++) {
+            let arg = args[i];
+            if(BSL_AST.isLiteral(arg)){
+                valueLst.push(arg);
+            }else{
+                count = i;
+                break;
+            }
+        }
+        const contextExpr = args[count];
+        //TODO
+        //get expr[]
+        for (let i = count + 1; i < args.length; i++) {
+            let arg = args[i];
+            if(BSL_AST.isExpr(arg)){
+                exprLst.push(arg);
+            }else{
+                return Error("error: split: expr is not an expr");
+            }
+        }
+        // get the context or recursive call within new expression
+        // 
+        const nextContext = (split(contextExpr) as SI_STRUCT.Split).context;
+        const context = {
+            type: "AppContext",
+            op: name,
+            values: valueLst,
+            ctx: nextContext as SI_STRUCT.AppContext,
+            args: exprLst
+        } as SI_STRUCT.AppContext;
+
+        //recursive call or return
         // multiple level call      
-        for (let i = 0; i < args.length; i++){
+/*         for (let i = 0; i < args.length; i++){
             if (BSL_AST.isCall(args[i])){
                 const call = args[i] as BSL_AST.Call;
-                hole.index = i;
+                //hole.index = i;
                 const splitResult ={
                     type: SI_STRUCT.Production.Split,
                     redex: {
@@ -107,7 +147,7 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | undefined {
                 name: null,
                 args: [hole] as SI_STRUCT.exprOrHole[]
             }
-        }
+        } */
     }else if (BSL_AST.isLiteral(expr)){
         return expr;
     }else if (BSL_AST.isCond(expr) || BSL_AST.isName(expr) || expr == undefined){
@@ -213,11 +253,11 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | undefined{
 }
 
 // plug
-// plug(expr: Expr, c: Context): PlugResult
+// plug(Redex, c: Context): Expression
 export function plug(pRule: SI_STRUCT.OneRule, c: SI_STRUCT.Context): SI_STRUCT.PlugResult | undefined{
     const args = c.args;
     const name = c.name;
-    const r_val = pRule.result;
+    const r_val = pRule.literal;
     for(let i=0; i < args.length; i++){
         if(name == null){
             return{
@@ -373,40 +413,39 @@ function renderProgStep(rule: SI_STRUCT.ProgStepRule): string{
 // ####### EVENT HANDLER FUNCTIONS #######
 
 //previous step und nextstep function (nicht zusammenfassen in einer function)
-function buttonClick(e: Event): void{
+function previousStep(e:Event){
     const button = e.target as HTMLButtonElement;
-    const id = button.id;
-    if(id == "prevButton"){
-        const wrapper = button.parentElement?.parentElement?.getElementsByClassName("step-result-wrapper")[0];
-        const visibleResult = wrapper?.querySelector(".step-result[visible=true]") as HTMLDivElement;
-        const prevVisibleResult = visibleResult?.previousElementSibling as HTMLDivElement;
-        // change Visibility
-        visibleResult?.setAttribute("visible", "false");
-        prevVisibleResult?.setAttribute("visible", "true");
-        // show next button if hidden
-        const nextButton = button.parentElement?.querySelector("#nextButton") as HTMLButtonElement;
-        if(nextButton.style.visibility == "hidden"){
-            nextButton.setAttribute("style","visibility: visible");
-        }
-        if (prevVisibleResult?.getAttribute("currentStep") == "0"){
-            button.setAttribute("style","visibility: hidden");
-        }
+    const wrapper = button.parentElement?.parentElement?.getElementsByClassName("step-result-wrapper")[0];
+    const visibleResult = wrapper?.querySelector(".step-result[visible=true]") as HTMLDivElement;
+    const prevVisibleResult = visibleResult?.previousElementSibling as HTMLDivElement;
+    // change Visibility
+    visibleResult?.setAttribute("visible", "false");
+    prevVisibleResult?.setAttribute("visible", "true");
+    // show next button if hidden
+    const nextButton = button.parentElement?.querySelector("#nextButton") as HTMLButtonElement;
+    if(nextButton.style.visibility == "hidden"){
+        nextButton.setAttribute("style","visibility: visible");
     }
-    else if(id == "nextButton"){
-        const wrapper = button.parentElement?.parentElement?.getElementsByClassName("step-result-wrapper")[0];
-        const visibleResult = wrapper?.querySelector(".step-result[visible=true]") as HTMLDivElement;
-        const nextVisibleResult = visibleResult?.nextElementSibling as HTMLDivElement;
-        const max = wrapper?.getElementsByClassName("step-result").length as number;
-        // change Visibility
-        visibleResult?.setAttribute("visible", "false");
-        nextVisibleResult?.setAttribute("visible", "true");
-        // show prev button if hidden
-        const prevButton = button.parentElement?.querySelector("#prevButton") as HTMLButtonElement;
-        if(prevButton.style.visibility == "hidden"){
-            prevButton.setAttribute("style","visibility: visible");
-        }
-        if (nextVisibleResult?.getAttribute("currentStep") == (max - 1).toString()){
-            button.setAttribute("style","visibility: hidden");
-        }
+    if (prevVisibleResult?.getAttribute("currentStep") == "0"){
+         button.setAttribute("style","visibility: hidden");
     }
+}
+
+function nextStep(e: Event): void{
+    const button = e.target as HTMLButtonElement;
+    const wrapper = button.parentElement?.parentElement?.getElementsByClassName("step-result-wrapper")[0];
+    const visibleResult = wrapper?.querySelector(".step-result[visible=true]") as HTMLDivElement;
+    const nextVisibleResult = visibleResult?.nextElementSibling as HTMLDivElement;
+    const max = wrapper?.getElementsByClassName("step-result").length as number;
+    // change Visibility
+    visibleResult?.setAttribute("visible", "false");
+    nextVisibleResult?.setAttribute("visible", "true");        
+    // show prev button if hidden
+    const prevButton = button.parentElement?.querySelector("#prevButton") as HTMLButtonElement;
+    if(prevButton.style.visibility == "hidden"){
+        prevButton.setAttribute("style","visibility: visible");
+    }
+    if (nextVisibleResult?.getAttribute("currentStep") == (max - 1).toString()){
+         button.setAttribute("style","visibility: hidden");
+     }
 }
