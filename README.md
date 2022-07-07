@@ -58,8 +58,11 @@ The `lang` attribute is only applicable for Quiz mode, since the regular tree do
 
 ## How to use: Scribble
 
-For the implemented scribble module we use Rackets Syntax Objects, which have a similar structure as S-Expressions.
-The interface in scribble is as follows:
+For the collapsible AST Production Trees, the interface in Scribble is as follows:
+
+- For BSL Expressions, we use Rackets Syntax Objects, which have a similar structure as S-Expressions
+- For other Expressions, you need to provide a JSON object with the correct structure, which will _not_ be checked at compile-time!
+
 
 ```racket
 (require bsl_tools.rkt)
@@ -69,11 +72,31 @@ The interface in scribble is as follows:
   #:lang "de" @; optional keyword argument, default is "en"
   #'((valid bsl syntax))
 ]
+
+@jsontree[
+  #:quiz #t   @; optional keyword argument, default is #f
+  #:lang "de" @; optional keyword argument, default is "en"
+]{
+  {
+    "production": "Subtraction",
+    "code": "(|2| - |3|)",
+    "holes": [
+      { "production": "Number", "code": "2"},
+      { "production": "Number", "code": "3"}
+    ]
+  }
+}
 ```
 
 It is necessary to wrap the BSL-Syntax with a ``#'()``, especially when there are multiple `<def-or-expr>`,
 however literal values, such as ``2`` don't need to be wrapped.
 The Scribble module parses the BSL-Syntax to a string in a ``<bsltree>`` and adds the javascript module as dependency.
+
+The JSON structure for non-BSL-Syntax needs to contain
+
+- a `"production"` name (string)
+- some `"code"` (string) optionally with holes fenced by `|`
+- optionally under `"holes"` a list of children with the same structure
 
 If you set the optional keyword argument `#:quiz` to `#t`, it will add `quiz="true"` which displays the tree in quiz mode.
 
