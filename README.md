@@ -13,6 +13,9 @@ Currently, the only implemented module is the collapsible AST tree view, with an
 optional "quiz" mode that starts the tree collapsed and expands if you select
 the correct production and mark all subexpressions ('holes').
 
+It can be used with BSL code, which will be parsed for you,
+or you can provide your own JSON structure.
+
 The interface is as follows:
 ```html
 <!-- import the bsl_tools script somewhere on the page, ideally in the head -->
@@ -32,8 +35,24 @@ The interface is as follows:
 <bsltree quiz="true" lang="de">
   (valid bsl syntax)
 </bsltree>
+
+<!-- displaying code trees for stuff that is not BSL -->
+<jsontree quiz="true" lang="de"><!-- same options as for bsltree -->
+  {
+    "production": "Subtraction",
+    "code": "(|2| - |3|)",
+    "holes": [
+      { "production": "Number", "code": "2"},
+      { "production": "Number", "code": "3"}
+    ]
+  }
+</jsontree>
 ```
 Anything inside the `<bsltree>` tag is parsed according to the  BSL Core Language as documented below.
+
+If you use `<jsontree>`, you need to provide valid JSON - so use double quotes (`"`)!
+`"code"` always needs to be a string, mark holes (code of children) by putting `|`s
+around it.
 
 The `lang` attribute is only applicable for Quiz mode, since the regular tree does not display any text in natural language. Currently implemented codes are `en`(English, default) and `de`(German).
 

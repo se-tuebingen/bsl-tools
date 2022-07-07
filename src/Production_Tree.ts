@@ -9,7 +9,14 @@ export interface node {
   holes: {start:number, end:number, content:node}[];
 }
 // add production tree to html element
-export function productionTree(root: node, target: HTMLElement, productions: string[], quiz=false, lang='en'){
+export function productionTree(
+  root: node,
+  target: HTMLElement,
+  productions: string[] | undefined,
+  quiz=false,
+  lang='en'){
+  // infer productions for quiz if necessary
+  if(quiz && !productions) productions = extractProductions(root);
   // add css if necessary
   if(!document.getElementById('bsl-tools-tree-style')) {
     const styleNode = document.createElement('style');
@@ -17,6 +24,7 @@ export function productionTree(root: node, target: HTMLElement, productions: str
     styleNode.id = 'bsl-tools-tree-style';
     document.getElementsByTagName('head')[0].appendChild(styleNode);
   }
+  // check language availability
   if (!implementedLanguages.includes(lang)) {
     console.error(`
       Selected language "${lang}" is not implemented, defaulting to "en".
@@ -24,9 +32,10 @@ export function productionTree(root: node, target: HTMLElement, productions: str
     `);
     lang = 'en';
   }
+  // render HTML
   target.innerHTML = `
     <ul class="tree ast">
-      ${quiz ? renderQuizNode(root, lang as implementedLanguage, productions) : renderNode(root)}
+      ${quiz ? renderQuizNode(root, lang as implementedLanguage, productions as string[]) : renderNode(root)}
     </ul>
   `;
   if (quiz) {
@@ -36,6 +45,17 @@ export function productionTree(root: node, target: HTMLElement, productions: str
   }
   // align connectors horizontally
   adjustConnectors(target);
+}
+
+// ### traverse tree to get all occurring productions
+function extractProductions(n: node): string[] {
+  const productions: string[] = [];
+  extractProductionsRecursive(n, productions);
+  return productions;
+}
+function extractProductionsRecursive(n: node, p: string[]) {
+  if(!p.includes(n.production)) p.push(n.production);
+  n.holes.map(h => extractProductionsRecursive(h.content, p));
 }
 
 // ###### internationalization for this module #####
