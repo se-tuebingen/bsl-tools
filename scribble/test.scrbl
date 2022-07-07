@@ -103,3 +103,46 @@ Internationalization currently only applies to quiz mode, since the regular tree
 @bsltree[ #:quiz #t #:lang "de"
 #'((define (f x y) (< x "42")))
 ]
+
+@section{JSON-Tree Tests}
+
+@jsontree[#:quiz #t #:lang "de"]{
+  {
+    "production": "Addition",
+    "code": "|(2 - 3)| + |4|",
+    "holes": [
+      {
+        "production": "Subtraction",
+        "code": "(|2| - |3|)",
+        "holes": [
+          {
+            "production": "Number",
+            "code": "2"
+          },
+          {
+            "production": "Number",
+            "code": "3"
+          }
+        ]
+      },
+      {
+        "production": "Number",
+        "code": "4"
+      }
+    ]
+  }
+}
+
+Errors in JSON will not be caught by Scribble!
+@jsontree[]{
+  {
+    "production": "Subtraction",
+    "code": "(|2| - |3|)",
+    "holes": [
+      {
+        "production": "Number",
+        "code": "2"
+      }
+    ]
+  }
+}

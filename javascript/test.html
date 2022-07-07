@@ -55,6 +55,70 @@
   <h2>Handling of non-valid BSL code</h2>
   <bsltree>nonvalid(code)</bsltree>
 
+  <h2>General AST from JSON</h2>
+  <jsontree quiz="true">
+    {
+      "production": "Addition",
+      "code": "|(2 - 3)| + |4|",
+      "holes": [
+        {
+          "production": "Subtraction",
+          "code": "(|2| - |3|)",
+          "holes": [
+            {
+              "production": "Number",
+              "code": "2"
+            },
+            {
+              "production": "Number",
+              "code": "3"
+            }
+          ]
+        },
+        {
+          "production": "Number",
+          "code": "4"
+        }
+      ]
+    }
+  </jsontree>
+
+  <jsontree>
+    {
+      "production": "Subtraction",
+      "code": "(|2| - |3|)",
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        }
+      ]
+    }
+  </jsontree>
+  <jsontree>
+    {
+      "production": "Subtraction",
+      "code": 2,
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        }
+      ]
+    }
+  </jsontree>
+  <jsontree>
+    {
+      "production": {hello: "there"},
+      "code": "(|2| - |3|)",
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        }
+      ]
+    }
+  </jsontree>
 </body>
 
 </html>
