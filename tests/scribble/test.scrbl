@@ -108,28 +108,49 @@ Internationalization currently only applies to quiz mode, since the regular tree
 
 @jsontree[#:quiz #t #:lang "de"]{
   {
-    "production": "Addition",
-    "code": "|(2 - 3)| + |4|",
-    "holes": [
-      {
-        "production": "Subtraction",
-        "code": "(|2| - |3|)",
-        "holes": [
-          {
-            "production": "Number",
-            "code": "2"
-          },
-          {
-            "production": "Number",
-            "code": "3"
-          }
-        ]
-      },
-      {
-        "production": "Number",
-        "code": "4"
-      }
-    ]
+    "grammar": {
+      "<Expression>": ["<Addition>", "<Subtraction>", "<Number>"],
+      "<Subexpression>": ["(<Addition>)", "(<Subtraction>)"],
+      "<Addition>": ["<Subexpression> + <Subexpression>",
+                   "<Number> + <Subexpression>",
+                   "<Subexpression> + <Number>",
+                   "<Number> + <Number>"],
+      "<Subtraction>": ["<Subexpression> - <Subexpression>",
+                      "<Number> - <Subexpression>",
+                      "<Subexpression> - <Number>",
+                      "<Number> - <Number>"],
+      "<Number>": []
+    },
+    "production": "<Expression>",
+    "code": "|(2 - 3) + 4|",
+    "holes": [{
+      "production": "<Addition>",
+      "code": "|(2 - 3)| + |4|",
+      "holes": [
+        {
+          "production": "<Subexpression>",
+          "code": "(|2 - 3|)",
+          "holes": [{
+            "production": "<Subtraction>",
+            "code": "|2| - |3|",
+            "holes": [
+              {
+                "production": "<Number>",
+                "code": "2"
+              },
+              {
+                "production": "<Number>",
+                "code": "3"
+              }
+            ]
+          }]
+        },
+        {
+          "production": "<Number>",
+          "code": "4"
+        }
+      ]
+    }]
   }
 }
 

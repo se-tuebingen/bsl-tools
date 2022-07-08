@@ -8,15 +8,18 @@ export interface node {
   code: string;
   holes: {start:number, end:number, content:node}[];
 }
+// object representing a grammar
+export type grammar = {[key: string]: string[]};
+
 // add production tree to html element
 export function productionTree(
   root: node,
   target: HTMLElement,
-  productions: string[] | undefined,
+  grammar: grammar | undefined,
   quiz=false,
   lang='en'){
-  // infer productions for quiz if necessary
-  if(quiz && !productions) productions = extractProductions(root);
+  // infer grammar if necessary
+  if(!grammar) grammar = extractProductions(root);
   // add css if necessary
   if(!document.getElementById('bsl-tools-tree-style')) {
     const styleNode = document.createElement('style');
@@ -35,7 +38,9 @@ export function productionTree(
   // render HTML
   target.innerHTML = `
     <ul class="tree ast">
-      ${quiz ? renderQuizNode(root, lang as implementedLanguage, productions as string[]) : renderNode(root)}
+      ${quiz
+        ? renderQuizNode(root, lang as implementedLanguage, grammar as grammar)
+        : renderNode(root, grammar as grammar)}
     </ul>
   `;
   if (quiz) {
@@ -48,13 +53,13 @@ export function productionTree(
 }
 
 // ### traverse tree to get all occurring productions
-function extractProductions(n: node): string[] {
-  const productions: string[] = [];
+function extractProductions(n: node): grammar {
+  const productions = {};
   extractProductionsRecursive(n, productions);
   return productions;
 }
-function extractProductionsRecursive(n: node, p: string[]) {
-  if(!p.includes(n.production)) p.push(n.production);
+function extractProductionsRecursive(n: node, p: grammar) {
+  p[n.production] = [];
   n.holes.map(h => extractProductionsRecursive(h.content, p));
 }
 
@@ -119,13 +124,13 @@ function adjustConnectors(tree: HTMLElement) {
 // ##### generate HTML ######
 
 // ### regular node/tree
-function renderNode(n: node, i:number=-1):string {
+function renderNode(n: node, p: grammar, i:number=-1):string {
   return `
     <li class="${i >= 0 ? `child-${i+1}` : ''}"
         data-collapsed="${i >= 0 ? 'true' : 'false'}">
       <span class="${n.holes.length > 0 ? '' : 'terminal-symbol'}">
 
-        <div class="name">${sanitize(n.production)}</div>
+        ${renderProduction(n, p)}
 
         ${renderCode(n)}
 
@@ -133,7 +138,7 @@ function renderNode(n: node, i:number=-1):string {
       ${n.holes.length > 0 ?
         `<ul>${
           n.holes.map((h, idx) =>
-            renderNode(h.content, idx))
+            renderNode(h.content, p, idx))
           .join('')
         }</ul>`
         : ''
@@ -197,9 +202,21 @@ function getSpans(n: node):span[] {
   }
   return spans;
 }
+// ### production name - with tooltip on hover
+function renderProduction(n: node, p: grammar) {
+  return `
+    <div class="name">${sanitize(n.production)}${
+      p[n.production] && p[n.production].length > 0 ?
+      `<div class="tooltip">::= ${
+        p[n.production].map(sanitize).join('<br>&nbsp;|&nbsp;&nbsp;')
+      }</div>`
+      : ''
+    }</div>
+  `;
+}
 
 // ###### rendering a node/tree as a quiz
-function renderQuizNode(n: node, lang: implementedLanguage, productions: string[], i:number=-1):string {
+function renderQuizNode(n: node, lang: implementedLanguage, grammar: grammar, i:number=-1):string {
   return `
     <li class="${i >= 0 ? `child-${i+1}` : ''}"
         data-collapsed="${i >= 0 ? 'true' : 'false'}">
@@ -208,19 +225,17 @@ function renderQuizNode(n: node, lang: implementedLanguage, productions: string[
             data-is-terminal="${n.holes.length <= 0}"
             data-is-trivial-hole="${n.holes.length === 1 && n.holes[0].start === 0 && n.holes[0].end === n.code.length}">
 
-        ${renderProductionQuiz(n, lang, productions)}
+        ${renderProductionQuiz(n, lang, grammar)}
 
         ${renderHoleQuiz(n, lang)}
 
-        <div class="name">
-          ${sanitize(n.production)}
-        </div>
+        ${renderProduction(n, grammar)}
         ${renderCode(n)}
       </span>
       ${n.holes.length > 0 ?
         `<ul>${
           n.holes.map((h, idx) =>
-            renderQuizNode(h.content, lang, productions, idx))
+            renderQuizNode(h.content, lang, grammar, idx))
             .join('')
          }</ul>`
         : ''
@@ -230,12 +245,12 @@ function renderQuizNode(n: node, lang: implementedLanguage, productions: string[
 }
 
 // ### first part of the quiz
-function renderProductionQuiz(n: node, lang: implementedLanguage, productions: string[]):string {
+function renderProductionQuiz(n: node, lang: implementedLanguage, grammar: grammar):string {
   return `
   <div class="production">
     <select onchange="checkProduction(event, '${n.production}')">
       <option selected="true">${dictionary[lang]['select production']}</option>
-      ${productions.map(p => `
+      ${Object.keys(grammar).map(p => `
           <option value="${p}">${sanitize(p)}</option>
         `).join('')}
     </select>

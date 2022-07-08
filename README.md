@@ -52,7 +52,20 @@ Anything inside the `<bsltree>` tag is parsed according to the  BSL Core Languag
 
 If you use `<jsontree>`, you need to provide valid JSON - so use double quotes (`"`)!
 `"code"` always needs to be a string, mark holes (code of children) by putting `|`s
-around it.
+around it. If you want to, you can provide your own grammar in the `"grammar"` field
+of the root node, like this:
+```
+...
+"grammar": {
+  "production name": ["rule 1", "rule 2"],
+  "terminal symbol": []
+}
+...
+```
+Note that the object keys need to match exactly the productions you use in your
+nodes. The Rules are shown as tooltips on hover, and the keys are used as
+options in quiz mode. If no grammar is specified, quiz mode options are inferred
+from all occurring productions.
 
 The `lang` attribute is only applicable for Quiz mode, since the regular tree does not display any text in natural language. Currently implemented codes are `en`(English, default) and `de`(German).
 
@@ -97,6 +110,7 @@ The JSON structure for non-BSL-Syntax needs to contain
 - a `"production"` name (string)
 - some `"code"` (string) optionally with holes fenced by `|`
 - optionally under `"holes"` a list of children with the same structure
+- optionally the root node can contain a custom `"grammar"` as described in the html API above
 
 If you set the optional keyword argument `#:quiz` to `#t`, it will add `quiz="true"` which displays the tree in quiz mode.
 

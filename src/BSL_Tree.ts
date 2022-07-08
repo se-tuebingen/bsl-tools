@@ -52,20 +52,31 @@ function renderError(el: HTMLElement, error:string){
 }
 
 // ### known list of productions
-const productions = [
-  '<program>',
-  '<def-or-expr>*',
-  '<def-or-expr>',
-  '<definition>',
-  '<e>',
-  '<e>*',
-  '{[ <e> <e> ]}+',
-  '[ <e> <e> ]',
-  '<name>*',
-  '<name>+',
-  '<name>',
-  '<v>'
-];
+const productions = {
+  '<program>':      ['<def-or-expr>*'],
+  '<def-or-expr>*': [], // ['<def-or-expr> <def-or-expr>*',
+                        // ''],
+  '<def-or-expr>':  ['<definition>',
+                     '<e>'],
+  '<definition>':   ['(define (<name> <name>+) <e>)',
+                     '(define <name> <e>)',
+                     '(define-struct <name> (<name>*))'],
+  '<e>':            ['(name <e>*)',
+                     '(cond {[<e>,<e>]}+)',
+                     '<name>',
+                     '<v>'],
+  '<e>*':           [], //['<e> <e>*',
+                        // ''],
+  '{[ <e> <e> ]}+': [], //['[<e> <e>]',
+                        // '[<e> <e>] {[<e>,<e>]}+'],
+  '[ <e> <e> ]':    [], //['[<e> <e>]'],
+  '<name>*':        [], //['',
+                        // '<name> <name>*'],
+  '<name>+':        [], //['<name>',
+                        // '<name> <name>+'],
+  '<name>':         [],
+  '<v>':            []
+};
 
 // ### transform AST into node helper structure
 function programToNode(p: BSL_AST.program): node {

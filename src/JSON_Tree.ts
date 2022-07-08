@@ -1,12 +1,14 @@
-import {node, productionTree, dirtify} from "./Production_Tree";
+import {node, productionTree, dirtify, grammar} from "./Production_Tree";
 
 export function processJsonTrees() {
   Array.from(document.getElementsByTagName('jsontree')).map(el => {
     try {
-      const root = parseJsonTree(dirtify(el.innerHTML));
+      const ret = parseJsonTree(dirtify(el.innerHTML));
+      const root = ret.root;
+      const grammar = ret.grammar;
       const quiz = el.getAttribute('quiz') === 'true' ? true : false;
       const lang = (el.getAttribute('lang') ? el.getAttribute('lang') : undefined) as string | undefined;
-      productionTree(root, el as HTMLElement, undefined, quiz, lang);
+      productionTree(root, el as HTMLElement, grammar, quiz, lang);
     } catch(e:any) {
       console.error(e);
       el.innerHTML = `${e}`;
@@ -19,10 +21,14 @@ export function processJsonTrees() {
   });
 }
 
-function parseJsonTree(js: string): node {
+function parseJsonTree(js: string): {root: node, grammar: grammar | undefined} {
   const json = JSON.parse(js.trim());
+  const grammar = json['grammar'];
   const root = processHolesRecursive(json);
-  return root;
+  return {
+    root: root,
+    grammar: grammar
+  };
 }
 
 // ### runtime type checking, extracting hole positions and removing
