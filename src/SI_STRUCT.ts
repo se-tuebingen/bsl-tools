@@ -5,7 +5,7 @@ export enum Production{
     StepResult = "StepResult",
     Split = "Split",
     PlugResult = "PlugResult",
-    Redex = "Redex",
+    CallRedex = "Redex",
     AppContext = "AppContext",
     Hole = "Hole",
     Prim = "Prim",
@@ -36,14 +36,14 @@ export interface Split{
 
 export interface PlugResult{
     type: Production.PlugResult;
-    rule: ProgStepRule | OneRule;
+    rule: Kong | OneRule;
     expr: BSL_AST.expr;
 }
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
 export type Redex = CallRedex;
 
 export interface CallRedex{
-    type: Production.Redex;
+    type: Production.CallRedex;
     name: BSL_AST.Name;
     args: BSL_AST.expr[];
 }
@@ -54,11 +54,11 @@ export interface CallRedex{
 // interface AppContext { operator: String; values: value[]; ctx: Context; args: expr[] }
 
 
-type Context = AppContext | Hole;
+export type Context = AppContext | Hole;
 
 export interface AppContext{
     type: Production.AppContext;
-    op: string;
+    op: BSL_AST.Name;
     values: BSL_AST.Literal[];
     ctx: Context;
     args: BSL_AST.expr[];
@@ -81,30 +81,28 @@ export type exprOrHole = BSL_AST.expr | Hole;
 //######## OneRule(s) ########
 export interface Prim{
     type: Production.Prim;
-    redex: Redex;
-    literal: BSL_AST.Literal;
+    //redex: Redex;
+    //literal: BSL_AST.Literal;
 }
 export type OneRule = Prim;
 
 // ####### ProgStepRule(s) ########
 export interface Kong{
     type: Production.Kong;
-    context: Context;
+    //context: Context;
     redexRule: OneRule;
 }
-export type ProgStepRule = Kong;
-
 // ##########################
 
 // runtime type checking
-export function isRedex(obj: any): obj is Redex {
-    return obj.type === Production.Redex;
+export function isCallRedex(obj: any): obj is CallRedex {
+    return obj.type === Production.CallRedex;
 }
 export function isHole(obj: any): obj is Hole {
     return obj.type === Production.Hole;
 }
-export function isContext(obj: any): obj is Context {
-    return obj.type === Production.Context;
+export function isAppContext(obj: any): obj is AppContext {
+    return obj.type === Production.AppContext;
 }
 export function isSplit(obj: any): obj is Split {
     return obj.type === Production.Split;
@@ -129,10 +127,4 @@ export function isStepper(obj: any): obj is Stepper {
 }
 export function isOneRule(obj: any): obj is OneRule {
     return obj.type === Production.Prim;
-}
-export function isProgStepRule(obj: any): obj is ProgStepRule {
-    return obj.type === Production.Kong;
-}
-export function isProgStepRules(obj: any): obj is ProgStepRule[] {
-    return Array.isArray(obj);
 }

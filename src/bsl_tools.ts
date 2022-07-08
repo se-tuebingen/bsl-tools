@@ -37,7 +37,7 @@ function processStepper() {
       //parse to AST
     try{
       const program : BSL_AST.program = parse(el.innerHTML);
-      SI.parseStepper(program, el as HTMLElement);
+      SI.setUpStepperGui(program, el as HTMLElement);
     } catch(e:any) {
 
     }
