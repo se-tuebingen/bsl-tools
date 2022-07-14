@@ -169,6 +169,10 @@ to compile TypeScript and bundle all resources into one single JavaScript file.
 For generating a BSL parser, we are using the [`ts-pegjs`](https://github.com/metadevpro/ts-pegjs) package, which builds upon `pegjs`.
 This package installs a node script which compiles the grammar found in `src/grammar/bsl.pegjs` to a TypeScript parser module. The best way to test and edit the grammar is the [pegjs online version](https://pegjs.org/online), since it has syntax highlighting and live testing.
 
+In order to generate a NodeJS-independent binary (effectively, a binary with
+NodeJS bundled, so not exactly lightweight) out of `ts-pegjs`, we are using
+the [`pkg`](https://github.com/vercel/pkg) package.
+
 ### Testing
 
 Running `make test` copies the generated JavaScript file and the latest version
