@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 16
           cache: 'npm'
-      - run: npm install
+      - run: npm install --force
       # - name: Install TexLive
       #   run: sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
       # - name: Install TypeScript
