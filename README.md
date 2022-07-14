@@ -139,42 +139,49 @@ and the [Info 1 script at 8.3](https://ps-tuebingen.github.io/informatik-1-skrip
 
 ## Development Setup
 
-### Building from Source
+### Building the project
 
-We are using [esbuild](https://esbuild.github.io/getting-started/#build-scripts) to bundle all TypeScript ressources into one single JavaScript file.
+For building the project, you need to have CMake or a similar tool that can handle
+the `Makefile` installed. For Linux and MacOS, this should already be the case.
 
-You need to have [NodeJS](nodejs.org) installed, on Ubuntu it is recommended to install it via [NodeSource](https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions).
+If you only changed something in the TypeScript Source Code or updated the Grammar,
+and are on a 64bit Linux, MaxOS or Windows Computer, you can simply run `make fallback_build`,
+which depends on binaries.
+_Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes._
 
-The first time you clone the project, and every time you pull changes that might add new dependencies, you need to run `npm install` in the project.
+If you are on another OS or want to change more, or update the fallback binaries,
+you need to have [NodeJS](nodejs.org) installed.
+_On Ubuntu, it is recommended to install it via [NodeSource](https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions)._
 
-To compile sources, run `make build` or `npm run build`. Notice that the command does not terminate: esbuild keeps watching your input files and recompiles if you save any changes.
+Since the `package.json` contains packages for different architectures in order to
+be able to update the `fallback_build`-binaries, you need to run `npm install` with
+the `--force` option. You need to run `npm install` anytime dependencies might have changed.
+
+Then, you can run
+- `make build` to compile grammar and TypeScript Sources (_Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes._)
+- `make update_fallback_build` to update the committed fallback binaries
+
+### Dependencies
+
+We are using [esbuild](https://esbuild.github.io/getting-started/#build-scripts)
+to compile TypeScript and bundle all resources into one single JavaScript file.
 
 For generating a BSL parser, we are using the [`ts-pegjs`](https://github.com/metadevpro/ts-pegjs) package, which builds upon `pegjs`.
 This package installs a node script which compiles the grammar found in `src/grammar/bsl.pegjs` to a TypeScript parser module. The best way to test and edit the grammar is the [pegjs online version](https://pegjs.org/online), since it has syntax highlighting and live testing.
 
-The command to compile the parser is included in the `npm run build` script (see `package.json` for details), but will not automatically be executed on save by esbuild.
-
 ### Testing
 
-Running `make test` copies the generated JavaScript file and the latest version of the Scribble Plugin to the test folders and renders the Scribble test.
+Running `make test` copies the generated JavaScript file and the latest version
+of the Scribble Plugin to the test folders and renders the Scribble test.
 
-The HTML test pages load the JavaScript plugin from the `dist` folder if opened locally (served via `file://`).
+In order to be able to render the Scribble test pages, you need to have
+[Racket](https://racket-lang.org) installed.
 
-### Building from Source - Fallback
+The HTML test pages load the JavaScript plugin from the `dist` folder if opened
+locally (served via `file://`).
 
-For the unlikely case that one or more of the node modules are no longer distributed or no longer distributed in a compatible version, the `build_backup` folder contains a more or less current version of them.
-
-- The `ts-pegjs`-module which generates the parser distributes JavaScript code and therefore requires node to be installed. The required node version is saved in `build_backup/node_version.txt`.
-- `esbuild` is a binary distribution. The backup contains the binary for Linux(64bit), which has been tested with Ubuntu 20.04. The current OS and architecture are saved in `build_backup/os.txt` and `arch.txt` respectively.
-
-To prevent changes on other platforms to update to e.g. Windows or Mac versions of these binaries, they need to be copied manually via `make update_build_fallback`.
-If your commit contains changes to `arch.txt` or `os.txt`, better double check if you accidentally replaced the Linux binaries.
-
-- Use `make fallback_build_parser` to generate the parser typescript module from the pegjs grammar
-- Use `make fallback_build_ts` to compile and bundle the typescript and css sources into one JavaScript module
-
-
-# Meeting 19.05.22
+# Meeting Notes
+## Meeting 19.05.22
 
 - Parser in JS/TS bauen
 - Scribble Plugin bauen für ("string" / sexpr -> Tree)
