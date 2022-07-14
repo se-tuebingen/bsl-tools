@@ -58,7 +58,9 @@ of the root node, like this:
 ...
 "grammar": {
   "production name": ["rule 1", "rule 2"],
-  "terminal symbol": []
+  ...,
+  "terminal symbol": [],
+  ...
 }
 ...
 ```
