@@ -26,7 +26,7 @@ export interface StepResult{
     currentStep: number;
 }
 
-export type SplitResult = Split | BSL_AST.Literal;
+export type SplitResult = Split | Value;
 
 export interface Split{
     type: Production.Split;
@@ -37,7 +37,7 @@ export interface Split{
 export interface PlugResult{
     type: Production.PlugResult;
     rule: Kong | OneRule;
-    expr: BSL_AST.expr;
+    expr: BSL_AST.expr | Value;
 }
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
 export type Redex = CallRedex;
@@ -45,7 +45,7 @@ export type Redex = CallRedex;
 export interface CallRedex{
     type: Production.CallRedex;
     name: BSL_AST.Name;
-    args: BSL_AST.expr[];
+    args: Value[];
 }
 
 // App value[] Context expr[]
@@ -59,25 +59,17 @@ export type Context = AppContext | Hole;
 export interface AppContext{
     type: Production.AppContext;
     op: BSL_AST.Name;
-    values: BSL_AST.Literal[];
+    values: Value[];
     ctx: Context;
     args: BSL_AST.expr[];
 }
-
-/* export interface Context{
-    type: Production.Context;
-    name: BSL_AST.Name | null;
-    args: exprOrHole[];
-
-} */
 
 export interface Hole{
     type: Production.Hole;
     //index: number //number[];
 }
 
-export type exprOrHole = BSL_AST.expr | Hole;
-
+export type Value = number | string | boolean | `'()`;
 //######## OneRule(s) ########
 export interface Prim{
     type: Production.Prim;
@@ -127,4 +119,7 @@ export function isStepper(obj: any): obj is Stepper {
 }
 export function isOneRule(obj: any): obj is OneRule {
     return obj.type === Production.Prim;
+}
+export function isValue(obj: any): obj is Value {
+    return typeof obj === "number" || typeof obj === "string" || typeof obj === "boolean" || obj === `'()`;
 }
