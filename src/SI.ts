@@ -48,6 +48,7 @@ export function calculateAllSteps(expr: BSL_AST.expr | SI_STRUCT.Value, stepper:
 
 export function calculateStep(expr: BSL_AST.expr):SI_STRUCT.StepResult | SI_STRUCT.Value{
     const splitExpr = split(expr) as SI_STRUCT.SplitResult;
+    console.log("splitExpr", splitExpr);
     if(SI_STRUCT.isSplit(splitExpr)){
         const stepExpr = step(splitExpr.redex) as SI_STRUCT.Value;
                 // if context is Hole, 
@@ -74,7 +75,7 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
     if(BSL_AST.isCall(expr)){
         const name = expr.name;
         const args = expr.args;
-        let count = 0;
+        let count = -1;
         
         const valueLst = [] as SI_STRUCT.Value[];
         const exprLst = [] as BSL_AST.expr[];
@@ -91,7 +92,7 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
             }
         }
         // if there is no context, return Hole and redex
-        if (count == 0){
+        if (count == -1){
             const redex = {
                 type: SI_STRUCT.Production.CallRedex,
                 name: name,
@@ -140,20 +141,10 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
 
 export function step(r: SI_STRUCT.Redex): SI_STRUCT.Value| Error{
     if(SI_STRUCT.isCallRedex(r)){
-        if (r.name.symbol === "+"){
-            // PRIM
-            let n = 0;
-            r.args.forEach(el => {
-                if (SI_STRUCT.isValue(el)){
-                    n += el as number;
-                }else{
-                    return Error("error: argument is not a literal: " + el);
-                }
-            });
-            console.log("n", n);
-            return n;
+        if(prim(r) != false){
+            return prim(r);
         }else{
-            return Error("error: Operation is not +");
+            return Error("error: prim is not applicable");
         }
     }else{
         return Error("error: redex is not a call");
@@ -212,7 +203,59 @@ export function plug(evalExpr: SI_STRUCT.Value, c: SI_STRUCT.Context): SI_STRUCT
     } as SI_STRUCT.PlugResult;
  */
 
+// ####### ONE RULE FUNCTIONS #######
 
+export function prim(r:SI_STRUCT.Redex): SI_STRUCT.Value | Error{
+    if (r.name.symbol === "+"){
+        let n = 0;
+        r.args.forEach(el => {
+            if (SI_STRUCT.isValue(el)){
+                n += el as number;
+            }else{
+                return Error("error: argument is not a literal: " + el);
+            }
+        });
+        return n;
+    }else if(r.name.symbol === "*"){
+        let n = 1;
+        r.args.forEach(el => {
+            if (SI_STRUCT.isValue(el)){
+                n *= el as number;
+            }else{
+                return Error("error: argument is not a literal: " + el);
+            }
+        });
+        return n;
+    }else if (r.name.symbol === "-"){
+        let n = r.args[0] as number;
+        for (let i = 1; i < r.args.length; i++) {
+            let el = r.args[i];
+            if (SI_STRUCT.isValue(el)){
+            n -= el as number;
+            }else{
+                return Error("error: argument is not a literal: " + r.args[i]);
+            }
+        }
+        return n;
+    } else if(r.name.symbol === "/"){
+        let n = r.args[0] as number;
+        for(let i = 1; i < r.args.length; i++){
+            let el = r.args[i];
+            if (SI_STRUCT.isValue(el) && el as number != 0){
+                n /= el as number;
+            }else if (SI_STRUCT.isValue(el) && el as number == 0){
+                return Error("error: division by zero");
+            }else{
+                return Error("error: argument is not a literal: " + el);
+            }
+        }
+        console.log("n in /", n);
+        return n;
+    } else{
+        return false;
+    }
+
+}
 
 // ####### RENDER FUNCTIONS #######
 
