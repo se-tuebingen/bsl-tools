@@ -48,7 +48,6 @@ export function calculateAllSteps(expr: BSL_AST.expr | SI_STRUCT.Value, stepper:
 
 export function calculateStep(expr: BSL_AST.expr):SI_STRUCT.StepResult | SI_STRUCT.Value{
     const splitExpr = split(expr) as SI_STRUCT.SplitResult;
-    console.log("splitExpr", splitExpr);
     if(SI_STRUCT.isSplit(splitExpr)){
         const stepExpr = step(splitExpr.redex) as SI_STRUCT.Value;
                 // if context is Hole, 
@@ -164,7 +163,6 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.Value| Error{
 // plug
 // plug(Redex, c: Context): Expression, pRule
 export function plug(evalExpr: SI_STRUCT.Value, c: SI_STRUCT.Context): SI_STRUCT.PlugResult | Error{
-
     //check if context is a Hole
     if (SI_STRUCT.isHole(c)){
         return {
@@ -174,26 +172,6 @@ export function plug(evalExpr: SI_STRUCT.Value, c: SI_STRUCT.Context): SI_STRUCT
                 type: SI_STRUCT.Production.Prim,
             }
         } as SI_STRUCT.PlugResult;
-        //check if next Context is a Hole
-    }else if(SI_STRUCT.isHole(c.ctx)){
-        const exprArgs = [c.values, evalExpr, c.args].flat() as BSL_AST.expr[];
-        console.log("exprArgs", exprArgs);
-        return {
-            type: SI_STRUCT.Production.PlugResult,
-            expr: {
-                type: BSL_AST.Production.FunctionCall,
-                name: c.op,
-                args:exprArgs
-
-            },
-            rule: {
-                type: SI_STRUCT.Production.Kong,
-                redexRule: {
-                    type: SI_STRUCT.Production.Prim
-                }
-            }
-        } as SI_STRUCT.PlugResult;
-
     }else{
         const finalExpr = {
             type: BSL_AST.Production.FunctionCall,
@@ -213,7 +191,26 @@ export function plug(evalExpr: SI_STRUCT.Value, c: SI_STRUCT.Context): SI_STRUCT
         } as SI_STRUCT.PlugResult;
     }
 }
+/* //old
+   }else if(SI_STRUCT.isHole(c.ctx)){
+    const exprArgs = [c.values, evalExpr, c.args].flat() as BSL_AST.expr[];
+    console.log("exprArgs", exprArgs);
+    return {
+        type: SI_STRUCT.Production.PlugResult,
+        expr: {
+            type: BSL_AST.Production.FunctionCall,
+            name: c.op,
+            args:exprArgs
 
+        },
+        rule: {
+            type: SI_STRUCT.Production.Kong,
+            redexRule: {
+                type: SI_STRUCT.Production.Prim
+            }
+        }
+    } as SI_STRUCT.PlugResult;
+ */
 
 
 
