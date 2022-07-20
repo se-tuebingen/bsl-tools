@@ -36,9 +36,7 @@ export function calculateAllSteps(expr: BSL_AST.expr | SI_STRUCT.Value, stepper:
         } as SI_STRUCT.Stepper;
         console.log("newExpr", newExpr);
         const allSteps = calculateAllSteps(newExpr, newStepper);
-        for(let i = 0; i < allSteps.stepperTree.length; i++){
-            allSteps.stepperTree[i].currentStep = i;
-        }
+        allSteps.stepperTree.map((step, i) => step.currentStep = i);
         return allSteps;
     }
     
@@ -75,7 +73,7 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
     if(BSL_AST.isCall(expr)){
         const name = expr.name;
         const args = expr.args;
-        let count = -1;
+        let pos = -1;
         
         const valueLst = [] as SI_STRUCT.Value[];
         const exprLst = [] as BSL_AST.expr[];
@@ -87,12 +85,12 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
             }else if (SI_STRUCT.isValue(arg)){
                 valueLst.push(arg);
             }else{
-                count = i;
+                pos = i;
                 break;
             }
         }
-        // if there is no context, return Hole and redex
-        if (count == -1){
+        // if there is no context, if all arguments are values
+        if (pos == -1){
             const redex = {
                 type: SI_STRUCT.Production.CallRedex,
                 name: name,
@@ -104,31 +102,31 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
                 redex: redex,
                 context: hole
             } as SI_STRUCT.Split;
-        // else get Split
-    }else{
-        //get all expressions from the right side
-        for (let i = count + 1; i < args.length; i++) {
-            let arg = args[i];
-            if(BSL_AST.isExpr(arg)){
-                exprLst.push(arg);
-            }else{
-                return new Error("split: argument is not an expression " + arg + i);
+        // else get all expressions from the right side
+        }else{
+            for (let i = pos + 1; i < args.length; i++) {
+                let arg = args[i];
+                if(BSL_AST.isExpr(arg)){
+                    exprLst.push(arg);
+                }else{
+                    return new Error("split: argument is not an expression " + arg + i);
+                }
             }
-        }
 
-        const call = args[count] as BSL_AST.Call;
-        return {
-            type: SI_STRUCT.Production.Split,
-            redex: (split(args[count]) as SI_STRUCT.Split).redex,
-            context: {
-                type: SI_STRUCT.Production.AppContext,
-                op: name,
-                values: valueLst,
-                ctx: (split(args[count])as SI_STRUCT.Split).context as SI_STRUCT.AppContext | SI_STRUCT.Hole,
-                args: exprLst
-            }
-        } as SI_STRUCT.Split;
-    }
+            const call = args[pos] as BSL_AST.Call;
+            const splitResult = split(call) as SI_STRUCT.Split;
+            return {
+                type: SI_STRUCT.Production.Split,
+                redex: splitResult.redex,
+                context: {
+                    type: SI_STRUCT.Production.AppContext,
+                    op: name,
+                    values: valueLst,
+                    ctx: splitResult.context as SI_STRUCT.AppContext | SI_STRUCT.Hole,
+                    args: exprLst
+                }
+            } as SI_STRUCT.Split;
+        }
     }else if (BSL_AST.isCond(expr) || BSL_AST.isName(expr)){
         console.log("error: expr is either Cond, Name, or undefined");
         return Error("error: expr is either Cond, Name, or undefined") as Error;
