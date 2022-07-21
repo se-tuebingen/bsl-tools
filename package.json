@@ -12,6 +12,7 @@
     "esbuild-linux-64": "^0.14.49",
     "esbuild-windows-64": "^0.14.49",
     "pkg": "^5.8.0",
+    "puppeteer": "^15.4.2",
     "ts-pegjs": "^1.2.2",
     "typescript": "^4.7.2"
   },

@@ -48,3 +48,6 @@ fallback_build:
 	echo "Compiling TypeScript and Ressources to JavaScript"
 	echo "Detected OS $(uname_S), using build_backup/esbuild-$(esbuild_arch)"
 	fallback_binaries/esbuild-$(esbuild_arch) src/bsl_tools.ts --bundle --minify --sourcemap=inline --target=chrome58,firefox57,safari11,edge16 --outfile=dist/bsl_tools.js --watch --loader:.css=text
+
+build_screenshot:
+	node_modules/.bin/pkg --out-path dist screenshot.js
