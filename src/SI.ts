@@ -26,18 +26,20 @@ export function calculateAllSteps(expr: BSL_AST.expr | SI_STRUCT.Value, stepper:
     if(SI_STRUCT.isValue(expr)){
         return stepper;
     }else{
-        const stepResult = calculateStep(expr) as SI_STRUCT.StepResult;
-        const newExpr = SI_STRUCT.isValue(stepResult) ? stepResult as SI_STRUCT.Value : stepResult.plugResult.expr as BSL_AST.expr;
-        const newStepper = {
-            type: SI_STRUCT.Production.Stepper,
-            root: stepper.root,
-            originExpr: stepper.originExpr,
-            stepperTree: [...stepper.stepperTree, stepResult]
-        } as SI_STRUCT.Stepper;
-        console.log("newExpr", newExpr);
-        const allSteps = calculateAllSteps(newExpr, newStepper);
-        allSteps.stepperTree.map((step, i) => step.currentStep = i);
-        return allSteps;
+        const stepperTree = stepper.stepperTree;
+        while(!SI_STRUCT.isValue(expr)){
+            const stepResult = calculateStep(expr) as SI_STRUCT.StepResult;
+            expr = SI_STRUCT.isValue(stepResult) ? stepResult as SI_STRUCT.Value : stepResult.plugResult.expr as BSL_AST.expr;
+            stepperTree.push(stepResult);
+    }
+    const newStepper = {
+        type: SI_STRUCT.Production.Stepper,
+        root: stepper.root,
+        originExpr: stepper.originExpr,
+        stepperTree: stepperTree
+    } as SI_STRUCT.Stepper;
+        newStepper.stepperTree.map((step, i) => step.currentStep = i);
+        return newStepper;
     }
     
 }
