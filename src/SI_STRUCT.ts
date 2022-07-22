@@ -5,10 +5,13 @@ export enum Production{
     StepResult = "StepResult",
     Split = "Split",
     PlugResult = "PlugResult",
-    CallRedex = "Redex",
+    CallRedex = "CallRedex",
+    CondRedex = "CondRedex",
+    CondOption = "CondOption",
     AppContext = "AppContext",
     Hole = "Hole",
     Prim = "Prim",
+    CondRule = "CondRule",
     Kong = "Kong"
 }
 
@@ -40,7 +43,7 @@ export interface PlugResult{
     expr: BSL_AST.expr | Value;
 }
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
-export type Redex = CallRedex;
+export type Redex = CallRedex | CondRedex;
 
 export interface CallRedex{
     type: Production.CallRedex;
@@ -48,6 +51,15 @@ export interface CallRedex{
     args: Value[];
 }
 
+export interface CondRedex{
+    type: Production.CondRedex;
+    options: BSL_AST.Clause[];
+}
+/* export interface Clause{
+    type: Production.CondOption;
+    condition: BSL_AST.expr | Value;
+    result: BSL_AST.expr;
+} */
 // App value[] Context expr[]
 // interface App {op: string; values: value[]; ctx: Context; args: expr[] }
 // type Context = AppContext | Hole
@@ -73,10 +85,15 @@ export type Value = number | string | boolean | `'()`;
 //######## OneRule(s) ########
 export interface Prim{
     type: Production.Prim;
-    //redex: Redex;
-    //literal: BSL_AST.Literal;
+    redex: CallRedex;
+    result: Value;
 }
-export type OneRule = Prim;
+export interface CondRule{
+    type: Production.CondRule;
+    redex: CondRedex;
+    result: BSL_AST.expr;
+} 
+export type OneRule = Prim | CondRule;
 
 // ####### ProgStepRule(s) ########
 export interface Kong{
@@ -89,6 +106,9 @@ export interface Kong{
 // runtime type checking
 export function isCallRedex(obj: any): obj is CallRedex {
     return obj.type === Production.CallRedex;
+}
+export function isCondRedex(obj: any): obj is CondRedex {
+    return obj.type === Production.CondRedex;
 }
 export function isHole(obj: any): obj is Hole {
     return obj.type === Production.Hole;

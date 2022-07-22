@@ -21,7 +21,7 @@ export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
     nextButton.addEventListener("click", nextStep);
 }
 // calculateAllSteps
-// Literal | Expression, Stepper => Stepper
+// Value | Expression, Stepper => Stepper
 export function calculateAllSteps(expr: BSL_AST.expr | SI_STRUCT.Value, stepper: SI_STRUCT.Stepper):SI_STRUCT.Stepper{
     if(SI_STRUCT.isValue(expr)){
         return stepper;
@@ -50,14 +50,10 @@ export function calculateStep(expr: BSL_AST.expr):SI_STRUCT.StepResult | SI_STRU
     const splitExpr = split(expr) as SI_STRUCT.SplitResult;
     console.log("splitExpr", splitExpr);
     if(SI_STRUCT.isSplit(splitExpr)){
-        const stepExpr = step(splitExpr.redex) as SI_STRUCT.Value;
-                // if context is Hole, 
-        // no KONG RULE => no plug
-        // return StepExpr
-        // else 
-        // Kong Rule => plug 
-        // return (context, stepExpr, PlugExpr) => KongExpr
+        const stepExpr = step(splitExpr.redex) as SI_STRUCT.OneRule;
+        console.log("stepExpr", stepExpr);
         const plugExpr = plug(stepExpr, splitExpr.context) as SI_STRUCT.PlugResult;
+        console.log("plugExpr", plugExpr);
         const stepResult = {
             type: SI_STRUCT.Production.StepResult,
             splitResult: splitExpr,
@@ -72,6 +68,7 @@ export function calculateStep(expr: BSL_AST.expr):SI_STRUCT.StepResult | SI_STRU
 //split
 // Expression => SplitResult | Error
 export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
+    const hole = {type: SI_STRUCT.Production.Hole} as SI_STRUCT.Hole; 
     if(BSL_AST.isCall(expr)){
         const name = expr.name;
         const args = expr.args;
@@ -98,7 +95,6 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
                 name: name,
                 args: valueLst
             } as SI_STRUCT.CallRedex;
-            const hole = {type: SI_STRUCT.Production.Hole} as SI_STRUCT.Hole; 
             return {
                 type: SI_STRUCT.Production.Split,
                 redex: redex,
@@ -129,83 +125,91 @@ export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
                 }
             } as SI_STRUCT.Split;
         }
-    }else if (BSL_AST.isCond(expr) || BSL_AST.isName(expr)){
-        console.log("error: expr is either Cond, Name, or undefined");
-        return Error("error: expr is either Cond, Name, or undefined") as Error;
+    }else if (BSL_AST.isCond(expr)){
+        const clause = expr.options[0];
+        // if condition is already reduced, build CondRedex
+        if(BSL_AST.isLiteral(clause.condition)){
+            const condition = clause.condition as BSL_AST.Literal;
+            return {
+                type: SI_STRUCT.Production.Split,
+                redex: {
+                    type: SI_STRUCT.Production.CondRedex,
+                    options: [{condition: condition, result: clause.result}, ...expr.options.slice(1)]
+                 } as SI_STRUCT.CondRedex,
+                context: hole} as SI_STRUCT.Split;
+        }
+        // else build other Redex
+        else{
+            return Error("not implemented");
+        }
+    }else if (BSL_AST.isName(expr)){
+        console.log("error: expr is  Name, or undefined");
+        return Error("error: expr is Name, or undefined") as Error;
     }else{
         return Error("error: something unexpected occured") as Error;
     }
 }
 
 // step
-
-export function step(r: SI_STRUCT.Redex): SI_STRUCT.Value| Error{
+// Redex => OneRule | Error
+export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | Error{
     if(SI_STRUCT.isCallRedex(r)){
-        if(prim(r) != false){
-            return prim(r);
+        if(prim(r) != null){
+            return {
+                type: SI_STRUCT.Production.Prim,
+                redex: r,
+                result: prim(r) as SI_STRUCT.Value
+            };
         }else{
             return Error("error: prim is not applicable");
         }
+    }else if(SI_STRUCT.isCondRedex(r)){
+        const clause = r.options[0];
+            return {
+                type: SI_STRUCT.Production.CondRule,
+                redex: r,
+                result: cond(r) as BSL_AST.expr
+            }
+        return Error("Cond not implemented yet");
     }else{
-        return Error("error: redex is not a call");
+        return Error("error: redex is neither a call nor cond");
     }
 }
 
 // plug
-// plug(Redex, c: Context): Expression, pRule
-export function plug(evalExpr: SI_STRUCT.Value, c: SI_STRUCT.Context): SI_STRUCT.PlugResult | Error{
+// plug(oneRule, c: Context): Expression, pRule
+export function plug(oneRule: SI_STRUCT.OneRule, c: SI_STRUCT.Context): SI_STRUCT.PlugResult | Error{
     //check if context is a Hole
     if (SI_STRUCT.isHole(c)){
+        // Apply OneRule
         return {
             type: SI_STRUCT.Production.PlugResult,
-            expr: evalExpr,
-            rule: {
-                type: SI_STRUCT.Production.Prim,
-            }
+            expr: oneRule.result,
+            rule: oneRule
         } as SI_STRUCT.PlugResult;
     }else{
+        //Apply OneRule with KONG RULE
         const finalExpr = {
             type: BSL_AST.Production.FunctionCall,
             name: c.op,
-            args: [c.values, (plug(evalExpr, c.ctx) as SI_STRUCT.PlugResult).expr, c.args].flat() as BSL_AST.expr[]
+            args: [c.values, (plug(oneRule, c.ctx) as SI_STRUCT.PlugResult).expr, c.args].flat() as BSL_AST.expr[]
         }
-        console.log("finalExpr", finalExpr);
+        //console.log("finalExpr", finalExpr);
         return {
             type: SI_STRUCT.Production.PlugResult,
             expr: finalExpr as BSL_AST.expr,
             rule: {
                 type: SI_STRUCT.Production.Kong,
-                redexRule: {
-                    type: SI_STRUCT.Production.Prim
-                }
+                redexRule: oneRule
             }
         } as SI_STRUCT.PlugResult;
     }
 }
-/* //old
-   }else if(SI_STRUCT.isHole(c.ctx)){
-    const exprArgs = [c.values, evalExpr, c.args].flat() as BSL_AST.expr[];
-    console.log("exprArgs", exprArgs);
-    return {
-        type: SI_STRUCT.Production.PlugResult,
-        expr: {
-            type: BSL_AST.Production.FunctionCall,
-            name: c.op,
-            args:exprArgs
-
-        },
-        rule: {
-            type: SI_STRUCT.Production.Kong,
-            redexRule: {
-                type: SI_STRUCT.Production.Prim
-            }
-        }
-    } as SI_STRUCT.PlugResult;
- */
 
 // ####### ONE RULE FUNCTIONS #######
 
-export function prim(r:SI_STRUCT.Redex): SI_STRUCT.Value | Error{
+export function prim(r:SI_STRUCT.CallRedex): SI_STRUCT.Value | null |Error{
+    // + - * / 
     if (r.name.symbol === "+"){
         let n = 0;
         r.args.forEach(el => {
@@ -249,14 +253,32 @@ export function prim(r:SI_STRUCT.Redex): SI_STRUCT.Value | Error{
                 return Error("error: argument is not a literal: " + el);
             }
         }
-        console.log("n in /", n);
         return n;
     } else{
-        return false;
+        return null;
     }
-
 }
 
+// cond
+// cond Redex => Value | BSL_AST.cond | Error
+function cond (r: SI_STRUCT.CondRedex): BSL_AST.expr | Error{
+    const clause = r.options[0];
+    if (BSL_AST.isLiteral(clause.condition) && clause.condition.value == true){
+        return clause.result;
+    }else if (BSL_AST.isLiteral(clause.condition) && clause.condition.value == false){
+        console.log("r.options", r.options);
+        const newOptions:BSL_AST.Clause[] =  r.options.slice(1).map(el => {
+            return {type: BSL_AST.Production.CondOption, condition: el.condition, result: el.result};
+        });
+        console.log("newOptions", newOptions);
+        return {
+            type: BSL_AST.Production.CondExpression,
+            options: newOptions
+        }
+    }else{
+        return Error("error: condition is not a boolean");
+    }
+}
 // ####### RENDER FUNCTIONS #######
 
 
@@ -316,6 +338,9 @@ function renderExpr(expr: BSL_AST.expr):string{
     }else if(SI_STRUCT.isValue(expr)){
         const str = `${expr}`;
         return str;
+    } else if (BSL_AST.isCond(expr)){
+        const str = expr.options.map(el => renderExpr(el.condition) + " -> " + renderExpr(el.result)).join("\n");
+        return str;
     }else{
         console.error("error: expr is neither Call nor Literal: " + expr);
         return "Neither Call nor Literal";
@@ -359,10 +384,16 @@ function renderPlugResult(plugResult: SI_STRUCT.PlugResult): string{
 }
 
 function renderRedex(redex: SI_STRUCT.Redex): string{
-    const name = redex.name.symbol;
-    const args = redex.args.map(arg => renderValue(arg)).join(" ");
-    const str = `<pre><code>(${name} ${args})</code></pre>`;
-    return str;
+    if (SI_STRUCT.isCallRedex(redex)){
+        const name = redex.name.symbol;
+        const args = redex.args.map(arg => renderValue(arg)).join(" ");
+        const str = `<pre><code>(${name} ${args})</code></pre>`;
+        return str;
+    }else if(SI_STRUCT.isCondRedex(redex)){
+        return "Conditional Redex";
+    }else{
+        return "Something went wrong: renderRedex";
+    }
 }
 function renderContext(context: SI_STRUCT.AppContext): string{
         const name = context.op ? context.op : "";
@@ -383,8 +414,7 @@ function renderKong(rule: SI_STRUCT.Kong): string{
     const type = rule.type;
     //const context = rule.context;
     const redexRule = rule.redexRule;
-    const str = `${type} with ${redexRule.type}:
-                 ${renderOneRule(redexRule)} `; 
+    const str = `${type} with ${renderOneRule(redexRule)} `; 
     return str;
 }
 
