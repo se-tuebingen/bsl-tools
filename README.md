@@ -153,9 +153,7 @@ If you are on another OS or want to change more, or update the fallback binaries
 you need to have [NodeJS](nodejs.org) installed.
 _On Ubuntu, it is recommended to install it via [NodeSource](https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions)._
 
-Since the `package.json` contains packages for different architectures in order to
-be able to update the `fallback_build`-binaries, you need to run `npm install` with
-the `--force` option. You need to run `npm install` anytime dependencies might have changed.
+You need to run `npm install` anytime dependencies might have changed.
 
 Then, you can run
 - `make build` to compile grammar and TypeScript Sources (_Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes._)
