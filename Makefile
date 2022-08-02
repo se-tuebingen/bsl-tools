@@ -36,10 +36,16 @@ test:
 	cd tests/scribble && ./test.sh
 
 update_fallback_build:
+	echo "Using pkg to create tspegjs binaries"
 	node_modules/.bin/pkg --out-path fallback_binaries node_modules/.bin/tspegjs
+	echo "Installing esbuild binary packages for all platforms"
+	npm install --save-dev --force esbuild-linux-64 esbuild-darwin-64 esbuild-windows-64
+	echo "Copying binaries to the respective folders"
 	cp node_modules/esbuild-linux-64/bin/esbuild fallback_binaries/esbuild-linux
 	cp node_modules/esbuild-darwin-64/bin/esbuild fallback_binaries/esbuild-darwin
 	cp node_modules/esbuild-windows-64/bin/esbuild fallback_binaries/esbuild-windows
+	echo "Uninstalling platform-incompatible binaries"
+	npm remove --force esbuild-linux-64 esbuild-darwin-64 esbuild-windows-64
 
 fallback_build:
 	echo "Building Parser TypeScript from Grammar"
