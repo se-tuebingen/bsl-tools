@@ -9,18 +9,6 @@
   with page width set to 640px;
 */
 const puppeteer = require('puppeteer-core');
-const chromium = require('chromium'); // for download
-// const download = require('download-chromium');
-// const os = require('os');
-// const tmp = os.tmpdir();
-//
-// const exec = await download({
-//    revision: 694644,
-//    installPath: `${tmp}/.local-chromium`})
-//
-// const browser = await puppeteer.launch({
-//    executablePath: exec
-// });
 
 (async () => {
   const PAGE_WIDTH = 640;
@@ -55,8 +43,13 @@ const chromium = require('chromium'); // for download
         installation (try "which chromium/chrome" on MaxOS or Linux).
       `);
       const cont = await chromium.install();
+      // const revision = await utils.getLatestRevisionNumber();
+      // console.log(`Fetched revision info: trying to install ${revision}`);
+      // const browserFetcher = puppeteer.createBrowserFetcher();
+      // const revisionInfo = await browserFetcher.download(revision);
+      // console.log('Done downloading');
       browser = await puppeteer.launch({
-        executablePath: chromium.path
+        executablePath: chromium.path//revisionInfo.executablePath //.chromium.path
       });
     } catch(e) {
       console.error(e);

@@ -7,6 +7,7 @@
     "test": "tests"
   },
   "devDependencies": {
+    "axios": "^0.27.2",
     "chromium": "^3.0.3",
     "esbuild": "^0.14.42",
     "pkg": "^5.8.0",
@@ -28,5 +29,8 @@
   "bugs": {
     "url": "https://github.com/se-tuebingen/bsl-tools/issues"
   },
-  "homepage": "https://github.com/se-tuebingen/bsl-tools#readme"
+  "homepage": "https://github.com/se-tuebingen/bsl-tools#readme",
+  "pkg": {
+    "assets": "screenshot/chromium/**/*"
+  }
 }
