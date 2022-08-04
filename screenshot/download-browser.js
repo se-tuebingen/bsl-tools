@@ -28,8 +28,16 @@ const platform = process.argv[process.argv.length - 1]; // 'linux' | 'mac' | 'wi
   const revisionUrl =
     `https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/${osString}%2FLAST_CHANGE?alt=media`;
   console.log(`Trying to fetch revision info from: ${revisionUrl}`);
-  const response = await axios.get(revisionUrl);
-  const revision = `${response.data}`;
+  let revision = '';
+  try {
+    const response = await axios.get(revisionUrl);
+    revision = `${response.data}`;
+  } catch(e) {
+    console.log('error with axios');
+    console.log(e);
+    return;
+  }
+
   console.log(revision);
   console.log(`Fetched revision info: trying to install ${revision} for ${platform}`);
 
