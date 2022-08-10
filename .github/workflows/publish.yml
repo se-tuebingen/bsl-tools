@@ -1,4 +1,4 @@
-name: GitHub Render Stuff
+name: Compile and Publish Test Pages
 on:
   push:
     branches:

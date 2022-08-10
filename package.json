@@ -6,16 +6,15 @@
   "directories": {
     "test": "tests"
   },
-  "dependencies": {
-  },
   "devDependencies": {
     "esbuild": "^0.14.42",
+    "pkg": "^5.8.0",
     "ts-pegjs": "^1.2.2",
     "typescript": "^4.7.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node_modules/.bin/tspegjs -o src/BSL_Parser.ts src/grammar/bsl.pegjs && node_modules/.bin/esbuild src/bsl_tools.ts --bundle --minify --sourcemap=inline --target=chrome58,firefox57,safari11,edge16 --outfile=dist/bsl_tools.js --watch --loader:.css=text"
+    "test": "make test",
+    "build": "make build"
   },
   "repository": {
     "type": "git",

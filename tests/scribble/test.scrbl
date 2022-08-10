@@ -93,3 +93,77 @@ Here are some tests for the Show Feature of the Abstract Syntax Tree.
 (define x 42)
 (define-struct name (firstName lastName)))
 ]
+
+@section{Internationalization}
+
+Internationalization currently only applies to quiz mode, since the regular tree does not contain any natural language elements.
+
+@subsection{German}
+
+@bsltree[ #:quiz #t #:lang "de"
+#'((define (f x y) (< x "42")))
+]
+
+@section{JSON-Tree Tests}
+
+@jsontree[#:quiz #t #:lang "de"]{
+  {
+    "grammar": {
+      "<Expression>": ["<Addition>", "<Subtraction>", "<Number>"],
+      "<Subexpression>": ["(<Addition>)", "(<Subtraction>)"],
+      "<Addition>": ["<Subexpression> + <Subexpression>",
+                   "<Number> + <Subexpression>",
+                   "<Subexpression> + <Number>",
+                   "<Number> + <Number>"],
+      "<Subtraction>": ["<Subexpression> - <Subexpression>",
+                      "<Number> - <Subexpression>",
+                      "<Subexpression> - <Number>",
+                      "<Number> - <Number>"],
+      "<Number>": []
+    },
+    "production": "<Expression>",
+    "code": "|(2 - 3) + 4|",
+    "holes": [{
+      "production": "<Addition>",
+      "code": "|(2 - 3)| + |4|",
+      "holes": [
+        {
+          "production": "<Subexpression>",
+          "code": "(|2 - 3|)",
+          "holes": [{
+            "production": "<Subtraction>",
+            "code": "|2| - |3|",
+            "holes": [
+              {
+                "production": "<Number>",
+                "code": "2"
+              },
+              {
+                "production": "<Number>",
+                "code": "3"
+              }
+            ]
+          }]
+        },
+        {
+          "production": "<Number>",
+          "code": "4"
+        }
+      ]
+    }]
+  }
+}
+
+Errors in JSON will not be caught by Scribble!
+@jsontree[]{
+  {
+    "production": "Subtraction",
+    "code": "(|2| - |3|)",
+    "holes": [
+      {
+        "production": "Number",
+        "code": "2"
+      }
+    ]
+  }
+}

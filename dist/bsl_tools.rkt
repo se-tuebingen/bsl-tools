@@ -11,9 +11,9 @@
 (require scribble/base)
 (require syntax/to-string)
 (require syntax/stx)
-(provide bsltree)
+(provide bsltree jsontree)
 
-
+(define implemented-language (or/c "en" "de"))
 (define value (or/c boolean? string? number? '()))
 (define name (or/c symbol?))
 (struct/contract bsl-string-container (
@@ -33,11 +33,21 @@
 )
 ; HTML
 (define
-  (bsl-tag-wrapper quiz)
+  (bsl-tag-wrapper quiz lang)
   (style #f (list
     (alt-tag "bsltree")
     (js-addition "bsl_tools.js")
-    (attributes (list (cons 'quiz (if quiz "true" "false"))))
+    (attributes (list (cons 'quiz (if quiz "true" "false"))
+                      (cons 'lang lang)))
+  ))
+)
+(define
+  (jsontree-tag-wrapper quiz lang)
+  (style #f (list
+    (alt-tag "jsontree")
+    (js-addition "bsl_tools.js")
+    (attributes (list (cons 'quiz (if quiz "true" "false"))
+                      (cons 'lang lang)))
   ))
 )
 
@@ -68,17 +78,34 @@
 
 ; render bsl-string
 (define
-  (bsltree stx #:quiz [quiz #f])
+  (bsltree stx #:quiz [quiz #f] #:lang [lang "en"])
   (cond
   [(not (or (syntax? stx) (value? stx)))
    (raise-argument-error 'bsltree "BSL-Tree only accepts Syntax-Expressions or Values" stx)]
   [(not (boolean? quiz))
-   (raise-argument-error 'quiz "BSL-Tree quiz toggle has to be a boolean!" stx)]
+   (raise-argument-error 'quiz "BSL-Tree #:quiz toggle has to be a boolean!" quiz)]
+  [(not (implemented-language lang))
+   (raise-argument-error 'lang "BSL-Tree #:lang needs to be an implemented language, currently either 'en' or 'de'" lang)]
   [(cond-block
-      [html (paragraph (bsl-tag-wrapper quiz)
+      [html (paragraph (bsl-tag-wrapper quiz lang)
       (strlist-or-str->str
         (synlst-or-val->strlist-or-str stx))
       )]
+     ;[latex (paragraph (style #f '()) (strlist-or-str->str(synlst-or-val->strlist-or-str stx)))]
+  )]
+  )
+)
+
+; render bsl-string
+(define
+  (jsontree #:quiz [quiz #f] #:lang [lang "en"] . json)
+  (cond
+  [(not (boolean? quiz))
+   (raise-argument-error 'quiz "JSON-Tree #:quiz toggle has to be a boolean!" quiz)]
+  [(not (implemented-language lang))
+   (raise-argument-error 'lang "JSON-Tree #:lang needs to be an implemented language, currently either 'en' or 'de'" lang)]
+  [(cond-block
+      [html (paragraph (jsontree-tag-wrapper quiz lang) json)]
      ;[latex (paragraph (style #f '()) (strlist-or-str->str(synlst-or-val->strlist-or-str stx)))]
   )]
   )
