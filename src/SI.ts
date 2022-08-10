@@ -1,15 +1,42 @@
 import * as BSL_AST from "./BSL_AST";
 import * as SI_STRUCT from "./SI_STRUCT";
+import { parse } from './BSL_Parser';
+import { dirtify } from './Production_Tree';
+import {default as small_interpreter_css} from './ressources/small-interpreter.css';
 
+// main function processing steppers
+export function processSteppers() {
+  Array.from(document.getElementsByTagName('stepper')).map(el => {
+    try {
+      const program : BSL_AST.program = parse(dirtify(el.innerHTML));
+      setUpStepperGui(program, el as HTMLElement);
+    } catch(e:any) {
+      console.error(e);
+      el.innerHTML = `${e}`;
+      (el as HTMLElement).style.cssText = `
+        padding: 2em;
+        color: darkred;
+        display: block;
+      `;
+    }
+  });
+}
 
 // setUpStepperGUI
 export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
+    // add css if necessary
+    if(!document.getElementById('bsl-tools-stepper-style')) {
+      const styleNode = document.createElement('style');
+      styleNode.innerHTML = small_interpreter_css;
+      styleNode.id = 'bsl-tools-stepper-style';
+      document.getElementsByTagName('head')[0].appendChild(styleNode);
+    }
     const expr =  program[0] as BSL_AST.expr;
     console.log("expression", expr);
     const emptyStepper = {
-        type: SI_STRUCT.Production.Stepper, 
-        root: el, 
-        originExpr: expr, 
+        type: SI_STRUCT.Production.Stepper,
+        root: el,
+        originExpr: expr,
         stepperTree: [],
     } as SI_STRUCT.Stepper;
     const stepper = calculateAllSteps(expr, emptyStepper);
@@ -41,7 +68,7 @@ export function calculateAllSteps(expr: BSL_AST.expr | SI_STRUCT.Value, stepper:
         newStepper.stepperTree.map((step, i) => step.currentStep = i);
         return newStepper;
     }
-    
+
 }
 // calculateStep
 // Expression => OneRule | KongRule | Done | Error
@@ -68,12 +95,12 @@ export function calculateStep(expr: BSL_AST.expr):SI_STRUCT.StepResult | SI_STRU
 //split
 // Expression => SplitResult | Error
 export function split (expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
-    const hole = {type: SI_STRUCT.Production.Hole} as SI_STRUCT.Hole; 
+    const hole = {type: SI_STRUCT.Production.Hole} as SI_STRUCT.Hole;
     if(BSL_AST.isCall(expr)){
         const name = expr.name;
         const args = expr.args;
         let pos = -1;
-        
+
         const valueLst = [] as SI_STRUCT.Value[];
         const exprLst = [] as BSL_AST.expr[];
         // get all values from the left side
@@ -209,7 +236,7 @@ export function plug(oneRule: SI_STRUCT.OneRule, c: SI_STRUCT.Context): SI_STRUC
 // ####### ONE RULE FUNCTIONS #######
 
 export function prim(r:SI_STRUCT.CallRedex): SI_STRUCT.Value | null |Error{
-    // + - * / 
+    // + - * /
     if (r.name.symbol === "+"){
         let n = 0;
         r.args.forEach(el => {
@@ -286,7 +313,7 @@ function renderStepper(stepper: SI_STRUCT.Stepper): string{
     const stepperTree = stepper.stepperTree;
     const originExpr = stepper.originExpr;
 
-    const str = 
+    const str =
     `<stepper>
         <div class="program-wrapper">
             Original Expression:
@@ -334,7 +361,7 @@ function renderExpr(expr: BSL_AST.expr):string{
     }else if(BSL_AST.isLiteral(expr)){
         const str = `${expr.value}`;
         return str;
-    
+
     }else if(SI_STRUCT.isValue(expr)){
         const str = `${expr}`;
         return str;
@@ -402,7 +429,7 @@ function renderContext(context: SI_STRUCT.AppContext): string{
         return str;
 }
 function renderHole(hole: SI_STRUCT.Hole): string{
-    return `<span class="hole">[    ]</span>`; 
+    return `<span class="hole">[    ]</span>`;
 }
 function renderOneRule(rule: SI_STRUCT.OneRule): string{
     const type = rule.type;
@@ -414,7 +441,7 @@ function renderKong(rule: SI_STRUCT.Kong): string{
     const type = rule.type;
     //const context = rule.context;
     const redexRule = rule.redexRule;
-    const str = `${type} with ${renderOneRule(redexRule)} `; 
+    const str = `${type} with ${renderOneRule(redexRule)} `;
     return str;
 }
 
@@ -447,7 +474,7 @@ function nextStep(e: Event): void{
     const max = wrapper?.getElementsByClassName("step-result").length as number;
     // change Visibility
     visibleResult?.setAttribute("visible", "false");
-    nextVisibleResult?.setAttribute("visible", "true");        
+    nextVisibleResult?.setAttribute("visible", "true");
     // show prev button if hidden
     const prevButton = button.parentElement?.querySelector("#prevButton") as HTMLButtonElement;
     if(prevButton.style.visibility == "hidden"){
