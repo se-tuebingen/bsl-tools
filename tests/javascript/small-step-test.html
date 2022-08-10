@@ -14,12 +14,16 @@
     </head>
     <body>
         <h2>Small-Step-Interpreter-Stepper for Racket</h2>
+        <h3 style="text-align: center;">First example</h3>
         <stepper>
-            (+ 2 (+ 4 6) (+ 3 5 8) (+ 2 3) (+ 4 5) 3)
+          (* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
         </stepper>
-
+        <h3 style="text-align: center;">Second example</h3>
         <stepper>
-            (+ 2 (+ 3 (+ 4 2)) 3 (+ 1 4) 2)
+            (+ 2 (+ (+ 9 8) 3)(- 5 9) 2)
+        </stepper>
+        <stepper>
+          (cond [#false "isThree"] [#true 3])
         </stepper>
     </body>
 </html>
