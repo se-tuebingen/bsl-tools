@@ -1,6 +1,6 @@
 import {processBslTrees} from './BSL_Tree';
 import {processJsonTrees} from './JSON_Tree';
-import {processSteppers} from './SI';
+import {processSteppers} from './SI_Renderer';
 
 // setup callbacks
 window.onload = () => {
