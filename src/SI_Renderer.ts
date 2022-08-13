@@ -5,6 +5,7 @@ import { dirtify } from './Production_Tree';
 import {default as small_interpreter_css} from './ressources/small-interpreter.css';
 import { calculateAllSteps } from './SI';
 import * as BSL_Print from './BSL_Print';
+import {getParentClassRecursive} from './DOM_Helpers';
 
 // main function processing steppers
 export function processSteppers() {
@@ -108,7 +109,16 @@ function renderStep(step: SI_STRUCT.StepResult): string {
   if (!context.right.startsWith(')')) context.right = ` ${context.right}`;
   return `
     <div class="step"
-         step="${step.currentStep}">
+         step="${step.currentStep}"
+         currentStep="${step.currentStep === 0 ? 'true' : 'false'}">
+       <div class="prev-button"
+            onclick="prevStep(event)">
+          Previous Step
+       </div>
+       <div class="next-button"
+            onclick="nextStep(event)">
+         Next Step
+       </div>
 
        <div class="split-result">${
          context.left
@@ -124,6 +134,22 @@ function renderStep(step: SI_STRUCT.StepResult): string {
 
     </div>
   `;
+}
+(window as any).nextStep = (e: Event) => {
+  const button = e.target as HTMLElement;
+  const currentStep = getParentClassRecursive(button, 'step');
+  if(currentStep && currentStep.nextElementSibling) {
+    currentStep.setAttribute('currentStep', 'false');
+    currentStep.nextElementSibling.setAttribute('currentStep', 'true');
+  }
+}
+(window as any).prevStep = (e: Event) => {
+  const button = e.target as HTMLElement;
+  const currentStep = getParentClassRecursive(button, 'step');
+  if(currentStep && currentStep.previousElementSibling) {
+    currentStep.setAttribute('currentStep', 'false');
+    currentStep.previousElementSibling.setAttribute('currentStep', 'true');
+  }
 }
 
 // recursive definition of printing the context

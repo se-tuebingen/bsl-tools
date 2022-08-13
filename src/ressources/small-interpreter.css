@@ -1,6 +1,6 @@
 .stepper {
-  /* --branch-color: #666;
-  --node-background: #ebf0f4; /* racket azure */
+  /* --branch-color: #666; */
+  --step-background: #ebf0f4; /* racket azure */
   --text-grey: #444; /* like in scribble */
   --hole-yellow: #fdf68d; /* pale yellow */
   /* --highlight-border-connectors: lime;
@@ -8,20 +8,13 @@
   --correct-background: lime;
   --hole-selection-background: white; */
 }
+/* general layout */
 div.stepper {
     display:flex;
     flex-direction:column;
     align-items:center;
     font-size: 1.2em;
 }
-/* .eval-step{
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: left;
-    max-width: 1200px;
-    margin: 2vh auto;
-} */
 .stepper .program-wrapper{
 margin:2vw;
 padding: 1vh 2vw;
@@ -34,9 +27,42 @@ border: 1px solid #000;
     flex-direction: column;
     margin: 1vh auto;
 }
+/* single step */
 .stepper .step {
   margin-bottom: 0.5em;
+  position: relative;
+  background-color: var(--step-background);
 }
+
+/* ####### buttons ###### */
+.stepper .step[currentStep="true"] {
+  padding-top: 2em;
+  padding-bottom: 2em;
+}
+.stepper .prev-button, .stepper .next-button {
+  display: none;
+}
+.stepper [currentStep="true"] .prev-button, .stepper [currentStep="true"] .next-button {
+  position: absolute;
+  display: inline-block;
+  left: 0;
+  right: 0;
+  margin-left: 0 auto;
+  margin-right: 0 auto;
+  padding: 0.25em;
+  border: 1px solid black;
+}
+.stepper .prev-button:hover, .stepper .next-button:hover {
+  cursor: pointer;
+}
+.stepper .prev-button {
+  top: 0;
+}
+.stepper .next-button {
+  bottom: 0;
+}
+
+/* ######### code and rules ####### */
 .stepper .split-result, .stepper .plug-result {
   font-family: 'Fira Sans', monospace;
   color: var(--text-grey);
@@ -75,35 +101,7 @@ border: 1px solid #000;
   transform: rotate(45deg);
 }
 
-/* .step-result{
-}
-
-[visible="false"]{
-    display: none;
-}
-
-[visible="true"]{
-    display: block;
-}
-
-.split-rule-plug{
-    display: flex;
-    flex-direction: row;
-    max-width:1200px;
-    margin: 2vh auto;
-    padding: 1vw;
-    border: 1px solid #000;
-}
-.split,.rule,.plug{
-    padding: 0 1.3vw;
-    margin:0 1.2vw;
-}
-pre{
-    margin: 1vh 0 3vh 0;
-    font-size: 1.1em;
-} */
-
-.step-button{
-    padding: 2vw;
-    font-size:1.1em;
+/* ##### showing and hiding stuff #### */
+.stepper .step[currentStep="true"] ~ .step {
+  display: none;
 }
