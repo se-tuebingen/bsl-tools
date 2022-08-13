@@ -82,32 +82,48 @@ function renderStepper(stepper: SI_STRUCT.Stepper): string{
 // one individual step
 function renderStep(step: SI_STRUCT.StepResult): string {
   console.log(`Rendering step ${step.currentStep}`);
+  const finished = !SI_STRUCT.isSplit(step.splitResult);
+  const context:Context =
+    finished ? {left:'', right:''}
+             : printContext((step.splitResult  as SI_STRUCT.Split).context);
+  const redex =
+    finished ? `${step.splitResult}`
+             : printRedex((step.splitResult as SI_STRUCT.Split).redex);
+  let rule;
+  let ruleName = '';
+  if (SI_STRUCT.isKong(step.plugResult.rule)) {
+    ruleName = 'Kong + ';
+    rule = step.plugResult.rule.redexRule;
+  } else {
+    rule = step.plugResult.rule;
+  }
+  let result;
+  if (SI_STRUCT.isPrim(rule)) {
+    result = `${rule.result}`;
+    ruleName = `${ruleName}Prim`;
+  } else if (SI_STRUCT.isCondRule(rule)) {
+    result = BSL_Print.printE(rule.result);
+    ruleName = `${ruleName}Cond`;
+  }
+  if (!context.right.startsWith(')')) context.right = ` ${context.right}`;
   return `
     <div class="step"
          step="${step.currentStep}">
-      ${renderSplitResult(step.splitResult)}
-      ${renderRule(step)}
-      ${renderPlugResult(step.plugResult, step.splitResult)}
-    </div>
-  `;
-}
 
-// split result as code with redex highlighted
-function renderSplitResult(split: SI_STRUCT.SplitResult): string {
-  if (SI_STRUCT.isSplit(split)) {
-    console.log(split);
-    const context:Context = printContext(split.context);
-    const redex = printRedex(split.redex);
-    return `
-      <div class="split-result">${
+       <div class="split-result">${
+         context.left
+       } <span class="hole">${redex}<span class="rule">${ruleName}</span></span>${
+         context.right
+       }</div>
+
+      <div class="plug-result">${
         context.left
-      } <span class="hole">${redex}</span> ${
+      } <span class="hole">${result}</span>${
         context.right
       }</div>
-    `;
-  } else {
-    return `${split}`;
-  }
+
+    </div>
+  `;
 }
 
 // recursive definition of printing the context
@@ -136,42 +152,6 @@ function printRedex(redex: SI_STRUCT.Redex): string {
     return `(cond ${redex.options.map(BSL_Print.printOption).join(' ')})`;
   } else {
     throw "Invalid Input to printRedex";
-  }
-}
-
-// rule showing what the redex becomes
-function renderRule(step: SI_STRUCT.StepResult): string {
-  console.log(step);
-  return `
-    <div class="rule"> todo: prim rule on redex </div>
-  `;
-}
-
-// plug result as code with redex result highlighted
-function renderPlugResult(res: SI_STRUCT.PlugResult, split: SI_STRUCT.SplitResult): string {
-  let rule;
-  if (SI_STRUCT.isKong(res.rule)) {
-    rule = res.rule.redexRule;
-  } else {
-    rule = res.rule;
-  }
-  let result;
-  if (SI_STRUCT.isPrim(rule)) {
-    result = `${rule.result}`;
-  } else if (SI_STRUCT.isCondRule(rule)) {
-    result = BSL_Print.printE(rule.result);
-  }
-  if (SI_STRUCT.isSplit(split)) {
-    const context:Context = printContext(split.context);
-    return `
-      <div class="split-result">${
-        context.left
-      } <span class="hole">${result}</span> ${
-        context.right
-      }</div>
-    `;
-  } else {
-    return `${split}`;
   }
 }
 

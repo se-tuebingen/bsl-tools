@@ -34,9 +34,15 @@ border: 1px solid #000;
     flex-direction: column;
     margin: 1vh auto;
 }
+.stepper .step {
+  margin-bottom: 0.5em;
+}
 .stepper .split-result, .stepper .plug-result {
   font-family: 'Fira Sans', monospace;
   color: var(--text-grey);
+}
+.stepper .split-result {
+  margin-bottom: 1.75em;
 }
 .stepper .hole {
   display: inline-block;
@@ -46,6 +52,27 @@ border: 1px solid #000;
   padding-left: 0.25em;
   padding-right: 0.25em;
   position: relative;
+}
+.stepper .rule {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 120%;
+  border-left: 2px solid var(--text-grey);
+  padding-left: .5em;
+  width: 200%; /* todo */
+}
+/* arrow head */
+.stepper .rule::after {
+  position: absolute;
+  content: '';
+  left: -0.35em; /* ca. sqrt(2)/2 * 0.5em */
+  bottom: 0;
+  width: 0.5em;
+  height: 0.5em;
+  border-right: 2px solid var(--text-grey);
+  border-bottom: 2px solid var(--text-grey);
+  transform: rotate(45deg);
 }
 
 /* .step-result{
