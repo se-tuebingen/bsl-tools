@@ -1,4 +1,14 @@
-stepper{
+.stepper {
+  /* --branch-color: #666;
+  --node-background: #ebf0f4; /* racket azure */
+  --text-grey: #444; /* like in scribble */
+  --hole-yellow: #fdf68d; /* pale yellow */
+  /* --highlight-border-connectors: lime;
+  --wrong-background: red;
+  --correct-background: lime;
+  --hole-selection-background: white; */
+}
+div.stepper {
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -12,20 +22,33 @@ stepper{
     max-width: 1200px;
     margin: 2vh auto;
 } */
-.program-wrapper{
+.stepper .program-wrapper{
 margin:2vw;
-padding: 1vh 2vw; 
+padding: 1vh 2vw;
 font-size: 1.1em;
 font-weight: 600;
 border: 1px solid #000;
 }
-.program-overview{
+.stepper .program-overview{
     display: flex;
     flex-direction: column;
     margin: 1vh auto;
 }
+.stepper .split-result {
+  font-family: 'Fira Sans', monospace;
+  color: var(--text-grey);
+}
+.stepper .hole {
+  display: inline-block;
+  background-color: var(--hole-yellow);
+  border: 1px solid var(--text-grey);
+  color: var(--text-grey);
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  position: relative;
+}
 
-.step-result{
+/* .step-result{
 }
 
 [visible="false"]{
@@ -51,7 +74,7 @@ border: 1px solid #000;
 pre{
     margin: 1vh 0 3vh 0;
     font-size: 1.1em;
-}
+} */
 
 .step-button{
     padding: 2vw;
