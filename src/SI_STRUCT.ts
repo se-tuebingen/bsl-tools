@@ -92,7 +92,7 @@ export interface CondRule{
     type: Production.CondRule;
     redex: CondRedex;
     result: BSL_AST.expr;
-} 
+}
 export type OneRule = Prim | CondRule;
 
 // ####### ProgStepRule(s) ########
@@ -127,6 +127,9 @@ export function isKong(obj: any): obj is Kong {
 }
 export function isOneRule(obj: any): obj is OneRule {
     return obj.type === Production.Prim;
+}
+export function isCondRule(obj: any): obj is CondRule {
+    return obj.type === Production.CondRule;
 }
 export function isValue(obj: any): obj is Value {
     return typeof obj === "number" || typeof obj === "string" || typeof obj === "boolean" || obj === `'()`;

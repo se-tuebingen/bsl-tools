@@ -87,7 +87,7 @@ function renderStep(step: SI_STRUCT.StepResult): string {
          step="${step.currentStep}">
       ${renderSplitResult(step.splitResult)}
       ${renderRule(step)}
-      ${renderPlugResult(step.plugResult)}
+      ${renderPlugResult(step.plugResult, step.splitResult)}
     </div>
   `;
 }
@@ -148,11 +148,31 @@ function renderRule(step: SI_STRUCT.StepResult): string {
 }
 
 // plug result as code with redex result highlighted
-function renderPlugResult(res: SI_STRUCT.PlugResult): string {
-  console.log(res);
-  return `
-    <div class="plug-result"> todo: result code with hole </div>
-  `;
+function renderPlugResult(res: SI_STRUCT.PlugResult, split: SI_STRUCT.SplitResult): string {
+  let rule;
+  if (SI_STRUCT.isKong(res.rule)) {
+    rule = res.rule.redexRule;
+  } else {
+    rule = res.rule;
+  }
+  let result;
+  if (SI_STRUCT.isPrim(rule)) {
+    result = `${rule.result}`;
+  } else if (SI_STRUCT.isCondRule(rule)) {
+    result = BSL_Print.printE(rule.result);
+  }
+  if (SI_STRUCT.isSplit(split)) {
+    const context:Context = printContext(split.context);
+    return `
+      <div class="split-result">${
+        context.left
+      } <span class="hole">${result}</span> ${
+        context.right
+      }</div>
+    `;
+  } else {
+    return `${split}`;
+  }
 }
 
 // function renderStepResult(stepperTree: SI_STRUCT.StepResult[], stepResult: SI_STRUCT.StepResult): string{

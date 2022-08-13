@@ -34,7 +34,7 @@ border: 1px solid #000;
     flex-direction: column;
     margin: 1vh auto;
 }
-.stepper .split-result {
+.stepper .split-result, .stepper .plug-result {
   font-family: 'Fira Sans', monospace;
   color: var(--text-grey);
 }
