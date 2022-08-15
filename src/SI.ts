@@ -22,12 +22,12 @@ export function calculateAllSteps(
                 return stepResult;
             }
         }
-        const newStepper = {
+        const newStepper: SI_STRUCT.Stepper = {
             type: SI_STRUCT.Production.Stepper,
             root: stepper.root,
             originExpr: stepper.originExpr,
             stepperTree: stepperTree,
-        } as SI_STRUCT.Stepper;
+        };
         newStepper.stepperTree.map((step, i) => (step.currentStep = i));
         return newStepper;
     }
@@ -99,9 +99,6 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
                 exprLst.push(args[i]);
             }
         });
-        console.log("valueLst", valueLst);
-        console.log("exprLst", exprLst);
-        console.log("pos", pos);
         /* for (let i = 0; i < args.length; i++) {
             let arg = args[i];
             if (BSL_AST.isLiteral(arg)) {
@@ -157,20 +154,16 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
         const clause = expr.options[0];
         // if condition is already reduced, build CondRedex
         if (BSL_AST.isLiteral(clause.condition)) {
-            const condition = clause.condition;
             return {
                 type: SI_STRUCT.Production.Split,
                 redex: {
                     type: SI_STRUCT.Production.CondRedex,
-                    options: [
-                        { type: BSL_AST.Production.CondOption, condition: condition, result: clause.result },
-                        ...expr.options.slice(1),
-                    ],
+                    options: expr.options,
                 },
                 context: hole,
             };
         }
-        // else build other Redex
+        // else split condition
         else {
             return Error("not implemented");
         }
@@ -197,7 +190,7 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | Error {
             return Error("error: prim is not applicable");
         }
     } else if (SI_STRUCT.isCondRedex(r)) {
-        // const clause = r.options[0];
+        const clause = r.options[0];
         const condResult = cond(r);
         if (BSL_AST.isExpr(condResult)) {
             return {
@@ -223,6 +216,7 @@ export function plug(
     //check if context is a Hole
     if (SI_STRUCT.isHole(c)) {
         // Apply OneRule
+        console.log("plug: oneRule", oneRule);
         return {
             type: SI_STRUCT.Production.PlugResult,
             expr: oneRule.result,

@@ -12,6 +12,7 @@ export enum Production {
     Hole = "Hole",
     Prim = "Prim",
     CondRule = "CondRule",
+    ProgRule = "ProgRule",
     Kong = "Kong"
 }
 
@@ -91,9 +92,12 @@ export interface Prim {
 export interface CondRule {
     type: Production.CondRule;
     redex: CondRedex;
-    result: BSL_AST.expr;
+    result: BSL_AST.expr | Value;
 }
-export type OneRule = Prim | CondRule;
+export interface ProgRule {
+    type: Production.ProgRule;
+}
+export type OneRule = Prim | CondRule; /*| ProgRule*/
 
 // ####### ProgStepRule(s) ########
 export interface Kong {
@@ -101,6 +105,19 @@ export interface Kong {
     //context: Context;
     redexRule: OneRule;
 }
+// ######### DEFINITIONS ########
+
+// definition is either structDef, funDef or constDef
+// DefRules PROG, STRUCT, FUN, CONST
+
+
+// ENVIRONMENT
+// interface Environment :Map = {[key: string]: Value};
+
+
+
+
+
 // ##########################
 
 // runtime type checking
@@ -128,14 +145,17 @@ export function isSplit(obj: any): obj is Split {
 export function isPlugResult(obj: any): obj is PlugResult {
     return obj.type === Production.PlugResult;
 }
+export function isOneRule(obj: any): obj is OneRule {
+    return obj.type === Production.Prim || obj.type === Production.CondRule;
+}
 export function isPrim(obj: any): obj is Prim {
     return obj.type === Production.Prim;
 }
+export function isCondRule(obj: any): obj is CondRule {
+    return obj.type === Production.CondRule;
+}
 export function isKong(obj: any): obj is Kong {
     return obj.type === Production.Kong;
-}
-export function isOneRule(obj: any): obj is OneRule {
-    return obj.type === Production.Prim;
 }
 export function isValue(obj: any): obj is Value {
     return typeof obj === "number" || typeof obj === "string" || typeof obj === "boolean" || obj === `'()`;
