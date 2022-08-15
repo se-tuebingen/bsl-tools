@@ -70,17 +70,39 @@ export function calculateStep(
 }
 
 //split
-// Expression => SplitResult | Error
+// Expression = > SplitResult | Error
 export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
     const hole: SI_STRUCT.Hole = { type: SI_STRUCT.Production.Hole };
     if (BSL_AST.isCall(expr)) {
         const name = expr.name;
         const args = expr.args;
-        let pos = -1;
         const valueLst: SI_STRUCT.Value[] = [];
         const exprLst: BSL_AST.expr[] = [];
-        // get all values from the left side
-        for (let i = 0; i < args.length; i++) {
+        // find position with map
+        let pos = -1;
+        let posFound = false;
+        const valueMap = args.map((arg, i) => {
+            if (!posFound && BSL_AST.isLiteral(arg)) {
+                return "left";
+            } else if (!posFound && !BSL_AST.isLiteral(arg)) {
+                posFound = true;
+                pos = i;
+                return "middle";
+            } else {
+                return "right";
+            }
+        });
+        valueMap.map((el, i) => {
+            if (el == "left") {
+                valueLst.push((args[i] as BSL_AST.Literal).value);
+            } else if (el == "right") {
+                exprLst.push(args[i]);
+            }
+        });
+        console.log("valueLst", valueLst);
+        console.log("exprLst", exprLst);
+        console.log("pos", pos);
+        /* for (let i = 0; i < args.length; i++) {
             let arg = args[i];
             if (BSL_AST.isLiteral(arg)) {
                 valueLst.push(arg.value);
@@ -90,7 +112,7 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
                 pos = i;
                 break;
             }
-        }
+        } */
         // if there is no context, if all arguments are values
         if (pos == -1) {
             const redex: SI_STRUCT.CallRedex = {
@@ -105,14 +127,14 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
             };
             // else get all expressions from the right side
         } else {
-            for (let i = pos + 1; i < args.length; i++) {
+            /* for (let i = pos + 1; i < args.length; i++) {
                 let arg = args[i];
                 if (BSL_AST.isExpr(arg)) {
                     exprLst.push(arg);
                 } else {
                     return new Error("split: argument is not an expression " + arg + i);
                 }
-            }
+            } */
             const expr: BSL_AST.expr = args[pos];
             const splitResult = split(expr);
             if (SI_STRUCT.isSplit(splitResult)) {
