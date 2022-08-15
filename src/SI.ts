@@ -263,7 +263,7 @@ export function plug(
 
 // ####### ONE RULE FUNCTIONS #######
 //TODO: refactor prim with map instead of for loop
-export function prim(r: SI_STRUCT.CallRedex): SI_STRUCT.Value | null | Error {
+export function prim(r: SI_STRUCT.CallRedex): SI_STRUCT.Value | Error {
     // + - * /
     if (r.name.symbol === "+") {
         let n = 0;
@@ -309,8 +309,48 @@ export function prim(r: SI_STRUCT.CallRedex): SI_STRUCT.Value | null | Error {
             }
         }
         return n;
+    }
+    // and, or, not
+    else if (r.name.symbol === "and") {
+        if (r.args.every(el => typeof el == "boolean")) {
+            if (r.args.length >= 2) {
+                if (r.args.every(el => el)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return Error("prim: 'and' needs at least two arguments");
+            }
+        } else {
+            return Error("prim: 'and' needs boolean arguments");
+        }
+    } else if (r.name.symbol === "or") {
+        if (r.args.every(el => typeof el == "boolean")) {
+            if (r.args.length >= 2) {
+                if (r.args.some(el => el)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return Error("prim: 'or' needs at least two arguments");
+            }
+        } else {
+            return Error("prim: 'or' needs boolean arguments");
+        }
+    } else if (r.name.symbol === "not") {
+        if (typeof r.args[0] == "boolean") {
+            if (r.args.length == 1) {
+                return !r.args[0];
+            } else {
+                return Error("prim: 'not' needs exactly one argument");
+            }
+        } else {
+            return Error("prim: 'not' needs boolean argument");
+        }
     } else {
-        return null;
+        return Error("prim: this function is not implemented");
     }
 }
 

@@ -29,6 +29,11 @@
         <stepper>
           (cond [#false "isThree"] [#true 3])
         </stepper>
+        <stepper>
+          (cond [(and #true #false) "isThree"] 
+          [#false 3] 
+          [(or #true #false) (* 2 3 4)])
+        </stepper>
         <h2>Error Tests</h2>
         <h3>Call without defined function</h3>
         <stepper>
