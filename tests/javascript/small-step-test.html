@@ -25,5 +25,10 @@
         <stepper>
           (cond [#false "isThree"] [#true 3])
         </stepper>
+        <h2>Error Tests</h2>
+        <h3>Call without defined function</h3>
+        <stepper>
+          (call 1 2 3)
+        </stepper>
     </body>
 </html>

@@ -104,6 +104,12 @@ export interface Kong {
 // ##########################
 
 // runtime type checking
+export function isStepper(obj:any): obj is Stepper {
+    return obj.type === Production.Stepper;
+}
+export function isStepResult(obj: any):obj is StepResult {
+    return obj.type === Production.StepResult;
+}
 export function isCallRedex(obj: any): obj is CallRedex {
     return obj.type === Production.CallRedex;
 }
@@ -118,6 +124,9 @@ export function isAppContext(obj: any): obj is AppContext {
 }
 export function isSplit(obj: any): obj is Split {
     return obj.type === Production.Split;
+}
+export function isPlugResult(obj: any): obj is PlugResult {
+    return obj.type === Production.PlugResult;
 }
 export function isPrim(obj: any): obj is Prim {
     return obj.type === Production.Prim;
