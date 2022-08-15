@@ -1,6 +1,8 @@
 .stepper {
   /* --branch-color: #666; */
   --step-background: #ebf0f4; /* racket azure */
+  --box-border: #0d3657;
+  --button-border: #0d3657;
   --text-grey: #444; /* like in scribble */
   --hole-yellow: #fdf68d; /* pale yellow */
   /* --highlight-border-connectors: lime;
@@ -14,6 +16,8 @@ div.stepper {
     flex-direction:column;
     align-items:center;
     font-size: 1.2em;
+    box-sizing: border-box;
+    font-family: sans-serif;
 }
 .stepper .program-wrapper{
 margin:2vw;
@@ -27,17 +31,27 @@ border: 1px solid #000;
     flex-direction: column;
     margin: 1vh auto;
 }
+.stepper .steps {
+  background-color: var(--step-background);
+  padding: 0.5em;
+  border: 1px solid var(--box-border);
+  border-radius: 0.5em;
+}
 /* single step */
 .stepper .step {
   margin-bottom: 0.5em;
   position: relative;
-  background-color: var(--step-background);
+  background-color: white;
+  padding: 0.5em;
 }
 
 /* ####### buttons ###### */
 .stepper .step[currentStep="true"] {
-  padding-top: 2em;
-  padding-bottom: 2em;
+  padding-top: 1.5em;
+  margin-top: 1.5em;
+  padding-bottom: 1em;
+  margin-bottom: 1.5em;
+
 }
 .stepper .prev-button, .stepper .next-button {
   display: none;
@@ -45,21 +59,21 @@ border: 1px solid #000;
 .stepper [currentStep="true"] .prev-button, .stepper [currentStep="true"] .next-button {
   position: absolute;
   display: inline-block;
-  left: 0;
-  right: 0;
-  margin-left: 0 auto;
-  margin-right: 0 auto;
-  padding: 0.25em;
-  border: 1px solid black;
+  right: 2em;
+  padding: 0.5em;
+  font-size: small;
+  border: 1px solid var(--button-border);
+  background-color: white;
+  border-radius: 0.25em;
 }
 .stepper .prev-button:hover, .stepper .next-button:hover {
   cursor: pointer;
 }
 .stepper .prev-button {
-  top: 0;
+  top: -1em;
 }
 .stepper .next-button {
-  bottom: 0;
+  bottom: -1em;
 }
 
 /* ######### code and rules ####### */
@@ -67,8 +81,10 @@ border: 1px solid #000;
   font-family: 'Fira Sans', monospace;
   color: var(--text-grey);
 }
-.stepper .split-result {
-  margin-bottom: 1.75em;
+.stepper .plug-result {
+  margin-top: 1.75em;
+  position: relative;
+  z-index: 2;
 }
 .stepper .hole {
   display: inline-block;
@@ -83,22 +99,52 @@ border: 1px solid #000;
   display: block;
   position: absolute;
   left: 0;
-  top: 120%;
-  border-left: 2px solid var(--text-grey);
+  top: -125%;
   padding-left: .5em;
-  width: 200%; /* todo */
+  width: fit-content;
+  white-space: nowrap;
+  font-variant-caps: small-caps;
 }
-/* arrow head */
-.stepper .rule::after {
+.stepper .kong {
+  top: calc(2px - 125%); /* account for difference to hole height (2 times 1px border)*/
+  padding-left: 0;
+  background-color: white;
+  border: 1px solid black;
+  font-size: small;
+}
+
+/* arrow body */
+.stepper .left-arrowed::before {
   position: absolute;
   content: '';
-  left: -0.35em; /* ca. sqrt(2)/2 * 0.5em */
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-left: 2px solid var(--text-grey);
+}
+.stepper .kong::before {
+  left: 0.35em;
+  top: -50%;
+  height: 200%;
+  border-left: 2px dotted var(--text-grey);
+  z-index: -1;
+}
+
+/* arrow head */
+.stepper .left-arrowed::after {
+  position: absolute;
+  content: '';
+  left: calc(2px - 0.35em); /*-0.35em; /* ca. sqrt(2)/2 * 0.5em */
   bottom: 0;
   width: 0.5em;
   height: 0.5em;
   border-right: 2px solid var(--text-grey);
   border-bottom: 2px solid var(--text-grey);
   transform: rotate(45deg);
+}
+.stepper .kong::after {
+  left: 2px;
+  bottom: -50%;
 }
 
 /* ##### showing and hiding stuff #### */

@@ -91,44 +91,45 @@ function renderStep(step: SI_STRUCT.StepResult): string {
     finished ? `${step.splitResult}`
              : printRedex((step.splitResult as SI_STRUCT.Split).redex);
   let rule;
-  let ruleName = '';
   if (SI_STRUCT.isKong(step.plugResult.rule)) {
-    ruleName = 'Kong + ';
     rule = step.plugResult.rule.redexRule;
   } else {
     rule = step.plugResult.rule;
   }
   let result;
+  let ruleName = '';
   if (SI_STRUCT.isPrim(rule)) {
     result = `${rule.result}`;
-    ruleName = `${ruleName}Prim`;
+    ruleName = 'Prim';
   } else if (SI_STRUCT.isCondRule(rule)) {
     result = BSL_Print.printE(rule.result);
-    ruleName = `${ruleName}Cond`;
+    ruleName = 'Cond';
   }
   if (!context.right.startsWith(')')) context.right = ` ${context.right}`;
   return `
     <div class="step"
          step="${step.currentStep}"
          currentStep="${step.currentStep === 0 ? 'true' : 'false'}">
-       <div class="prev-button"
-            onclick="prevStep(event)">
-          Previous Step
-       </div>
-       <div class="next-button"
-            onclick="nextStep(event)">
-         Next Step
-       </div>
+      <div class="prev-button"
+           onclick="prevStep(event)">
+        Previous Step ^
+      </div>
+      <div class="next-button"
+           onclick="nextStep(event)">
+        Next Step v
+      </div>
 
-       <div class="split-result">${
-         context.left
-       } <span class="hole">${redex}<span class="rule">${ruleName}</span></span>${
-         context.right
-       }</div>
+      <div class="split-result">${
+        context.left
+      } <span class="hole">${redex}</span>${
+        context.right
+      }</div>
 
       <div class="plug-result">${
+        context.left !== '' ? '<span class="rule left-arrowed kong">Kong</span>' : ''
+      }${
         context.left
-      } <span class="hole">${result}</span>${
+      } <span class="hole">${result}<span class="rule left-arrowed">${ruleName}</span></span>${
         context.right
       }</div>
 
