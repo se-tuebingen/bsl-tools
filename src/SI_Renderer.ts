@@ -3,6 +3,10 @@ import * as SI_STRUCT from "./SI_STRUCT";
 import { parse } from './BSL_Parser';
 import { dirtify } from './Production_Tree';
 import {default as small_interpreter_css} from './ressources/small-interpreter.css';
+import { default as angle_up } from './ressources/icons/angle-up-solid.svg';
+import { default as angle_down } from './ressources/icons/angle-down-solid.svg';
+import { default as plus_icon } from './ressources/icons/plus-solid.svg';
+import { default as minus_icon } from './ressources/icons/minus-solid.svg';
 import { calculateAllSteps } from './SI';
 import * as BSL_Print from './BSL_Print';
 import {getParentClassRecursive} from './DOM_Helpers';
@@ -70,7 +74,8 @@ function renderStepper(stepper: SI_STRUCT.Stepper): string{
             <pre><code>${BSL_Print.printE(originExpr)}</code></pre>
         </div>
         <div class="steps">
-        ${stepperTree.map(el => renderStep(el)).join('')}
+          <div class="blocklabel">Current Evaluation</div>
+          ${stepperTree.map(el => renderStep(el)).join('')}
         </div>
         <div class="buttons">
             <button class="step-button" id="prevButton" style="visibility: hidden">Previous Step</button>
@@ -109,21 +114,28 @@ function renderStep(step: SI_STRUCT.StepResult): string {
   return `
     <div class="step"
          step="${step.currentStep}"
-         currentStep="${step.currentStep === 0 ? 'true' : 'false'}">
+         currentStep="${step.currentStep === 0 ? 'true' : 'false'}"
+         collapsed="false">
       <div class="prev-button"
            onclick="prevStep(event)">
-        Previous Step ^
+        Previous Step <img class="icon" src="${angle_up}">
       </div>
       <div class="next-button"
            onclick="nextStep(event)">
-        Next Step v
+        Next Step <img class="icon" src="${angle_down}">
       </div>
 
       <div class="split-result">${
         context.left
       } <span class="hole">${redex}</span>${
         context.right
-      }</div>
+      }<img class="icon expander"
+            src="${plus_icon}"
+            onclick="expand(event)"
+      ><img class="icon collapser"
+            src="${minus_icon}"
+            onclick="collapse(event)"
+      ></div>
 
       <div class="plug-result">${
         context.left !== '' ? '<span class="rule left-arrowed kong">Kong</span>' : ''
@@ -141,7 +153,9 @@ function renderStep(step: SI_STRUCT.StepResult): string {
   const currentStep = getParentClassRecursive(button, 'step');
   if(currentStep && currentStep.nextElementSibling) {
     currentStep.setAttribute('currentStep', 'false');
+    currentStep.setAttribute('collapsed', 'true');
     currentStep.nextElementSibling.setAttribute('currentStep', 'true');
+    currentStep.nextElementSibling.setAttribute('collapsed','false');
   }
 }
 (window as any).prevStep = (e: Event) => {
@@ -149,7 +163,23 @@ function renderStep(step: SI_STRUCT.StepResult): string {
   const currentStep = getParentClassRecursive(button, 'step');
   if(currentStep && currentStep.previousElementSibling) {
     currentStep.setAttribute('currentStep', 'false');
+    currentStep.setAttribute('collapsed', 'true');
     currentStep.previousElementSibling.setAttribute('currentStep', 'true');
+    currentStep.previousElementSibling.setAttribute('collapsed', 'false');
+  }
+}
+(window as any).collapse = (e: Event) => {
+  const button = e.target as HTMLElement;
+  const step = getParentClassRecursive(button, 'step');
+  if(step) {
+    step.setAttribute('collapsed', 'true');
+  }
+}
+(window as any).expand = (e: Event) => {
+  const button = e.target as HTMLElement;
+  const step = getParentClassRecursive(button, 'step');
+  if(step) {
+    step.setAttribute('collapsed', 'false');
   }
 }
 
