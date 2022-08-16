@@ -62,7 +62,7 @@ div.stepper {
 }
 
 /* ####### buttons ###### */
-.stepper .step[currentStep="true"] {
+.stepper .step[data-currentStep="true"] {
   padding-top: 1.5em;
   margin-top: 1.5em;
   padding-bottom: 1em;
@@ -72,7 +72,7 @@ div.stepper {
 .stepper .prev-button, .stepper .next-button {
   display: none;
 }
-.stepper [currentStep="true"] .prev-button, .stepper [currentStep="true"] .next-button {
+.stepper [data-currentStep="true"] .prev-button, .stepper [data-currentStep="true"] .next-button {
   position: absolute;
   display: inline-block;
   right: 2em;
@@ -166,10 +166,10 @@ div.stepper {
 }
 
 /* ##### showing and hiding stuff #### */
-.stepper .step[currentStep="true"] ~ .step {
+.stepper .step[data-currentStep="true"] ~ .step {
   display: none;
 }
-.stepper .step[collapsed="true"] .plug-result {
+.stepper .step[data-collapsed="true"] .plug-result {
   display: none;
 }
 .stepper .expander, .stepper .collapser {
@@ -180,9 +180,9 @@ div.stepper {
 .stepper .expander:hover, .stepper .collapser:hover {
   cursor: pointer;
 }
-.stepper .step[collapsed="true"] .collapser {
+.stepper .step[data-collapsed="true"] .collapser {
   display: none;
 }
-.stepper .step[collapsed="false"] .expander {
+.stepper .step[data-collapsed="false"] .expander {
   display: none;
 }

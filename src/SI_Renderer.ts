@@ -11,7 +11,7 @@ import { calculateAllSteps } from './SI';
 import * as BSL_Print from './BSL_Print';
 import {getParentClassRecursive} from './DOM_Helpers';
 
-// main function processing steppers
+// ######### main function processing steppers ###########
 export function processSteppers() {
   Array.from(document.getElementsByTagName('stepper')).map(el => {
     try {
@@ -43,6 +43,7 @@ export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
       styleNode.id = 'bsl-tools-stepper-style';
       document.getElementsByTagName('head')[0].appendChild(styleNode);
     }
+    // calculate Steps
     const expr =  program[0] as BSL_AST.expr;
     console.log("expression", expr);
     const emptyStepper = {
@@ -53,40 +54,59 @@ export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
     } as SI_STRUCT.Stepper;
     const stepper = calculateAllSteps(expr, emptyStepper);
     console.log("stepper", stepper);
-    el.innerHTML = renderStepper(stepper);
-    // const prevButton = el.querySelector("#prevButton") as HTMLButtonElement;
-    // const nextButton = el.querySelector("#nextButton") as HTMLButtonElement;
-    // prevButton.addEventListener("click", previousStep);
-    // nextButton.addEventListener("click", nextStep);
+    // set language
+    let lang = el.getAttribute('lang');
+    if (!lang) {
+      lang = 'en';
+    } else if (!implementedLanguages.includes(lang)) {
+      console.error(`
+        Language ${lang} is not implemented for this module,
+        you can choose from ${implementedLanguages.join(',')}.
+        Defaulting to 'en'.
+      `);
+      lang = 'en';
+    }
+    // render and attach
+    el.innerHTML = renderStepper(stepper, lang as implementedLanguage);
 }
+
+// ###### internationalization for this module #####
+// mainly for quiz, currently
+type implementedLanguage = 'en' | 'de';
+const implementedLanguages = ['en', 'de'];
+
+const dictionary = {
+  'en': {
+    'current evaluation': 'Current Evaluation',
+    'next step': 'Next Step',
+    'previous step': 'Previous Step'
+  },
+  'de': {
+    'current evaluation': 'Aktuelle Auswertung',
+    'next step': 'Nächster Schritt',
+    'previous step': 'Vorheriger Schritt'
+  },
+};
 
 // ####### RENDER FUNCTIONS #######
 
 
-function renderStepper(stepper: SI_STRUCT.Stepper): string{
+function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): string{
     const stepperTree = stepper.stepperTree;
     const originExpr = stepper.originExpr;
 
     const str =
     `<div class="stepper">
-        <div class="program-wrapper">
-            Original Expression:
-            <pre><code>${BSL_Print.printE(originExpr)}</code></pre>
-        </div>
         <div class="steps">
-          <div class="blocklabel">Current Evaluation</div>
-          ${stepperTree.map(el => renderStep(el)).join('')}
-        </div>
-        <div class="buttons">
-            <button class="step-button" id="prevButton" style="visibility: hidden">Previous Step</button>
-            <button class="step-button" id="nextButton">Next Step</button>
+          <div class="blocklabel">${dictionary[lang]['current evaluation']}</div>
+          ${stepperTree.map(el => renderStep(el, lang)).join('')}
         </div>
     </div>`;
     return str;
 }
 
 // one individual step
-function renderStep(step: SI_STRUCT.StepResult): string {
+function renderStep(step: SI_STRUCT.StepResult, lang: implementedLanguage): string {
   console.log(`Rendering step ${step.currentStep}`);
   const finished = !SI_STRUCT.isSplit(step.splitResult);
   const context:Context =
@@ -113,16 +133,16 @@ function renderStep(step: SI_STRUCT.StepResult): string {
   if (!context.right.startsWith(')')) context.right = ` ${context.right}`;
   return `
     <div class="step"
-         step="${step.currentStep}"
-         currentStep="${step.currentStep === 0 ? 'true' : 'false'}"
-         collapsed="false">
+         data-step="${step.currentStep}"
+         data-currentStep="${step.currentStep === 0 ? 'true' : 'false'}"
+         data-collapsed="false">
       <div class="prev-button"
            onclick="prevStep(event)">
-        Previous Step <img class="icon" src="${angle_up}">
+        ${dictionary[lang]['previous step']} <img class="icon" src="${angle_up}">
       </div>
       <div class="next-button"
            onclick="nextStep(event)">
-        Next Step <img class="icon" src="${angle_down}">
+        ${dictionary[lang]['next step']} <img class="icon" src="${angle_down}">
       </div>
 
       <div class="split-result">${
@@ -152,34 +172,34 @@ function renderStep(step: SI_STRUCT.StepResult): string {
   const button = e.target as HTMLElement;
   const currentStep = getParentClassRecursive(button, 'step');
   if(currentStep && currentStep.nextElementSibling) {
-    currentStep.setAttribute('currentStep', 'false');
-    currentStep.setAttribute('collapsed', 'true');
-    currentStep.nextElementSibling.setAttribute('currentStep', 'true');
-    currentStep.nextElementSibling.setAttribute('collapsed','false');
+    currentStep.setAttribute('data-currentStep', 'false');
+    currentStep.setAttribute('data-collapsed', 'true');
+    currentStep.nextElementSibling.setAttribute('data-currentStep', 'true');
+    currentStep.nextElementSibling.setAttribute('data-collapsed','false');
   }
 }
 (window as any).prevStep = (e: Event) => {
   const button = e.target as HTMLElement;
   const currentStep = getParentClassRecursive(button, 'step');
   if(currentStep && currentStep.previousElementSibling) {
-    currentStep.setAttribute('currentStep', 'false');
-    currentStep.setAttribute('collapsed', 'true');
-    currentStep.previousElementSibling.setAttribute('currentStep', 'true');
-    currentStep.previousElementSibling.setAttribute('collapsed', 'false');
+    currentStep.setAttribute('data-currentStep', 'false');
+    currentStep.setAttribute('data-collapsed', 'true');
+    currentStep.previousElementSibling.setAttribute('data-currentStep', 'true');
+    currentStep.previousElementSibling.setAttribute('data-collapsed', 'false');
   }
 }
 (window as any).collapse = (e: Event) => {
   const button = e.target as HTMLElement;
   const step = getParentClassRecursive(button, 'step');
   if(step) {
-    step.setAttribute('collapsed', 'true');
+    step.setAttribute('data-collapsed', 'true');
   }
 }
 (window as any).expand = (e: Event) => {
   const button = e.target as HTMLElement;
   const step = getParentClassRecursive(button, 'step');
   if(step) {
-    step.setAttribute('collapsed', 'false');
+    step.setAttribute('data-collapsed', 'false');
   }
 }
 
@@ -211,159 +231,3 @@ function printRedex(redex: SI_STRUCT.Redex): string {
     throw "Invalid Input to printRedex";
   }
 }
-
-// function renderStepResult(stepperTree: SI_STRUCT.StepResult[], stepResult: SI_STRUCT.StepResult): string{
-//     const currentStep = stepResult.currentStep;
-//     const programExpr = stepperTree.slice(0, currentStep).map(stepResult => stepResult.plugResult.expr); //renderExprs
-//     const splitResult = stepResult.splitResult; //renderSplitResult
-//     const plugResult = stepResult.plugResult; //renderPlugResult
-//     const str = `<div class="step-result" currentStep="${currentStep}" visible=${(currentStep == 0) ? "true" : "false"}>
-//                     <div class="program-overview">
-//                         Program Overview:
-//                         <ul>
-//                         ${programExpr.map(expr => SI_STRUCT.isValue(expr) ? renderValue(expr) : renderExpr(expr)).join("\n")}
-//                         </ul>
-//                     </div>
-//                     <div class="split-rule-plug">
-//                         <div class="split">
-//                             Split:
-//                             ${renderSplitResult(splitResult)}
-//                         </div>
-//                         ${renderPlugResult(plugResult)}
-//                     </div>
-//                 </div>`;
-//         return str;
-// }
-
-// function renderExpr(expr: BSL_AST.expr):string{
-//     if(BSL_AST.isCall(expr)){
-//         const name = expr.name.symbol;
-//         const args = expr.args.map(arg => renderExpr(arg)).join(" ");
-//         const str = `(${name} ${args})`;
-//         return str;
-//     }else if(BSL_AST.isLiteral(expr)){
-//         const str = `${expr.value}`;
-//         return str;
-//
-//     }else if(SI_STRUCT.isValue(expr)){
-//         const str = `${expr}`;
-//         return str;
-//     } else if (BSL_AST.isCond(expr)){
-//         const str = expr.options.map(el => renderExpr(el.condition) + " -> " + renderExpr(el.result)).join("\n");
-//         return str;
-//     }else{
-//         console.error("error: expr is neither Call nor Literal: " + expr);
-//         return "Neither Call nor Literal";
-//     }
-// }
-// function renderValue(val: SI_STRUCT.Value): string{
-//     const str = `${val}`;
-//     return str;
-// }
-
-// function renderSplitResult(splitResult: SI_STRUCT.SplitResult): string{
-//     if (SI_STRUCT.isSplit(splitResult)){
-//         const redex = splitResult.redex;
-//         const context = splitResult.context;
-//         const redexStr = renderRedex(redex);
-//         const contextStr = (SI_STRUCT.isAppContext(context)) ? renderContext(context) : renderHole(context);
-//         const str = `
-//         <div class="context">
-//             Context: ${contextStr}
-//         </div>
-//         <div class="redex">
-//             Redex: ${redexStr}
-//         </div>`;
-//         return str;
-//     } else{
-//         return `${splitResult}`;
-//     }
-// }
-
-// function renderPlugResult(plugResult: SI_STRUCT.PlugResult): string{
-//     const expr = plugResult.expr;
-//     const rule = plugResult.rule;
-//     const str = `
-//     <div class="rule">
-//         ${SI_STRUCT.isOneRule(rule) ? renderOneRule(rule) : renderKong(rule)}
-//     </div>
-//     <div class="plug">
-//         Plug Result: <pre><code>${SI_STRUCT.isValue(expr) ? renderValue(expr) : renderExpr(expr)}</code></pre>
-//     </div>`;
-//     return str;
-// }
-//
-// function renderRedex(redex: SI_STRUCT.Redex): string{
-//     if (SI_STRUCT.isCallRedex(redex)){
-//         const name = redex.name.symbol;
-//         const args = redex.args.map(arg => renderValue(arg)).join(" ");
-//         const str = `<pre><code>(${name} ${args})</code></pre>`;
-//         return str;
-//     }else if(SI_STRUCT.isCondRedex(redex)){
-//         return "Conditional Redex";
-//     }else{
-//         return "Something went wrong: renderRedex";
-//     }
-// }
-// function renderContext(context: SI_STRUCT.AppContext): string{
-//         const name = context.op ? context.op : "";
-//         const args = context.args.map(arg => SI_STRUCT.isValue(arg) ? renderValue(arg) : renderExpr(arg)).join(" ");
-//         const str = `<pre><code>(${name} ${args})</code></pre>`;
-//         return str;
-// }
-// function renderHole(hole: SI_STRUCT.Hole): string{
-//     return `<span class="hole">[    ]</span>`;
-// }
-// function renderOneRule(rule: SI_STRUCT.OneRule): string{
-//     const type = rule.type;
-//     const str = `${type}`;
-//     console.log(str);
-//     return str;
-// }
-// function renderKong(rule: SI_STRUCT.Kong): string{
-//     const type = rule.type;
-//     //const context = rule.context;
-//     const redexRule = rule.redexRule;
-//     const str = `${type} with ${renderOneRule(redexRule)} `;
-//     return str;
-// }
-//
-// // ####### EVENT HANDLER FUNCTIONS #######
-//
-// //previous step und nextstep function (nicht zusammenfassen in einer function)
-// function previousStep(e:Event){
-//     const button = e.target as HTMLButtonElement;
-//     const wrapper = button.parentElement?.parentElement?.getElementsByClassName("step-result-wrapper")[0];
-//     const visibleResult = wrapper?.querySelector(".step-result[visible=true]") as HTMLDivElement;
-//     const prevVisibleResult = visibleResult?.previousElementSibling as HTMLDivElement;
-//     // change Visibility
-//     visibleResult?.setAttribute("visible", "false");
-//     prevVisibleResult?.setAttribute("visible", "true");
-//     // show next button if hidden
-//     const nextButton = button.parentElement?.querySelector("#nextButton") as HTMLButtonElement;
-//     if(nextButton.style.visibility == "hidden"){
-//         nextButton.setAttribute("style","visibility: visible");
-//     }
-//     if (prevVisibleResult?.getAttribute("currentStep") == "0"){
-//          button.setAttribute("style","visibility: hidden");
-//     }
-// }
-//
-// function nextStep(e: Event): void{
-//     const button = e.target as HTMLButtonElement;
-//     const wrapper = button.parentElement?.parentElement?.getElementsByClassName("step-result-wrapper")[0];
-//     const visibleResult = wrapper?.querySelector(".step-result[visible=true]") as HTMLDivElement;
-//     const nextVisibleResult = visibleResult?.nextElementSibling as HTMLDivElement;
-//     const max = wrapper?.getElementsByClassName("step-result").length as number;
-//     // change Visibility
-//     visibleResult?.setAttribute("visible", "false");
-//     nextVisibleResult?.setAttribute("visible", "true");
-//     // show prev button if hidden
-//     const prevButton = button.parentElement?.querySelector("#prevButton") as HTMLButtonElement;
-//     if(prevButton.style.visibility == "hidden"){
-//         prevButton.setAttribute("style","visibility: visible");
-//     }
-//     if (nextVisibleResult?.getAttribute("currentStep") == (max - 1).toString()){
-//          button.setAttribute("style","visibility: hidden");
-//      }
-// }
