@@ -149,8 +149,3 @@ Split object:
   }
 }
 ```
-
-
-# Render Functions
-
-RenderStepper as an Either Type Function: [Split, Step, Plug] => RenderHTML

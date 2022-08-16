@@ -99,18 +99,7 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
                 exprLst.push(args[i]);
             }
         });
-        /* for (let i = 0; i < args.length; i++) {
-            let arg = args[i];
-            if (BSL_AST.isLiteral(arg)) {
-                valueLst.push(arg.value);
-            } else if (SI_STRUCT.isValue(arg)) {
-                valueLst.push(arg);
-            } else {
-                pos = i;
-                break;
-            }
-        } */
-        // if there is no context, if all arguments are values
+        // if there is no context, all arguments are values and the result is a value
         if (pos == -1) {
             const redex: SI_STRUCT.CallRedex = {
                 type: SI_STRUCT.Production.CallRedex,
@@ -122,16 +111,8 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
                 redex: redex,
                 context: hole,
             };
-            // else get all expressions from the right side
+            // else there is a context and the result is an expression
         } else {
-            /* for (let i = pos + 1; i < args.length; i++) {
-                let arg = args[i];
-                if (BSL_AST.isExpr(arg)) {
-                    exprLst.push(arg);
-                } else {
-                    return new Error("split: argument is not an expression " + arg + i);
-                }
-            } */
             const expr: BSL_AST.expr = args[pos];
             const splitResult = split(expr);
             if (SI_STRUCT.isSplit(splitResult)) {
@@ -165,13 +146,26 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
         }
         // else split condition
         else {
-            return Error("not implemented");
+            const splitResult = split(clause.condition);
+            if (SI_STRUCT.isSplit(splitResult)) {
+                return {
+                    type: SI_STRUCT.Production.Split,
+                    redex: splitResult.redex,
+                    context: {
+                        type: SI_STRUCT.Production.CondContext,
+                        options: expr.options,
+                        ctx: splitResult.context,
+                    },
+                };
+            } else {
+                return splitResult;
+            }
         }
     } else if (BSL_AST.isName(expr)) {
-        console.log("error: expr is  Name, or undefined");
-        return Error("error: expr is Name, or undefined");
+        console.log("split: expr is  Name");
+        return Error("split: expr is Name");
     } else {
-        return Error("error: something unexpected occured");
+        return Error("split: something unexpected occured");
     }
 }
 
@@ -190,25 +184,36 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | Error {
             return Error("error: prim is not applicable");
         }
     } else if (SI_STRUCT.isCondRedex(r)) {
-        const clause = r.options[0];
         const condResult = cond(r);
-        if (BSL_AST.isExpr(condResult)) {
+        console.warn("condResult", condResult);
+        if (condResult == undefined) {
+            const newOptions = r.options.slice(1);
+            const newExpr:BSL_AST.Cond = {
+                type: BSL_AST.Production.CondExpression,
+                options: newOptions,
+            };
             return {
-                type: SI_STRUCT.Production.CondRule,
+                type: SI_STRUCT.Production.CondFalse,
+                redex: r,
+                result: newExpr,
+            };
+        } else if (BSL_AST.isExpr(condResult)) {
+            return {
+                type: SI_STRUCT.Production.CondTrue,
                 redex: r,
                 result: condResult,
             };
         } else {
             return Error("error: cond is not applicable");
         }
-        return Error("Cond not implemented yet");
+
     } else {
         return Error("error: redex is neither a call nor cond");
     }
 }
 
 // plug
-// plug(oneRule, c: Context): Expression, pRule
+// plug(oneRule, c: Context): PlugResult | Error
 export function plug(
     oneRule: SI_STRUCT.OneRule,
     c: SI_STRUCT.Context
@@ -226,35 +231,67 @@ export function plug(
         //Apply OneRule with KONG RULE
         const plugResult = plug(oneRule, c.ctx);
         if (SI_STRUCT.isPlugResult(plugResult)) {
-            const args = [
-                c.values,
-                plugResult.expr,
-                c.args,
-            ].flat();
-            const newArgs = args.map(el => {
-                if (SI_STRUCT.isValue(el)) {
-                    const newEl: BSL_AST.Literal = {
-                        type: BSL_AST.Production.Literal,
-                        value: el,
-                    };
-                    return newEl;
-                }
-                else { return el; }
-            });
-            const finalExpr: BSL_AST.Call = {
-                type: BSL_AST.Production.FunctionCall,
-                name: c.op,
-                args: newArgs,
-            };
-            //console.log("finalExpr", finalExpr);
-            return {
-                type: SI_STRUCT.Production.PlugResult,
-                expr: finalExpr,
-                rule: {
-                    type: SI_STRUCT.Production.Kong,
-                    redexRule: oneRule,
-                },
-            };
+            //AppContext
+            if (SI_STRUCT.isAppContext(c)) {
+                const args = [
+                    c.values,
+                    plugResult.expr,
+                    c.args,
+                ].flat();
+                const newArgs = args.map(arg => {
+                    if (SI_STRUCT.isValue(arg)) {
+                        const newArg: BSL_AST.Literal = {
+                            type: BSL_AST.Production.Literal,
+                            value: arg,
+                        };
+                        return newArg;
+                    } else {
+                        return arg;
+                    }
+                });
+                const finalExpr: BSL_AST.Call = {
+                    type: BSL_AST.Production.FunctionCall,
+                    name: c.op,
+                    args: newArgs,
+                };
+                //console.log("finalExpr", finalExpr);
+                return {
+                    type: SI_STRUCT.Production.PlugResult,
+                    expr: finalExpr,
+                    rule: {
+                        type: SI_STRUCT.Production.Kong,
+                        redexRule: oneRule,
+                    },
+                };
+                //CondContext
+            } else if (SI_STRUCT.isCondContext(c)) {
+                const options = c.options;
+                const condition = options[0].condition;
+                const expr: BSL_AST.expr = (SI_STRUCT.isValue(oneRule.result)) ? { type: BSL_AST.Production.Literal, value: oneRule.result } : oneRule.result;
+                const firstClause: BSL_AST.Clause = {
+                    type: BSL_AST.Production.CondOption,
+                    condition: expr,
+                    result: options[0].result,
+                };
+                const newOptions = [firstClause, ...options.slice(1)];
+                const finalExpr: BSL_AST.Cond = {
+                    type: BSL_AST.Production.CondExpression,
+                    options: newOptions,
+                };
+
+                return {
+                    type: SI_STRUCT.Production.PlugResult,
+                    rule: {
+                        type: SI_STRUCT.Production.Kong,
+                        redexRule: oneRule,
+                    },
+                    expr: finalExpr,
+                };
+
+
+            } else {
+                return Error("plug: context is not an AppContext or CondContext");
+            }
         } else {
             return plugResult;
         }
@@ -355,8 +392,8 @@ export function prim(r: SI_STRUCT.CallRedex): SI_STRUCT.Value | Error {
 }
 
 // cond
-// cond Redex => Value | BSL_AST.cond | Error
-function cond(r: SI_STRUCT.CondRedex): BSL_AST.expr | Error {
+// cond Redex =>  BSL_AST.expr | false
+function cond(r: SI_STRUCT.CondRedex): BSL_AST.expr | undefined | Error {
     const clause = r.options[0];
     if (BSL_AST.isLiteral(clause.condition) && clause.condition.value == true) {
         return clause.result;
@@ -364,20 +401,31 @@ function cond(r: SI_STRUCT.CondRedex): BSL_AST.expr | Error {
         BSL_AST.isLiteral(clause.condition) &&
         clause.condition.value == false
     ) {
-        console.log("r.options", r.options);
-        const newOptions: BSL_AST.Clause[] = r.options.slice(1).map((el) => {
-            return {
-                type: BSL_AST.Production.CondOption,
-                condition: el.condition,
-                result: el.result,
-            };
-        });
-        console.log("newOptions", newOptions);
-        return {
-            type: BSL_AST.Production.CondExpression,
-            options: newOptions,
-        };
+        return undefined;
     } else {
         return Error("error: condition is not a boolean");
     }
 }
+
+
+/* OLD CODE */
+
+/* for (let i = pos + 1; i < args.length; i++) {
+    let arg = args[i];
+    if (BSL_AST.isExpr(arg)) {
+        exprLst.push(arg);
+    } else {
+        return new Error("split: argument is not an expression " + arg + i);
+    }
+} */
+/* for (let i = 0; i < args.length; i++) {
+    let arg = args[i];
+    if (BSL_AST.isLiteral(arg)) {
+        valueLst.push(arg.value);
+    } else if (SI_STRUCT.isValue(arg)) {
+        valueLst.push(arg);
+    } else {
+        pos = i;
+        break;
+    }
+} */

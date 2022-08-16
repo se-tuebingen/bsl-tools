@@ -9,9 +9,11 @@ export enum Production {
     CondRedex = "CondRedex",
     CondOption = "CondOption",
     AppContext = "AppContext",
+    CondContext = "CondContext",
     Hole = "Hole",
     Prim = "Prim",
-    CondRule = "CondRule",
+    CondTrue = "CondTrue",
+    CondFalse = "CondFalse", 
     ProgRule = "ProgRule",
     Kong = "Kong"
 }
@@ -56,18 +58,9 @@ export interface CondRedex {
     type: Production.CondRedex;
     options: BSL_AST.Clause[];
 }
-/* export interface Clause{
-    type: Production.CondOption;
-    condition: BSL_AST.expr | Value;
-    result: BSL_AST.expr;
-} */
-// App value[] Context expr[]
-// interface App {op: string; values: value[]; ctx: Context; args: expr[] }
-// type Context = AppContext | Hole
-// interface AppContext { operator: String; values: value[]; ctx: Context; args: expr[] }
 
-
-export type Context = AppContext | Hole;
+// ####### Context #######
+export type Context = AppContext | CondContext | Hole;
 
 export interface AppContext {
     type: Production.AppContext;
@@ -76,7 +69,11 @@ export interface AppContext {
     ctx: Context;
     args: BSL_AST.expr[];
 }
-
+export interface CondContext {
+    type: Production.CondContext;
+    options: BSL_AST.Clause[];
+    ctx: Context;
+}
 export interface Hole {
     type: Production.Hole;
     //index: number //number[];
@@ -89,10 +86,16 @@ export interface Prim {
     redex: CallRedex;
     result: Value;
 }
-export interface CondRule {
-    type: Production.CondRule;
-    redex: CondRedex;
-    result: BSL_AST.expr | Value;
+export type CondRule = CondTrue | CondFalse;
+export interface CondTrue{
+    type: Production.CondTrue;
+    redex:CondRedex;
+    result:BSL_AST.expr | Value;
+}
+export interface CondFalse{
+    type: Production.CondFalse;
+    redex:CondRedex;
+    result: BSL_AST.Cond;
 }
 export interface ProgRule {
     type: Production.ProgRule;
@@ -135,9 +138,15 @@ export function isCondRedex(obj: any): obj is CondRedex {
 }
 export function isHole(obj: any): obj is Hole {
     return obj.type === Production.Hole;
+} 
+export function isContext(obj: any): obj is Context {
+    return obj.type === Production.AppContext || obj.type === Production.CondContext;
 }
 export function isAppContext(obj: any): obj is AppContext {
     return obj.type === Production.AppContext;
+}
+export function isCondContext(obj: any): obj is CondContext {
+    return obj.type === Production.CondContext;
 }
 export function isSplit(obj: any): obj is Split {
     return obj.type === Production.Split;
@@ -146,13 +155,13 @@ export function isPlugResult(obj: any): obj is PlugResult {
     return obj.type === Production.PlugResult;
 }
 export function isOneRule(obj: any): obj is OneRule {
-    return obj.type === Production.Prim || obj.type === Production.CondRule;
+    return obj.type === Production.Prim || (obj.type === Production.CondTrue || obj.type === Production.CondFalse);
 }
 export function isPrim(obj: any): obj is Prim {
     return obj.type === Production.Prim;
 }
 export function isCondRule(obj: any): obj is CondRule {
-    return obj.type === Production.CondRule;
+    return obj.type === Production.CondTrue || obj.type === Production.CondFalse;
 }
 export function isKong(obj: any): obj is Kong {
     return obj.type === Production.Kong;
