@@ -219,6 +219,7 @@ export function plug(
     c: SI_STRUCT.Context
 ): SI_STRUCT.PlugResult | Error {
     //check if context is a Hole
+    console.log("show me context:", c);
     if (SI_STRUCT.isHole(c)) {
         // Apply OneRule
         console.log("plug: oneRule", oneRule);
@@ -230,6 +231,7 @@ export function plug(
     } else {
         //Apply OneRule with KONG RULE
         const plugResult = plug(oneRule, c.ctx);
+        console.log("plug: plugResult", plugResult);
         if (SI_STRUCT.isPlugResult(plugResult)) {
             //AppContext
             if (SI_STRUCT.isAppContext(c)) {
@@ -266,8 +268,8 @@ export function plug(
                 //CondContext
             } else if (SI_STRUCT.isCondContext(c)) {
                 const options = c.options;
-                const condition = options[0].condition;
-                const expr: BSL_AST.expr = (SI_STRUCT.isValue(oneRule.result)) ? { type: BSL_AST.Production.Literal, value: oneRule.result } : oneRule.result;
+                const expr: BSL_AST.expr = (SI_STRUCT.isValue(plugResult.expr)) ? { type: BSL_AST.Production.Literal, value: plugResult.expr } : plugResult.expr;
+                console.warn("expr", expr);
                 const firstClause: BSL_AST.Clause = {
                     type: BSL_AST.Production.CondOption,
                     condition: expr,
@@ -278,7 +280,7 @@ export function plug(
                     type: BSL_AST.Production.CondExpression,
                     options: newOptions,
                 };
-
+                console.warn("finalExpr", finalExpr);
                 return {
                     type: SI_STRUCT.Production.PlugResult,
                     rule: {

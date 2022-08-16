@@ -184,7 +184,7 @@ function renderContext(context: SI_STRUCT.Context): string {
         return str;
     } else if (SI_STRUCT.isCondContext(context)) {
         const options = context.options.map(el => "[" + renderExpr(el.condition) + " " + renderExpr(el.result) + "]").join("\n");
-        const str = `<pre><code>(${options})</code></pre>`;
+        const str = `<pre><code>(cond ${options})</code></pre>`;
         return str;
     }else{
         return "Something went wrong: renderContext";
