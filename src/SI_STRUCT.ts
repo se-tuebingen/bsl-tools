@@ -2,7 +2,8 @@ import * as BSL_AST from "./BSL_AST";
 
 export enum Production {
     Stepper = "Stepper",
-    StepResult = "StepResult",
+    ExprStep = "ExprStep",
+    DefinitionStep = "DefinitionStep",
     Split = "Split",
     PlugResult = "PlugResult",
     CallRedex = "CallRedex",
@@ -15,22 +16,30 @@ export enum Production {
     CondTrue = "CondTrue",
     CondFalse = "CondFalse", 
     ProgRule = "ProgRule",
-    Kong = "Kong"
+    Kong = "Kong",
+    Nothing = "Nothing",
 }
 
 export interface Stepper {
     type: Production.Stepper;
     root: HTMLElement;
-    originExpr: BSL_AST.expr;
+    originProgram: BSL_AST.program;
     stepperTree: StepResult[];
 }
-// StepResult is type = StepResult | Error
-export interface StepResult {
-    type: Production.StepResult;
+// StepResult is type = ExprStep | DefinitionStep
+export type StepResult = ExprStep | DefinitionStep;
+export interface ExprStep {
+    type: Production.ExprStep;
     splitResult: SplitResult;
     plugResult: PlugResult;
     currentStep: number;
 }
+export interface DefinitionStep {
+    type: Production.DefinitionStep;
+    definition: BSL_AST.definition;
+    currentStep: number;
+}
+
 
 export type SplitResult = Split | Value;
 
@@ -46,6 +55,7 @@ export interface PlugResult {
     expr: BSL_AST.expr | Value;
 }
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
+// ####### REDEX #######
 export type Redex = CallRedex | CondRedex;
 
 export interface CallRedex {
@@ -79,7 +89,10 @@ export interface Hole {
     //index: number //number[];
 }
 
-export type Value = number | string | boolean | `'()`;
+export type Value = number | string | boolean | `'()` /*| Nothing*/;
+/*export interface Nothing {
+    type: Production.Nothing;
+}*/
 //######## OneRule(s) ########
 export interface Prim {
     type: Production.Prim;
@@ -99,6 +112,7 @@ export interface CondFalse{
 }
 export interface ProgRule {
     type: Production.ProgRule;
+    definition: BSL_AST.definition;
 }
 export type OneRule = Prim | CondRule; /*| ProgRule*/
 
@@ -117,6 +131,9 @@ export interface Kong {
 // ENVIRONMENT
 // interface Environment :Map = {[key: string]: Value};
 
+export interface Environment {
+    [key: string]: Value;
+}
 
 
 
@@ -128,7 +145,10 @@ export function isStepper(obj:any): obj is Stepper {
     return obj.type === Production.Stepper;
 }
 export function isStepResult(obj: any):obj is StepResult {
-    return obj.type === Production.StepResult;
+    return obj.type === Production.ExprStep || obj.type === Production.DefinitionStep;
+}
+export function isExprStep(obj: any): obj is ExprStep {
+    return obj.type === Production.ExprStep;
 }
 export function isCallRedex(obj: any): obj is CallRedex {
     return obj.type === Production.CallRedex;

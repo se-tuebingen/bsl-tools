@@ -32,7 +32,7 @@
 
   <body>
     <h2>Small-Step-Interpreter-Stepper for Racket</h2>
-   <!-- <h3>First example</h3>
+   <h3>First example</h3>
     <stepper>
       (* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
     </stepper>
@@ -59,7 +59,7 @@
       (cond [(and #true #false) "maybe"]
       [#false 3]
       [(or #false #false) (* 2 3 4)])
-    </stepper>-->
+    </stepper>
     <h3>Cond example #5</h3>
     <stepper>
       (cond 
@@ -71,11 +71,22 @@
       [#false 3]
       [(or #true #false) (* 2 3 4)])
     </stepper>
+    <h3>PROG example</h3>
+    <stepper>
+      (define x 2)
+      </stepper>
+    <h3>multiple expression example #1</h3>
+    <stepper>
+      (+ 2 4)
+      (+ 3 2)
+      (+ 4 5)
+    </stepper>
    <!-- <h2>Error Tests</h2>
     <h3>Call without defined function</h3>
     <stepper>
       (call 1 2 3)
-    </stepper>-->
+    </stepper>
+
   </body>
 
 </html>
