@@ -30,12 +30,14 @@ export interface Stepper {
 export type StepResult = ExprStep | DefinitionStep;
 export interface ExprStep {
     type: Production.ExprStep;
+    env: Environment;
     splitResult: SplitResult;
     plugResult: PlugResult;
     currentStep: number;
 }
 export interface DefinitionStep {
     type: Production.DefinitionStep;
+    env: Environment;
     definition: BSL_AST.definition;
     currentStep: number;
 }
@@ -131,13 +133,7 @@ export interface Kong {
 // ENVIRONMENT
 // interface Environment :Map = {[key: string]: Value};
 
-export interface Environment {
-    [key: string]: Value;
-}
-
-
-
-
+export type Environment = Map<string, Value | BSL_AST.expr>;
 // ##########################
 
 // runtime type checking

@@ -4,23 +4,30 @@ import * as SI_STRUCT from "./SI_STRUCT";
 
 
 // calculateAllSteps (for the whole program)
-export function calculateProgram(program: BSL_AST.program, stepper:SI_STRUCT.Stepper): SI_STRUCT.Stepper | Error{
+export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.Stepper): SI_STRUCT.Stepper | Error {
     const copyProgram = JSON.parse(JSON.stringify(program));
+    const env: SI_STRUCT.Environment = new Map();
     while (copyProgram.length > 0) {
         let stepperTree: SI_STRUCT.StepResult[] = stepper.stepperTree;
         let defOrExpr = copyProgram.shift();
-        if (BSL_AST.isExpr(defOrExpr)){
-             let stepperTreeMaybe = calculateExprSteps(defOrExpr, stepperTree);
-                if (stepperTreeMaybe instanceof Error) {
-                    return stepperTreeMaybe;
-                }else{
-                    stepperTree = stepperTreeMaybe;
-                }
-        }else if (BSL_AST.isDefinition(defOrExpr)) {
-            //stepperTree = prog(defOrExpr, stepperTree);
-            return Error("calculateStep : definition not allowed, you didnt think it was that easy, did you?");
-        }else {
-            return Error("calculateStep: neither expression nor definition; how did you get here?");
+        if (BSL_AST.isExpr(defOrExpr)) {
+            let stepperTreeMaybe = calculateExprSteps(defOrExpr, stepperTree);
+            if (stepperTreeMaybe instanceof Error) {
+                return stepperTreeMaybe;
+            } else {
+                stepperTree = stepperTreeMaybe;
+            }
+        } else if (BSL_AST.isDefinition(defOrExpr)) {
+            console.log("definition", defOrExpr);
+            console.log("prog", prog(defOrExpr, env))
+            let stepResultMaybe = prog(defOrExpr, env);
+            if (stepResultMaybe instanceof Error) {
+                return stepResultMaybe;
+            } else {
+                let stepResult = stepResultMaybe;
+                stepperTree.push(stepResult);
+                //return Error("error: definition not implemented");
+            }
         }
         stepper.stepperTree = stepperTree;
     }
@@ -32,6 +39,40 @@ export function calculateProgram(program: BSL_AST.program, stepper:SI_STRUCT.Ste
     };
     newStepper.stepperTree.map((step, i) => (step.currentStep = i));
     return newStepper;
+}
+//prog
+//definition, Environment => SI_STRUCT.DefStep
+export function prog(
+    def: BSL_AST.definition,
+    env: SI_STRUCT.Environment
+): SI_STRUCT.DefinitionStep | Error {
+    if (BSL_AST.isConstDef(def)) {
+        const name = def.name;
+        const value = def.value;
+        if (name.symbol in env) {
+            return Error("prog: name already bound");
+        } else {
+            const newEnv = new Map(env);
+            env.set(name.symbol, value);
+            return {
+                type: SI_STRUCT.Production.DefinitionStep,
+                env: newEnv,
+                definition: def,
+                currentStep: 0,
+            }
+        }
+    } else if (BSL_AST.isFunDef(def)) {
+        const name = def.name;
+        const args = def.args;
+        const body = def.body;
+        if (name.symbol in env) {
+            return Error("prog: name already bound");
+        } else {
+            return Error("prog: function definition not defined");
+        }
+    } else {
+        return Error("prog: struct definition not defined");
+    }
 }
 // calculateExprSteps
 // expr, steppResult[] => stepResult[] | Error
@@ -74,6 +115,7 @@ export function evaluateExpression(expr: BSL_AST.expr): SI_STRUCT.ExprStep | SI_
                 if (SI_STRUCT.isPlugResult(plugExpr)) {
                     const exprStep: SI_STRUCT.ExprStep = {
                         type: SI_STRUCT.Production.ExprStep,
+                        env: new Map(),
                         splitResult: splitExpr,
                         plugResult: plugExpr,
                         currentStep: 0,

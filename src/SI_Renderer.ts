@@ -32,8 +32,6 @@ export function setUpStepperGui(program: BSL_AST.program, el: HTMLElement): void
         styleNode.id = 'bsl-tools-stepper-style';
         document.getElementsByTagName('head')[0].appendChild(styleNode);
     }
-    //const expr = program[0] as BSL_AST.expr;
-    //console.log("expression", expr);
     const emptyStepper: SI_STRUCT.Stepper = {
         type: SI_STRUCT.Production.Stepper,
         root: el,
@@ -131,7 +129,7 @@ function renderStepExpr(stepperTree: SI_STRUCT.StepResult[], stepResult: SI_STRU
 
 function renderDef(def: BSL_AST.definition): string {
     if (BSL_AST.isConstDef(def)) {
-        return `(define ${def.name} ${renderExpr(def.value)})`;
+        return `(define ${def.name.symbol} ${renderExpr(def.value)})`;
     } else if (BSL_AST.isFunDef(def)) {
         return `FunDef not implemented yet`;
     } else {
