@@ -3,7 +3,7 @@ import * as SI_STRUCT from "./SI_STRUCT";
 import { parse } from './BSL_Parser';
 import { dirtify } from './Production_Tree';
 import { default as small_interpreter_css } from './ressources/small-interpreter.css';
-import { calculateProgram } from './SI';
+import { calculateProgram, plug } from './SI';
 
 // main function processing steppers
 export function processSteppers() {
@@ -34,7 +34,7 @@ export function setUpStepperGui(program: BSL_AST.program, el: HTMLElement): void
     }
     //const expr = program[0] as BSL_AST.expr;
     //console.log("expression", expr);
-    const emptyStepper:SI_STRUCT.Stepper = {
+    const emptyStepper: SI_STRUCT.Stepper = {
         type: SI_STRUCT.Production.Stepper,
         root: el,
         originProgram: program,
@@ -63,8 +63,8 @@ export function setUpStepperGui(program: BSL_AST.program, el: HTMLElement): void
 
 
 function renderStepper(stepper: SI_STRUCT.Stepper): string {
-    const stepperTree:SI_STRUCT.StepResult[] = stepper.stepperTree;
-    const originProgram:BSL_AST.defOrExpr[] = stepper.originProgram;
+    const stepperTree: SI_STRUCT.StepResult[] = stepper.stepperTree;
+    const originProgram: BSL_AST.defOrExpr[] = stepper.originProgram;
     console.log("originProgram", originProgram);
     const str =
         `<stepper>
@@ -73,7 +73,7 @@ function renderStepper(stepper: SI_STRUCT.Stepper): string {
             <pre><code>${originProgram.map(defOrExpr => (BSL_AST.isExpr(defOrExpr)) ? renderExpr(defOrExpr) : renderDef(defOrExpr)).join("\n")}</code></pre>
         </div>
         <div class="step-result-wrapper">
-        ${renderStepperTree(stepperTree)}
+        ${stepperTree.map(step => (SI_STRUCT.isExprStep(step) ? renderStepExpr(stepperTree, step) : renderStepDef(stepperTree, step))).join("\n")}
         </div>
         <div class="buttons">
             <button class="step-button" id="prevButton" style="visibility: hidden">Previous Step</button>
@@ -82,17 +82,18 @@ function renderStepper(stepper: SI_STRUCT.Stepper): string {
     </stepper>`;
     return str;
 }
-function renderStepperTree(stepperTree: SI_STRUCT.StepResult[]): string {
-    return stepperTree.map(step => (SI_STRUCT.isExprStep(step) ? renderStepExpr(step) : renderStepDef(step))).join("\n");
-}
-function renderStepDef(stepResult: SI_STRUCT.DefinitionStep): string {
+function renderStepDef(stepperTree: SI_STRUCT.StepResult[], stepResult: SI_STRUCT.DefinitionStep): string {
     const definition = stepResult.definition;
     const currentStep = stepResult.currentStep;
     const str = `<div class="step-result" currentStep="${currentStep}" visible=${(currentStep == 0) ? "true" : "false"}>
                     <div class="program-overview">
                         Program Overview:
                         <ul>
-                        ${renderDef(definition)}
+                        ${stepperTree.map(step =>
+        (step.currentStep <= currentStep) ? (
+            (SI_STRUCT.isExprStep(step) ?
+                (SI_STRUCT.isValue(step.plugResult.expr) ? renderValue(step.plugResult.expr) : renderExpr(step.plugResult.expr))
+                : renderDef(step.definition))) : "").join("<br>")}
                         </ul>
                     </div>
                     <div class="split-rule-plug">
@@ -102,16 +103,19 @@ function renderStepDef(stepResult: SI_STRUCT.DefinitionStep): string {
                 </div>`;
     return str;
 }
-function renderStepExpr(stepResult: SI_STRUCT.ExprStep): string {
+function renderStepExpr(stepperTree: SI_STRUCT.StepResult[], stepResult: SI_STRUCT.ExprStep): string {
     const currentStep = stepResult.currentStep;
-    const programExpr = stepResult.plugResult.expr; //renderExprs
     const splitResult = stepResult.splitResult; //renderSplitResult
     const plugResult = stepResult.plugResult; //renderPlugResult
     const str = `<div class="step-result" currentStep="${currentStep}" visible=${(currentStep == 0) ? "true" : "false"}>
                     <div class="program-overview">
                         Program Overview:
                         <ul>
-                        ${SI_STRUCT.isValue(programExpr) ? renderValue(programExpr) : renderExpr(programExpr)}
+                        ${stepperTree.map(step =>
+        (step.currentStep <= currentStep) ? (
+            (SI_STRUCT.isExprStep(step) ?
+                (SI_STRUCT.isValue(step.plugResult.expr) ? renderValue(step.plugResult.expr) : renderExpr(step.plugResult.expr))
+                : renderDef(step.definition))) : "").join("<br>")}
                         </ul>
                     </div>
                     <div class="split-rule-plug">
@@ -124,13 +128,14 @@ function renderStepExpr(stepResult: SI_STRUCT.ExprStep): string {
                 </div>`;
     return str;
 }
+
 function renderDef(def: BSL_AST.definition): string {
     if (BSL_AST.isConstDef(def)) {
         return `(define ${def.name} ${renderExpr(def.value)})`;
     } else if (BSL_AST.isFunDef(def)) {
         return `FunDef not implemented yet`;
     } else {
-       return `StructDef not implemented yet`;
+        return `StructDef not implemented yet`;
     }
 }
 function renderExpr(expr: BSL_AST.expr): string {
