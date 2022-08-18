@@ -95,6 +95,9 @@ div.stepper {
   display: inline-block;
   height: 1em;
 }
+.stepper .split-result .icon {
+  opacity: 70%;
+}
 
 /* ######### code and rules ####### */
 .stepper .split-result, .stepper .plug-result {
@@ -115,7 +118,7 @@ div.stepper {
   padding-right: 0.25em;
   position: relative;
 }
-.stepper .plug-result .hole {
+.stepper .hole-result {
   background-color: var(--hole-green);
 }
 .stepper .rule {
@@ -126,12 +129,17 @@ div.stepper {
   padding-left: .5em;
   width: fit-content;
   white-space: nowrap;
-  font-variant-caps: small-caps;
 }
 .stepper .kong {
   top: calc(1px - 2.5em); /* account for difference to hole height (1px border)*/
   padding-left: 0;
   background-color: rgba(255,255,255,0.5);
+}
+.stepper .rule-name {
+  font-variant-caps: small-caps;
+}
+.stepper .rule-description {
+  font-family: 'Fira Mono', monospace;
 }
 
 /* arrow body */

@@ -1,15 +1,19 @@
-import * as BSL_AST from "./BSL_AST";
-import * as SI_STRUCT from "./SI_STRUCT";
-import { parse } from './BSL_Parser';
+// parsing and processing code input
 import { dirtify } from './Production_Tree';
-import {default as small_interpreter_css} from './ressources/small-interpreter.css';
+import { parse } from './BSL_Parser';
+import * as BSL_AST from "./BSL_AST";
+import * as BSL_Print from './BSL_Print';
+// small-step interpreter back-end
+import * as SI_STRUCT from "./SI_STRUCT";
+import { calculateAllSteps } from './SI';
+// styles & icon ressources
+import { default as small_interpreter_css } from './ressources/small-interpreter.css';
 import { default as angle_up } from './ressources/icons/angle-up-solid.svg';
 import { default as angle_down } from './ressources/icons/angle-down-solid.svg';
 import { default as plus_icon } from './ressources/icons/plus-solid.svg';
 import { default as minus_icon } from './ressources/icons/minus-solid.svg';
-import { calculateAllSteps } from './SI';
-import * as BSL_Print from './BSL_Print';
-import {getParentClassRecursive} from './DOM_Helpers';
+// html helpers
+import { getParentClassRecursive } from './DOM_Helpers';
 
 // ######### main function processing steppers ###########
 export function processSteppers() {
@@ -34,7 +38,7 @@ export function processSteppers() {
   });
 }
 
-// setUpStepperGUI
+// ### set up a single stepper ###
 export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
     // add css if necessary
     if(!document.getElementById('bsl-tools-stepper-style')) {
@@ -71,7 +75,6 @@ export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
 }
 
 // ###### internationalization for this module #####
-// mainly for quiz, currently
 type implementedLanguage = 'en' | 'de';
 const implementedLanguages = ['en', 'de'];
 
@@ -90,10 +93,9 @@ const dictionary = {
 
 // ####### RENDER FUNCTIONS #######
 
-
+// main function
 function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): string{
     const stepperTree = stepper.stepperTree;
-    const originExpr = stepper.originExpr;
 
     const str =
     `<div class="stepper">
@@ -108,6 +110,8 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
 // one individual step
 function renderStep(step: SI_STRUCT.StepResult, lang: implementedLanguage): string {
   console.log(`Rendering step ${step.currentStep}`);
+  // acquire necessary information:
+  // context and redex
   const finished = !SI_STRUCT.isSplit(step.splitResult);
   const context:Context =
     finished ? {left:'', right:''}
@@ -115,21 +119,25 @@ function renderStep(step: SI_STRUCT.StepResult, lang: implementedLanguage): stri
   const redex =
     finished ? `${step.splitResult}`
              : printRedex((step.splitResult as SI_STRUCT.Split).redex);
+  // rule
   let rule;
   if (SI_STRUCT.isKong(step.plugResult.rule)) {
     rule = step.plugResult.rule.redexRule;
   } else {
     rule = step.plugResult.rule;
   }
+  // result and rule name
   let result;
   let ruleName = '';
   if (SI_STRUCT.isPrim(rule)) {
     result = `${rule.result}`;
     ruleName = 'Prim';
+    // else-Fall gilt für alle anderen Regeln
   } else if (SI_STRUCT.isCondRule(rule)) {
     result = BSL_Print.printE(rule.result);
     ruleName = 'Cond';
   }
+  // add whitespace to context if necessary
   if (!context.right.startsWith(')')) context.right = ` ${context.right}`;
   return `
     <div class="step"
@@ -146,28 +154,39 @@ function renderStep(step: SI_STRUCT.StepResult, lang: implementedLanguage): stri
       </div>
 
       <div class="split-result">${
-        context.left
-      } <span class="hole">${redex}</span>${
-        context.right
-      }<img class="icon expander"
-            src="${plus_icon}"
-            onclick="expand(event)"
-      ><img class="icon collapser"
-            src="${minus_icon}"
-            onclick="collapse(event)"
+          context.left
+        } <span class="hole">${redex}</span>${
+          context.right
+        }<img class="icon expander"
+              src="${plus_icon}"
+              onclick="expand(event)"
+        ><img class="icon collapser"
+              src="${minus_icon}"
+              onclick="collapse(event)"
       ></div>
 
       <div class="plug-result">${
-        context.left !== '' ? '<span class="rule left-arrowed kong">Kong</span>' : ''
-      }${
-        context.left
-      } <span class="hole">${result}<span class="rule left-arrowed">${ruleName}</span></span>${
-        context.right
+          // if context is not empty, we are applying KONG
+          context.left !== '' ? '<span class="rule rule-name left-arrowed kong">Kong</span>' : ''
+        }${
+          context.left
+        } <span class="hole hole-result">${
+          result
+          // adding rule explanation here so we can align it with result hole
+          }<span class="rule left-arrowed"><span class="rule-name">${
+            ruleName
+          }</span>: <span class="rule-description"><span class="hole">${
+            redex
+            }</span> = <span class="hole hole-result">${
+              result
+            }</span></span></span></span>${
+          context.right
       }</div>
 
     </div>
   `;
 }
+// event handlers
 (window as any).nextStep = (e: Event) => {
   const button = e.target as HTMLElement;
   const currentStep = getParentClassRecursive(button, 'step');
