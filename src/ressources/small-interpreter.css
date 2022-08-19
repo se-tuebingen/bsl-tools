@@ -181,6 +181,20 @@ div.stepper {
 .stepper .info-toggle:hover {
   cursor: pointer;
 }
+.stepper .rule-info {
+  font-family: Palatino,Georgia,"Times New Roman",serif;
+  padding: 0.5em;
+}
+.stepper .rule-info small {
+  vertical-align: sub;
+}
+.stepper .rule-info cap {
+  font-variant-caps: small-caps;
+}
+/* .stepper .rule-info strong {
+  font-family: sans-serif;
+  font-style: normal;
+} */
 
 /* ##### showing and hiding stuff #### */
 /* hide steps that are not yet reached */

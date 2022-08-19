@@ -266,7 +266,10 @@ function renderRuleInformation(rule: string, kong: boolean):string {
          ><img src="${circle_xmark}"
                class="icon info-toggle info-collapse"
                onclick="collapseInfo(event)"
-         ><div class="rule-info">${ruleInfo}</div>`;
+         ><div class="rule-info">${
+           kong ? `<div>${rules['Kong']}</div>` : ''
+         } <div>${ruleInfo}</div>
+         </div>`;
 }
 (window as any).expandInfo = (e: Event) => {
   const t = e.target as HTMLElement;
@@ -285,10 +288,54 @@ function renderRuleInformation(rule: string, kong: boolean):string {
 // ### rules ###
 // as taken from overview-reduction-and-equivalence.pdf, i.e. the script
 // to be displayed as reference
-type availableRules = 'Kong' | 'Prim' | 'Cond';
-const availableRules = ['Kong', 'Prim', 'Cond'];
+type availableRules = 'Kong' | 'Fun' | 'Prim' | 'Const' | 'Cond-True' | 'Cond-False' | 'Struct-Make' | 'Struct-Select' | 'Struct-PredTrue' | 'Struct-PredFalse' | 'Prog';
+const availableRules = ['Kong', 'Fun', 'Prim', 'Const', 'Cond-True', 'Cond-False', 'Struct-Make', 'Struct-Select', 'Struct-PredTrue', 'Struct-PredFalse', 'Prog'];
 const rules = {
-  'Kong': `Kong description here`,
-  'Prim': `Prim description here <br> With a second line`,
-  'Cond': `Cond description here`,
+  'Kong': `
+    <cap>Kong</cap>: <em>E[e<small>1</small>] → E[e<small>2</small>] falls e<small>1</small> → e<small>2</small></em><br>
+    <em>‹E› ::= []<br>
+    &nbsp;&nbsp;&nbsp;| (‹name› ‹v›* ‹E› ‹e›*)<br>
+    &nbsp;&nbsp;&nbsp;| (<strong>cond</strong> [‹E› ‹e› ]{[ ‹e› ‹e›]}*)</em>
+  `,
+  'Fun': `
+    <cap>Fun</cap>: <em>(name v<small>1</small> … v<small>n</small>) →
+    e[name<small>1</small> := v<small>1</small> … name<small>n</small> := v<small>n</small> ]</em>
+    falls
+    <em>(</em> <strong>define</strong> <em>(name name<small>1</small> … name<small>n</small>) e)</em> in Umgebung
+  `,
+  'Prim': `
+    <cap>Prim</cap>: <em>(name v<small>1</small> … v<small>n</small>) → v</em> falls <em>name</em> eine primitive Funktion <em>f</em> ist und <em>f(v<small>1</small> … v<small>n</small>) = v</em>
+  `,
+  'Const': `
+    <cap>Const</cap>: <em>name → v</em> falls <em>(<strong>define</strong> name v)</em> in Umgebung.
+  `,
+  'Cond-True': `
+    <cap>Cond</cap>-True: <em>(<strong>cond</strong> [<strong>#true</strong> e] …) → e</em>
+  `,
+  'Cond-False': `
+    <cap>Cond</cap>-False: <em>(<strong>cond</strong> [<strong>#false</strong> e<small>1</small>] [e<small>2</small> e<small>3</small>] …) → (<strong>cond</strong> [e<small>2</small> e<small>3</small>] …)</em>
+  `,
+  'Struct-Make': `
+    <cap>Struct</cap>-make: <em>(<strong>make</strong>-name v<small>1</small> … v<small>n</small>) → &lt;<strong>make</strong>-name v<small>1</small> … v<small>n</small>&gt;</em>
+    falls <em>(<strong>define-struct</strong> name (name<small>1</small> … name<small>n</small>))</em> in Umgebung
+  `,
+  'Struct-Select': `
+    <cap>Struct</cap>-select: <em>(name-name<small>i</small> &lt;<strong>make</strong>-name v<small>1</small> … v<small>n</small>&gt;) → v<small>i</small></em>
+    falls <em>(<strong>define-struct</strong> name (name<small>1</small> … name<small>n</small>))</em> in Umgebung
+  `,
+  'Struct-PredTrue': `
+    <cap>Struct</cap>-predtrue: <em>(name? &lt;<strong>make</strong>-name …&gt;) → <strong>#true</strong></em>
+  `,
+  'Struct-PredFalse': `
+    <cap>Struct</cap>-predfalse: <em>(name? v) → <strong>#false</strong></em> falls <em>v</em> nicht <em>&lt;<strong>make</strong>-name …&gt;</em> ist
+  `,
+  'Prog': `
+    <cap>Prog</cap>: Ein Programm wird von links nach rechts ausgeführt und startet mit der leeren Umgebung. Ist das nächste
+Programmelement eine Funktions- oder StrukturdeWinition, so wird diese DeWinition in die Umgebung
+aufgenommen und die Ausführung mit dem nächsten Programmelement in der erweiterten Umgebung
+fortgesetzt. Ist das nächste Programmelement ein Ausdruck, so wird dieser gemäß der unten stehenden
+Regeln in der aktuellen Umgebung zu einem Wert ausgewert. Ist das nächste Programmelement eine
+Konstantendefinition <em>(<strong>define</strong> x e)</em>, so wird in der aktuellen Umgebung zunächst <em>e</em> zu einem Wert <em>v</em>
+ausgewertet und dann <em>(<strong>define</strong> x v)</em> zur aktuellen Umgebung hinzugefügt.
+  `
 }
