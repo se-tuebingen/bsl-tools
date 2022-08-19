@@ -131,7 +131,7 @@ div.stepper {
   white-space: nowrap;
 }
 .stepper .kong {
-  top: calc(1px - 2.5em); /* account for difference to hole height (1px border)*/
+  top: calc(1px - 2.5em) !important; /* account for difference to hole height (1px border)*/
   padding-left: 0;
   background-color: rgba(255,255,255,0.5);
 }
@@ -172,11 +172,25 @@ div.stepper {
 .stepper .kong::after {
   left: 2px;
 }
+/* rule info */
+.stepper .info-toggle {
+  position: absolute;
+  top: -2em;
+  right: 0;
+}
+.stepper .info-toggle:hover {
+  cursor: pointer;
+}
+.stepper .rule-info {
+  height: 3em;
+}
 
 /* ##### showing and hiding stuff #### */
+/* hide steps that are not yet reached */
 .stepper .step[data-currentStep="true"] ~ .step {
   display: none;
 }
+/* collapsing and expanding steps */
 .stepper .step[data-collapsed="true"] .plug-result {
   display: none;
 }
@@ -193,4 +207,16 @@ div.stepper {
 }
 .stepper .step[data-collapsed="false"] .expander {
   display: none;
+}
+/* collapsing and expanding info about the rules */
+.stepper .plug-result[data-info-collapsed="true"] .rule-info,
+.stepper .plug-result[data-info-collapsed="true"] .info-collapse {
+  display: none;
+}
+.stepper .plug-result[data-info-collapsed="false"] .info-expand {
+  display: none;
+}
+/* adjust rule position */
+.stepper .plug-result[data-info-collapsed="false"] .rule {
+  top: -5.5em;
 }

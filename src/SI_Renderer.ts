@@ -12,6 +12,8 @@ import { default as angle_up } from './ressources/icons/angle-up-solid.svg';
 import { default as angle_down } from './ressources/icons/angle-down-solid.svg';
 import { default as plus_icon } from './ressources/icons/plus-solid.svg';
 import { default as minus_icon } from './ressources/icons/minus-solid.svg';
+import { default as circle_info } from './ressources/icons/circle-info-solid.svg';
+import { default as circle_xmark } from './ressources/icons/circle-xmark-solid.svg';
 // html helpers
 import { getParentClassRecursive } from './DOM_Helpers';
 
@@ -165,9 +167,12 @@ function renderStep(step: SI_STRUCT.StepResult, lang: implementedLanguage): stri
               onclick="collapse(event)"
       ></div>
 
-      <div class="plug-result">${
+      <div class="plug-result"
+           data-info-collapsed="true">${
           // if context is not empty, we are applying KONG
           context.left !== '' ? '<span class="rule rule-name left-arrowed kong">Kong</span>' : ''
+        }${
+          renderRuleInformation(ruleName, context.left !== '')
         }${
           context.left
         } <span class="hole hole-result">${
@@ -249,4 +254,37 @@ function printRedex(redex: SI_STRUCT.Redex): string {
   } else {
     throw "Invalid Input to printRedex";
   }
+}
+
+// rendering the rule tip
+function renderRuleInformation(rule: string, kong: boolean):string {
+  if (!availableRules.includes(rule)) return '';
+  const ruleInfo = rules[rule as availableRules];
+  return `<img src="${circle_info}"
+               class="icon info-toggle info-expand"
+               onclick="expandInfo(event)"
+         ><img src="${circle_xmark}"
+               class="icon info-toggle info-collapse"
+               onclick="collapseInfo(event)"
+         ><div class="rule-info">${ruleInfo}</div>`;
+}
+(window as any).expandInfo = (e: Event) => {
+  const t = e.target as HTMLElement;
+  const p = getParentClassRecursive(t, 'plug-result');
+  if(p) p.setAttribute('data-info-collapsed', 'false');
+}
+(window as any).collapseInfo = (e: Event) => {
+  const t = e.target as HTMLElement;
+  const p = getParentClassRecursive(t, 'plug-result');
+  if(p) p.setAttribute('data-info-collapsed', 'true');
+}
+// ### rules ###
+// as taken from overview-reduction-and-equivalence.pdf, i.e. the script
+// to be displayed as reference
+type availableRules = 'Kong' | 'Prim' | 'Cond';
+const availableRules = ['Kong', 'Prim', 'Cond'];
+const rules = {
+  'Kong': `Kong description here`,
+  'Prim': `Prim description here`,
+  'Cond': `Cond description here`,
 }
