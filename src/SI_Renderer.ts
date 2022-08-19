@@ -271,7 +271,11 @@ function renderRuleInformation(rule: string, kong: boolean):string {
 (window as any).expandInfo = (e: Event) => {
   const t = e.target as HTMLElement;
   const p = getParentClassRecursive(t, 'plug-result');
-  if(p) p.setAttribute('data-info-collapsed', 'false');
+  if(!p) return;
+  p.setAttribute('data-info-collapsed', 'false');
+  const info = p.querySelector('.rule-info');
+  if(!info) return;
+  p.style.cssText = `--rule-info-height: ${info.getBoundingClientRect().height}px`;
 }
 (window as any).collapseInfo = (e: Event) => {
   const t = e.target as HTMLElement;
@@ -285,6 +289,6 @@ type availableRules = 'Kong' | 'Prim' | 'Cond';
 const availableRules = ['Kong', 'Prim', 'Cond'];
 const rules = {
   'Kong': `Kong description here`,
-  'Prim': `Prim description here`,
+  'Prim': `Prim description here <br> With a second line`,
   'Cond': `Cond description here`,
 }

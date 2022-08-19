@@ -181,9 +181,6 @@ div.stepper {
 .stepper .info-toggle:hover {
   cursor: pointer;
 }
-.stepper .rule-info {
-  height: 3em;
-}
 
 /* ##### showing and hiding stuff #### */
 /* hide steps that are not yet reached */
@@ -218,5 +215,5 @@ div.stepper {
 }
 /* adjust rule position */
 .stepper .plug-result[data-info-collapsed="false"] .rule {
-  top: -5.5em;
+  top: calc(-2.5em - var(--rule-info-height, 0px));
 }
