@@ -8,6 +8,7 @@ export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.St
     const copyProgram = JSON.parse(JSON.stringify(program));
     const env: SI_STRUCT.Environment = new Map();
     while (copyProgram.length > 0) {
+        //program.forEach
         let stepperTree: SI_STRUCT.StepResult[] = stepper.stepperTree;
         let defOrExpr = copyProgram.shift();
         if (BSL_AST.isExpr(defOrExpr)) {
@@ -157,7 +158,7 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
                 return "right";
             }
         });
-        valueMap.map((el, i) => {
+        valueMap.forEach((el, i) => {
             if (el == "left") {
                 valueLst.push((args[i] as BSL_AST.Literal).value);
             } else if (el == "right") {

@@ -26,7 +26,7 @@ export interface Stepper {
     originProgram: BSL_AST.program;
     stepperTree: StepResult[];
 }
-// StepResult is type = ExprStep | DefinitionStep
+// ProgStep is type = ExprStep | DefinitionStep
 export type StepResult = ExprStep | DefinitionStep;
 export interface ExprStep {
     type: Production.ExprStep;
@@ -133,7 +133,7 @@ export interface Kong {
 // ENVIRONMENT
 // interface Environment :Map = {[key: string]: Value};
 
-export type Environment = Map<string, Value | BSL_AST.expr>;
+export type Environment = Map<string, Value | BSL_AST.expr>; // BSL_AST.expr zuerst auswerten (call by value)
 // ##########################
 
 // runtime type checking
