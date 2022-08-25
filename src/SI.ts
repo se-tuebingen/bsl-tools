@@ -9,7 +9,7 @@ export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.St
     const env: SI_STRUCT.Environment = new Map();
     while (copyProgram.length > 0) {
         //program.forEach
-        let stepperTree: SI_STRUCT.StepResult[] = stepper.stepperTree;
+        let stepperTree: SI_STRUCT.ProgStep[] = stepper.stepperTree;
         let defOrExpr = copyProgram.shift();
         if (BSL_AST.isExpr(defOrExpr)) {
             let stepperTreeMaybe = calculateExprSteps(defOrExpr, stepperTree);
@@ -21,12 +21,12 @@ export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.St
         } else if (BSL_AST.isDefinition(defOrExpr)) {
             console.log("definition", defOrExpr);
             console.log("prog", prog(defOrExpr, env))
-            let stepResultMaybe = prog(defOrExpr, env);
-            if (stepResultMaybe instanceof Error) {
-                return stepResultMaybe;
+            let progResultMaybe = prog(defOrExpr, env);
+            if (progResultMaybe instanceof Error) {
+                return progResultMaybe;
             } else {
-                let stepResult = stepResultMaybe;
-                stepperTree.push(stepResult);
+                let progResult = progResultMaybe;
+                stepperTree.push(progResult);
                 //return Error("error: definition not implemented");
             }
         }
@@ -76,23 +76,23 @@ export function prog(
     }
 }
 // calculateExprSteps
-// expr, steppResult[] => stepResult[] | Error
+// expr, steppResult[] => ProgStep[] | Error
 export function calculateExprSteps(
     expr: BSL_AST.expr | SI_STRUCT.Value,
-    stepperTree: SI_STRUCT.StepResult[]
-): SI_STRUCT.StepResult[] | Error {
+    stepperTree: SI_STRUCT.ProgStep[]
+): SI_STRUCT.ProgStep[] | Error {
     if (SI_STRUCT.isValue(expr)) {
         return stepperTree;
     } else {
         while (!SI_STRUCT.isValue(expr)) {
-            const stepResult = evaluateExpression(expr)
-            if (SI_STRUCT.isValue(stepResult)) {
-                expr = stepResult;
-            } else if (SI_STRUCT.isStepResult(stepResult)) {
-                expr = stepResult.plugResult.expr;
-                stepperTree.push(stepResult);
+            const progStep = evaluateExpression(expr)
+            if (SI_STRUCT.isValue(progStep)) {
+                expr = progStep;
+            } else if (SI_STRUCT.isProgStep(progStep)) {
+                expr = progStep.plugResult.expr;
+                stepperTree.push(progStep);
             } else {
-                return stepResult;
+                return progStep;
             }
         }
         return stepperTree;

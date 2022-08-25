@@ -16,18 +16,17 @@ export enum Production {
     CondTrue = "CondTrue",
     CondFalse = "CondFalse", 
     ProgRule = "ProgRule",
-    Kong = "Kong",
-    Nothing = "Nothing",
+    Kong = "Kong"
 }
 
 export interface Stepper {
     type: Production.Stepper;
     root: HTMLElement;
     originProgram: BSL_AST.program;
-    stepperTree: StepResult[];
+    stepperTree: ProgStep[];
 }
 // ProgStep is type = ExprStep | DefinitionStep
-export type StepResult = ExprStep | DefinitionStep;
+export type ProgStep = ExprStep | DefinitionStep;
 export interface ExprStep {
     type: Production.ExprStep;
     env: Environment;
@@ -35,6 +34,19 @@ export interface ExprStep {
     plugResult: PlugResult;
     currentStep: number;
 }
+//export interface DefinitionStep {
+//    type: Production.DefinitionStep;
+//    env: Environment;
+//    rule: ProgRule;
+//    result: BSL__AST.definition;
+//}
+
+//export interface ExprStep {
+//    type: Production.ExprStep;
+//    env: Environment;
+//    rule: Kong | OneRule;
+//    result: BSL__AST.expr;
+//}
 export interface DefinitionStep {
     type: Production.DefinitionStep;
     env: Environment;
@@ -88,14 +100,11 @@ export interface CondContext {
 }
 export interface Hole {
     type: Production.Hole;
-    //index: number //number[];
 }
 
-export type Value = number | string | boolean | `'()` /*| Nothing*/;
-/*export interface Nothing {
-    type: Production.Nothing;
-}*/
-//######## OneRule(s) ########
+export type Value = number | string | boolean | `'()`;
+
+//######## OneRule(s) ########a
 export interface Prim {
     type: Production.Prim;
     redex: CallRedex;
@@ -140,7 +149,7 @@ export type Environment = Map<string, Value | BSL_AST.expr>; // BSL_AST.expr zue
 export function isStepper(obj:any): obj is Stepper {
     return obj.type === Production.Stepper;
 }
-export function isStepResult(obj: any):obj is StepResult {
+export function isProgStep(obj: any):obj is ProgStep {
     return obj.type === Production.ExprStep || obj.type === Production.DefinitionStep;
 }
 export function isExprStep(obj: any): obj is ExprStep {

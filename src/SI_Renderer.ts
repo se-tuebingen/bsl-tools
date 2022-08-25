@@ -61,7 +61,7 @@ export function setUpStepperGui(program: BSL_AST.program, el: HTMLElement): void
 
 
 function renderStepper(stepper: SI_STRUCT.Stepper): string {
-    const stepperTree: SI_STRUCT.StepResult[] = stepper.stepperTree;
+    const stepperTree: SI_STRUCT.ProgStep[] = stepper.stepperTree;
     const originProgram: BSL_AST.defOrExpr[] = stepper.originProgram;
     console.log("originProgram", originProgram);
     const str =
@@ -80,9 +80,9 @@ function renderStepper(stepper: SI_STRUCT.Stepper): string {
     </stepper>`;
     return str;
 }
-function renderStepDef(stepperTree: SI_STRUCT.StepResult[], stepResult: SI_STRUCT.DefinitionStep): string {
-    const definition = stepResult.definition;
-    const currentStep = stepResult.currentStep;
+function renderStepDef(stepperTree: SI_STRUCT.ProgStep[], ProgStep: SI_STRUCT.DefinitionStep): string {
+    const definition = ProgStep.definition;
+    const currentStep = ProgStep.currentStep;
     const str = `<div class="step-result" currentStep="${currentStep}" visible=${(currentStep == 0) ? "true" : "false"}>
                     <div class="program-overview">
                         Program Overview:
@@ -101,10 +101,10 @@ function renderStepDef(stepperTree: SI_STRUCT.StepResult[], stepResult: SI_STRUC
                 </div>`;
     return str;
 }
-function renderStepExpr(stepperTree: SI_STRUCT.StepResult[], stepResult: SI_STRUCT.ExprStep): string {
-    const currentStep = stepResult.currentStep;
-    const splitResult = stepResult.splitResult; //renderSplitResult
-    const plugResult = stepResult.plugResult; //renderPlugResult
+function renderStepExpr(stepperTree: SI_STRUCT.ProgStep[], ProgStep: SI_STRUCT.ExprStep): string {
+    const currentStep = ProgStep.currentStep;
+    const splitResult = ProgStep.splitResult; //renderSplitResult
+    const plugResult = ProgStep.plugResult; //renderPlugResult
     const str = `<div class="step-result" currentStep="${currentStep}" visible=${(currentStep == 0) ? "true" : "false"}>
                     <div class="program-overview">
                         Program Overview:
