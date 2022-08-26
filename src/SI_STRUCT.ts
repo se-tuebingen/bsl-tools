@@ -23,9 +23,16 @@ export interface Stepper {
     type: Production.Stepper;
     root: HTMLElement;
     originProgram: BSL_AST.program;
-    stepperTree: ProgStep[];
+    stepperTree: /* Step[] */ ProgStep[]; // ProgStep[];
 }
-// ProgStep is type = ExprStep | DefinitionStep
+// ProgStep represents a line of code in a BSL program
+// export interface ProgStep {
+//     type: Production.ProgStep;
+//     group: Step[];
+// }
+
+// Step[]
+// Step is type = ExprStep | DefinitionStep
 export type ProgStep = ExprStep | DefinitionStep;
 export interface ExprStep {
     type: Production.ExprStep;
