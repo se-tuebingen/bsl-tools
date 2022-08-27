@@ -32,7 +32,7 @@ export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.St
         }
         stepper.stepperTree = stepperTree; */
         //NEW APPROACH
-        let progStep = calculateProgStep(defOrExpr);
+        let progStep = calculateProgStep(defOrExpr, env);
         if (progStep instanceof Error) {
             return progStep;
         } else {
@@ -53,7 +53,7 @@ export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.St
 
 // calculate ProgStep
 // line is a line of program code -> ProgStep | Error
-export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition): SI_STRUCT.ProgStep | Error {
+export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition, env: SI_STRUCT.Environment): SI_STRUCT.ProgStep | Error {
         if (BSL_AST.isExpr(defOrExpr)) {
             let stepList = calculateExprSteps(defOrExpr);
             if (stepList instanceof Error) {
@@ -64,9 +64,7 @@ export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition):
                     stepList: stepList,
                 };
             }
-        } else {
-            return Error("error: definition not implemented");
-        } /* else if (BSL_AST.isDefinition(defOrExpr)) {
+        } else{
             console.log("definition", defOrExpr);
             console.log("prog", calculateDefSteps(defOrExpr, env))
             let stepList = calculateDefSteps(defOrExpr, env);
@@ -78,14 +76,14 @@ export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition):
                     stepList: stepList,
                 };
             }
-        } */
+        }
     }
 //prog
 //definition, Environment => SI_STRUCT.DefStep
-/* export function calculateDefSteps(
+ export function calculateDefSteps(
     def: BSL_AST.definition,
     env: SI_STRUCT.Environment
-): SI_STRUCT.DefinitionStep | Error {
+): SI_STRUCT.DefinitionStep[] | Error {
     if (BSL_AST.isConstDef(def)) {
         const name = def.name;
         const value = def.value;
@@ -94,12 +92,16 @@ export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition):
         } else {
             const newEnv = new Map(env);
             env.set(name.symbol, value);
-            return {
+            let stepList: SI_STRUCT.DefinitionStep[] = [];
+            stepList.push({
                 type: SI_STRUCT.Production.DefinitionStep,
                 env: newEnv,
-                definition: def,
-                currentStep: 0,
-            }
+                result: def,
+                rule: {
+                    type: SI_STRUCT.Production.ProgRule, 
+                    definition: def},
+            });
+            return stepList;
         }
     } else if (BSL_AST.isFunDef(def)) {
         const name = def.name;
@@ -113,7 +115,7 @@ export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition):
     } else {
         return Error("prog: struct definition not defined");
     }
-} */
+}
 // calculateExprSteps
 // expr, steppResult[] => exprStep[] | Error
 export function calculateExprSteps(
@@ -165,8 +167,7 @@ export function evaluateExpression(expr: BSL_AST.expr): SI_STRUCT.ExprStep | SI_
         }
     }
 }
-//prog
-// Definition => void | Error
+
 //split
 // Expression = > SplitResult | Error
 export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
