@@ -11,25 +11,34 @@ export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.St
         //program.forEach
         let stepperTree: SI_STRUCT.ProgStep[] = stepper.stepperTree;
         let defOrExpr = copyProgram.shift();
-        if (BSL_AST.isExpr(defOrExpr)) {
-            let stepperTreeMaybe = calculateExprSteps(defOrExpr, stepperTree);
-            if (stepperTreeMaybe instanceof Error) {
-                return stepperTreeMaybe;
+        /*if (BSL_AST.isExpr(defOrExpr)) {
+            let stepList = calculateExprSteps(defOrExpr, stepperTree);
+            if (stepList instanceof Error) {
+                return stepList;
             } else {
-                stepperTree = stepperTreeMaybe;
+                stepperTree = stepList;
             }
         } else if (BSL_AST.isDefinition(defOrExpr)) {
             console.log("definition", defOrExpr);
             console.log("prog", prog(defOrExpr, env))
-            let progResultMaybe = prog(defOrExpr, env);
-            if (progResultMaybe instanceof Error) {
-                return progResultMaybe;
+            let stepList = prog(defOrExpr, env);
+            if (stepList instanceof Error) {
+                return stepList;
             } else {
-                let progResult = progResultMaybe;
+                let progResult = stepList;
                 stepperTree.push(progResult);
                 //return Error("error: definition not implemented");
             }
         }
+        stepper.stepperTree = stepperTree; */
+        //NEW APPROACH
+        let progStep = calculateProgStep(defOrExpr);
+        if (progStep instanceof Error) {
+            return progStep;
+        } else {
+            stepperTree.push(progStep);
+        }
+        console.log("progStep", progStep);
         stepper.stepperTree = stepperTree;
     }
     const newStepper: SI_STRUCT.Stepper = {
@@ -38,12 +47,42 @@ export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.St
         originProgram: stepper.originProgram,
         stepperTree: stepper.stepperTree,
     };
-    newStepper.stepperTree.map((step, i) => (step.currentStep = i));
+    //newStepper.stepperTree.map((step, i) => (step.currentStep = i));
     return newStepper;
 }
+
+// calculate ProgStep
+// line is a line of program code -> ProgStep | Error
+export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition): SI_STRUCT.ProgStep | Error {
+        if (BSL_AST.isExpr(defOrExpr)) {
+            let stepList = calculateExprSteps(defOrExpr);
+            if (stepList instanceof Error) {
+                return stepList;
+            } else {
+                return {
+                    type: SI_STRUCT.Production.ProgStep,
+                    stepList: stepList,
+                };
+            }
+        } else {
+            return Error("error: definition not implemented");
+        } /* else if (BSL_AST.isDefinition(defOrExpr)) {
+            console.log("definition", defOrExpr);
+            console.log("prog", calculateDefSteps(defOrExpr, env))
+            let stepList = calculateDefSteps(defOrExpr, env);
+            if (stepList instanceof Error) {
+                return stepList;
+            } else {
+                return {
+                    type: SI_STRUCT.Production.ProgStep,
+                    stepList: stepList,
+                };
+            }
+        } */
+    }
 //prog
 //definition, Environment => SI_STRUCT.DefStep
-export function prog(
+/* export function calculateDefSteps(
     def: BSL_AST.definition,
     env: SI_STRUCT.Environment
 ): SI_STRUCT.DefinitionStep | Error {
@@ -74,28 +113,28 @@ export function prog(
     } else {
         return Error("prog: struct definition not defined");
     }
-}
+} */
 // calculateExprSteps
-// expr, steppResult[] => ProgStep[] | Error
+// expr, steppResult[] => exprStep[] | Error
 export function calculateExprSteps(
-    expr: BSL_AST.expr | SI_STRUCT.Value,
-    stepperTree: SI_STRUCT.ProgStep[]
-): SI_STRUCT.ProgStep[] | Error {
+    expr: BSL_AST.expr | SI_STRUCT.Value
+): SI_STRUCT.ExprStep[] | Error {
+    let stepList: SI_STRUCT.ExprStep[] = [];
     if (SI_STRUCT.isValue(expr)) {
-        return stepperTree;
+        return stepList;
     } else {
         while (!SI_STRUCT.isValue(expr)) {
-            const progStep = evaluateExpression(expr)
-            if (SI_STRUCT.isValue(progStep)) {
-                expr = progStep;
-            } else if (SI_STRUCT.isProgStep(progStep)) {
-                expr = progStep.plugResult.expr;
-                stepperTree.push(progStep);
+            const step = evaluateExpression(expr)
+            if (SI_STRUCT.isValue(step)) {
+                expr = step;
+            } else if (SI_STRUCT.isExprStep(step)) {
+                expr = step.result;
+                stepList.push(step);
             } else {
-                return progStep;
+                return step;
             }
         }
-        return stepperTree;
+        return stepList;
     }
 }
 
@@ -106,24 +145,17 @@ export function evaluateExpression(expr: BSL_AST.expr): SI_STRUCT.ExprStep | SI_
         return expr.value;
     } else {
         const splitExpr = split(expr);
-        console.log("splitExpr", splitExpr);
+        //console.log("splitExpr", splitExpr);
         if (SI_STRUCT.isSplit(splitExpr)) {
             const stepExpr = step(splitExpr.redex);
-            console.log("stepExpr", stepExpr);
+            //console.log("stepExpr", stepExpr);
             if (SI_STRUCT.isOneRule(stepExpr)) {
-                const plugExpr = plug(stepExpr, splitExpr.context);
-                console.log("plugExpr", plugExpr);
-                if (SI_STRUCT.isPlugResult(plugExpr)) {
-                    const exprStep: SI_STRUCT.ExprStep = {
-                        type: SI_STRUCT.Production.ExprStep,
-                        env: new Map(),
-                        splitResult: splitExpr,
-                        plugResult: plugExpr,
-                        currentStep: 0,
-                    };
+                const exprStep = plug(stepExpr, splitExpr.context);
+                console.log("exprStep", exprStep);
+                if (SI_STRUCT.isExprStep(exprStep)) {
                     return exprStep;
                 } else {
-                    return plugExpr;
+                    return exprStep;
                 }
             } else {
                 return stepExpr;
@@ -278,30 +310,31 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | Error {
 }
 
 // plug
-// plug(oneRule, c: Context): PlugResult | Error
+// plug(oneRule, c: Context): ExprStep | Error
 export function plug(
     oneRule: SI_STRUCT.OneRule,
     c: SI_STRUCT.Context
-): SI_STRUCT.PlugResult | Error {
+): SI_STRUCT.ExprStep | Error {
     //check if context is a Hole
     if (SI_STRUCT.isHole(c)) {
         // Apply OneRule
         //console.log("plug: oneRule", oneRule);
         return {
-            type: SI_STRUCT.Production.PlugResult,
-            expr: oneRule.result,
+            type: SI_STRUCT.Production.ExprStep,
+            env: new Map(),
             rule: oneRule,
+            result: oneRule.result,
         };
     } else {
         //Apply OneRule with KONG RULE
         const plugResult = plug(oneRule, c.ctx);
         //console.log("plug: plugResult", plugResult);
-        if (SI_STRUCT.isPlugResult(plugResult)) {
+        if (SI_STRUCT.isStep(plugResult)) {
             //AppContext
             if (SI_STRUCT.isAppContext(c)) {
                 const args = [
                     c.values,
-                    plugResult.expr,
+                    plugResult.result,
                     c.args,
                 ].flat();
                 const newArgs = args.map(arg => {
@@ -322,17 +355,19 @@ export function plug(
                 };
                 //console.log("finalExpr", finalExpr);
                 return {
-                    type: SI_STRUCT.Production.PlugResult,
-                    expr: finalExpr,
+                    type: SI_STRUCT.Production.ExprStep,
+                    env: new Map(),
                     rule: {
                         type: SI_STRUCT.Production.Kong,
+                        context: c,
                         redexRule: oneRule,
                     },
+                    result: finalExpr
                 };
                 //CondContext
             } else if (SI_STRUCT.isCondContext(c)) {
                 const options = c.options;
-                const expr: BSL_AST.expr = (SI_STRUCT.isValue(plugResult.expr)) ? { type: BSL_AST.Production.Literal, value: plugResult.expr } : plugResult.expr;
+                const expr: BSL_AST.expr = (SI_STRUCT.isValue(plugResult.result)) ? { type: BSL_AST.Production.Literal, value: plugResult.result } : plugResult.result;
                 const firstClause: BSL_AST.Clause = {
                     type: BSL_AST.Production.CondOption,
                     condition: expr,
@@ -344,15 +379,15 @@ export function plug(
                     options: newOptions,
                 };
                 return {
-                    type: SI_STRUCT.Production.PlugResult,
+                    type: SI_STRUCT.Production.ExprStep,
+                    env: new Map(),
                     rule: {
                         type: SI_STRUCT.Production.Kong,
+                        context: c,
                         redexRule: oneRule,
                     },
-                    expr: finalExpr,
+                    result: finalExpr,
                 };
-
-
             } else {
                 return Error("plug: context is not an AppContext or CondContext");
             }

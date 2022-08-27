@@ -71,7 +71,7 @@ function renderStepper(stepper: SI_STRUCT.Stepper): string {
             <pre><code>${originProgram.map(defOrExpr => (BSL_AST.isExpr(defOrExpr)) ? renderExpr(defOrExpr) : renderDef(defOrExpr)).join("\n")}</code></pre>
         </div>
         <div class="step-result-wrapper">
-        ${stepperTree.map(step => (SI_STRUCT.isExprStep(step) ? renderStepExpr(stepperTree, step) : renderStepDef(stepperTree, step))).join("\n")}
+        ${renderProgStep(stepperTree[0])}
         </div>
         <div class="buttons">
             <button class="step-button" id="prevButton" style="visibility: hidden">Previous Step</button>
@@ -80,48 +80,67 @@ function renderStepper(stepper: SI_STRUCT.Stepper): string {
     </stepper>`;
     return str;
 }
-function renderStepDef(stepperTree: SI_STRUCT.ProgStep[], ProgStep: SI_STRUCT.DefinitionStep): string {
-    const definition = ProgStep.definition;
-    const currentStep = ProgStep.currentStep;
-    const str = `<div class="step-result" currentStep="${currentStep}" visible=${(currentStep == 0) ? "true" : "false"}>
-                    <div class="program-overview">
-                        Program Overview:
-                        <ul>
-                        ${stepperTree.map(step =>
-        (step.currentStep <= currentStep) ? (
-            (SI_STRUCT.isExprStep(step) ?
-                (SI_STRUCT.isValue(step.plugResult.expr) ? renderValue(step.plugResult.expr) : renderExpr(step.plugResult.expr))
-                : renderDef(step.definition))) : "").join("<br>")}
-                        </ul>
-                    </div>
-                    <div class="split-rule-plug">
-                        PROG:
-                        ${renderDef(definition)}
-                    </div>
-                </div>`;
+function renderProgStep(step: SI_STRUCT.ProgStep): string {
+    const stepList = step.stepList;
+    const str = `
+    <div class="step">
+        ${stepList.map(step => SI_STRUCT.isExprStep(step) ? renderExprStep(stepList, step) : /*renderDefStep(step)*/"").join("\n")}
+    </div>`;
     return str;
 }
-function renderStepExpr(stepperTree: SI_STRUCT.ProgStep[], ProgStep: SI_STRUCT.ExprStep): string {
-    const currentStep = ProgStep.currentStep;
-    const splitResult = ProgStep.splitResult; //renderSplitResult
-    const plugResult = ProgStep.plugResult; //renderPlugResult
-    const str = `<div class="step-result" currentStep="${currentStep}" visible=${(currentStep == 0) ? "true" : "false"}>
+
+// function renderStepDef(stepperTree: SI_STRUCT.ProgStep[], ProgStep: SI_STRUCT.DefinitionStep): string {
+//     const definition = ProgStep.result;
+//     const currentStep = ProgStep;
+//     const str = `<div class="step-result" currentStep="${currentStep}" visible=${(currentStep == 0) ? "true" : "false"}>
+//                     <div class="program-overview">
+//                         Program Overview:
+//                         <ul>
+//                         ${stepperTree.map(step =>
+//         (step.currentStep <= currentStep) ? (
+//             (SI_STRUCT.isExprStep(step) ?
+//                 (SI_STRUCT.isValue(step.plugResult.expr) ? renderValue(step.plugResult.expr) : renderExpr(step.plugResult.expr))
+//                 : renderDef(step.definition))) : "").join("<br>")}
+//                         </ul>
+//                     </div>
+//                     <div class="split-rule-plug">
+//                         PROG:
+//                         ${renderDef(definition)}
+//                     </div>
+//                 </div>`;
+//     return str;
+// }
+function renderExprStep(stepList: SI_STRUCT.Step[], step: SI_STRUCT.ExprStep): string {
+    const rule = step.rule; //renderSplitResult
+    const index = stepList.indexOf(step);
+    const result = step.result; //renderPlugResult
+    const str = `<div class="step-result" currentStep="${index}" visible=${(index == 0) ? "true" : "false"}>
                     <div class="program-overview">
                         Program Overview:
                         <ul>
-                        ${stepperTree.map(step =>
-        (step.currentStep <= currentStep) ? (
+                        ${stepList.map((step,i) => 
+        ( i <= index) ? (
             (SI_STRUCT.isExprStep(step) ?
-                (SI_STRUCT.isValue(step.plugResult.expr) ? renderValue(step.plugResult.expr) : renderExpr(step.plugResult.expr))
-                : renderDef(step.definition))) : "").join("<br>")}
+                (SI_STRUCT.isValue(step.result) ? renderValue(step.result) : renderExpr(step.result))
+                : renderDef(step.result))) : "").join("<br>")}
                         </ul>
                     </div>
                     <div class="split-rule-plug">
                         <div class="split">
                             Split:
-                            ${renderSplitResult(splitResult)}
+                            <div class="context">
+                            Context: ${SI_STRUCT.isKong(rule) ? renderContext(rule.context) : "[ ]"}
+                            </div>
+                            <div class="redex">
+                                Redex: ${SI_STRUCT.isKong(rule) ? renderRedex(rule.redexRule.redex) : renderRedex(rule.redex)}
+                            </div>
                         </div>
-                        ${renderPlugResult(plugResult)}
+                        <div class="rule">
+                        ${SI_STRUCT.isOneRule(rule) ? renderOneRule(rule) : renderKong(rule)}
+                    </div>
+                    <div class="plug">
+                         <pre><code>${(SI_STRUCT.isValue(result)) ? renderValue(result) : renderExpr(result)}</code></pre>
+                    </div>
                     </div>
                 </div>`;
     return str;
@@ -181,7 +200,7 @@ function renderSplitResult(splitResult: SI_STRUCT.SplitResult): string {
     }
 }
 
-function renderPlugResult(plugResult: SI_STRUCT.PlugResult): string {
+/* function renderPlugResult(plugResult: SI_STRUCT.PlugResult): string {
     const expr = plugResult.expr;
     const rule = plugResult.rule;
     const str = `
@@ -192,7 +211,7 @@ function renderPlugResult(plugResult: SI_STRUCT.PlugResult): string {
         Plug Result: <pre><code>${SI_STRUCT.isValue(expr) ? renderValue(expr) : renderExpr(expr)}</code></pre>
     </div>`;
     return str;
-}
+} */
 
 function renderRedex(redex: SI_STRUCT.Redex): string {
     if (SI_STRUCT.isCallRedex(redex)) {

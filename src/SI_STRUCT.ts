@@ -2,6 +2,7 @@ import * as BSL_AST from "./BSL_AST";
 
 export enum Production {
     Stepper = "Stepper",
+    ProgStep = "ProgStep",
     ExprStep = "ExprStep",
     DefinitionStep = "DefinitionStep",
     Split = "Split",
@@ -23,43 +24,43 @@ export interface Stepper {
     type: Production.Stepper;
     root: HTMLElement;
     originProgram: BSL_AST.program;
-    stepperTree: /* Step[] */ ProgStep[]; // ProgStep[];
+    stepperTree:  ProgStep[];
 }
 // ProgStep represents a line of code in a BSL program
-// export interface ProgStep {
-//     type: Production.ProgStep;
-//     group: Step[];
-// }
+ export interface ProgStep {
+     type: Production.ProgStep;
+     stepList: Step[];
+ }
 
 // Step[]
 // Step is type = ExprStep | DefinitionStep
-export type ProgStep = ExprStep | DefinitionStep;
-export interface ExprStep {
+export type Step = ExprStep | DefinitionStep;
+/* export interface ExprStep {
     type: Production.ExprStep;
     env: Environment;
     splitResult: SplitResult;
     plugResult: PlugResult;
     currentStep: number;
-}
-//export interface DefinitionStep {
-//    type: Production.DefinitionStep;
-//    env: Environment;
-//    rule: ProgRule;
-//    result: BSL__AST.definition;
-//}
-
-//export interface ExprStep {
-//    type: Production.ExprStep;
-//    env: Environment;
-//    rule: Kong | OneRule;
-//    result: BSL__AST.expr;
-//}
+} */
 export interface DefinitionStep {
+    type: Production.DefinitionStep;
+    env: Environment;
+    rule: ProgRule;
+    result: BSL_AST.definition;
+}
+
+export interface ExprStep {
+   type: Production.ExprStep;
+   env: Environment;
+   rule: Kong | OneRule;
+   result: BSL_AST.expr | Value;
+}
+/* export interface DefinitionStep {
     type: Production.DefinitionStep;
     env: Environment;
     definition: BSL_AST.definition;
     currentStep: number;
-}
+} */
 
 
 export type SplitResult = Split | Value;
@@ -70,11 +71,11 @@ export interface Split {
     context: Context;
 }
 
-export interface PlugResult {
+/* export interface PlugResult {
     type: Production.PlugResult;
     rule: Kong | OneRule;
     expr: BSL_AST.expr | Value;
-}
+} */
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
 // ####### REDEX #######
 export type Redex = CallRedex | CondRedex;
@@ -137,7 +138,7 @@ export type OneRule = Prim | CondRule; /*| ProgRule*/
 // ####### ProgStepRule(s) ########
 export interface Kong {
     type: Production.Kong;
-    //context: Context;
+    context: Context;
     redexRule: OneRule;
 }
 // ######### DEFINITIONS ########
@@ -156,7 +157,10 @@ export type Environment = Map<string, Value | BSL_AST.expr>; // BSL_AST.expr zue
 export function isStepper(obj:any): obj is Stepper {
     return obj.type === Production.Stepper;
 }
-export function isProgStep(obj: any):obj is ProgStep {
+export function isProgStep(obj:any): obj is ProgStep {
+    return obj.type === Production.ProgStep;
+}
+export function isStep(obj: any):obj is Step {
     return obj.type === Production.ExprStep || obj.type === Production.DefinitionStep;
 }
 export function isExprStep(obj: any): obj is ExprStep {
@@ -183,9 +187,9 @@ export function isCondContext(obj: any): obj is CondContext {
 export function isSplit(obj: any): obj is Split {
     return obj.type === Production.Split;
 }
-export function isPlugResult(obj: any): obj is PlugResult {
+/* export function isPlugResult(obj: any): obj is PlugResult {
     return obj.type === Production.PlugResult;
-}
+} */
 export function isOneRule(obj: any): obj is OneRule {
     return obj.type === Production.Prim || (obj.type === Production.CondTrue || obj.type === Production.CondFalse);
 }
