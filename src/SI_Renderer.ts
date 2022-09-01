@@ -36,18 +36,18 @@ export function processSteppers() {
         color: darkred;
         display: block;
       `;
-    }
-  });
+        }
+    });
 }
 
 // ### set up a single stepper ###
 export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
     // add css if necessary
-    if(!document.getElementById('bsl-tools-stepper-style')) {
-      const styleNode = document.createElement('style');
-      styleNode.innerHTML = small_interpreter_css;
-      styleNode.id = 'bsl-tools-stepper-style';
-      document.getElementsByTagName('head')[0].appendChild(styleNode);
+    if (!document.getElementById('bsl-tools-stepper-style')) {
+        const styleNode = document.createElement('style');
+        styleNode.innerHTML = small_interpreter_css;
+        styleNode.id = 'bsl-tools-stepper-style';
+        document.getElementsByTagName('head')[0].appendChild(styleNode);
     }
     // calculate Steps
     const expr =  program[0] as BSL_AST.expr;
@@ -55,10 +55,10 @@ export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement):void{
     const emptyStepper = {
         type: SI_STRUCT.Production.Stepper,
         root: el,
-        originExpr: expr,
+        originProgram: program,
         stepperTree: [],
-    } as SI_STRUCT.Stepper;
-    const stepper = calculateAllSteps(expr, emptyStepper);
+    };
+    const stepper = calculateProgram(program, emptyStepper);
     console.log("stepper", stepper);
     // set language
     let lang = el.getAttribute('lang');
