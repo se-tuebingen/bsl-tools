@@ -135,9 +135,6 @@ div.stepper {
   padding-left: 0;
   background-color: rgba(255,255,255,0.5);
 }
-.stepper .rule-name {
-  font-variant-caps: small-caps;
-}
 .stepper .rule-description {
   font-family: 'Fira Mono', monospace;
 }
@@ -182,14 +179,26 @@ div.stepper {
   cursor: pointer;
 }
 .stepper .rule-info {
-  font-family: Palatino,Georgia,"Times New Roman",serif;
   padding: 0.5em;
 }
-.stepper .rule-info small {
+.stepper .rule-info-rule-text {
+  font-family: Palatino,Georgia,"Times New Roman",serif;
+}
+.stepper .rule-info-rule-text small {
   vertical-align: sub;
 }
-.stepper .rule-info cap {
+.stepper cap {
   font-variant-caps: small-caps;
+}
+.stepper .rule-info-rule-name {
+  position: absolute;
+  left: -5em;
+  top: 0;
+}
+.stepper .rule-info-text-container {
+  position: relative;
+  margin-left: 5em;
+  margin-bottom: 1em;
 }
 /* .stepper .rule-info strong {
   font-family: sans-serif;

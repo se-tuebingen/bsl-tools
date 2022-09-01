@@ -170,7 +170,7 @@ function renderStep(step: SI_STRUCT.StepResult, lang: implementedLanguage): stri
       <div class="plug-result"
            data-info-collapsed="true">${
           // if context is not empty, we are applying KONG
-          context.left !== '' ? '<span class="rule rule-name left-arrowed kong">Kong</span>' : ''
+          context.left !== '' ? `<span class="rule rule-name left-arrowed kong">${rules['Kong']['name']}</span>` : ''
         }${
           renderRuleInformation(ruleName, context.left !== '')
         }${
@@ -179,7 +179,7 @@ function renderStep(step: SI_STRUCT.StepResult, lang: implementedLanguage): stri
           result
           // adding rule explanation here so we can align it with result hole
           }<span class="rule left-arrowed"><span class="rule-name">${
-            ruleName
+            rules[ruleName as availableRules]['name']
           }</span>: <span class="rule-description"><span class="hole">${
             redex
             }</span> = <span class="hole hole-result">${
@@ -267,8 +267,17 @@ function renderRuleInformation(rule: string, kong: boolean):string {
                class="icon info-toggle info-collapse"
                onclick="collapseInfo(event)"
          ><div class="rule-info">${
-           kong ? `<div>${rules['Kong']}</div>` : ''
-         } <div>${ruleInfo}</div>
+           kong ? `
+            <div class="rule-info-text-container">
+              <div class="rule-info-rule-name">${rules['Kong']['name']}</div>
+              <div class="rule-info-rule-text">${rules['Kong']['text']}</div>
+            </div>
+           ` : ''
+         }
+         <div class="rule-info-text-container">
+           <div class="rule-info-rule-name">${ruleInfo['name']}</div>
+           <div class="rule-info-rule-text">${ruleInfo['text']}</div>
+         </div>
          </div>`;
 }
 (window as any).expandInfo = (e: Event) => {
@@ -291,51 +300,96 @@ function renderRuleInformation(rule: string, kong: boolean):string {
 type availableRules = 'Kong' | 'Fun' | 'Prim' | 'Const' | 'Cond-True' | 'Cond-False' | 'Struct-Make' | 'Struct-Select' | 'Struct-PredTrue' | 'Struct-PredFalse' | 'Prog';
 const availableRules = ['Kong', 'Fun', 'Prim', 'Const', 'Cond-True', 'Cond-False', 'Struct-Make', 'Struct-Select', 'Struct-PredTrue', 'Struct-PredFalse', 'Prog'];
 const rules = {
-  'Kong': `
-    <cap>Kong</cap>: <em>E[e<small>1</small>] → E[e<small>2</small>] falls e<small>1</small> → e<small>2</small></em><br>
-    <em>‹E› ::= []<br>
-    &nbsp;&nbsp;&nbsp;| (‹name› ‹v›* ‹E› ‹e›*)<br>
-    &nbsp;&nbsp;&nbsp;| (<strong>cond</strong> [‹E› ‹e› ]{[ ‹e› ‹e›]}*)</em>
-  `,
-  'Fun': `
-    <cap>Fun</cap>: <em>(name v<small>1</small> … v<small>n</small>) →
-    e[name<small>1</small> := v<small>1</small> … name<small>n</small> := v<small>n</small> ]</em>
-    falls
-    <em>(</em> <strong>define</strong> <em>(name name<small>1</small> … name<small>n</small>) e)</em> in Umgebung
-  `,
-  'Prim': `
-    <cap>Prim</cap>: <em>(name v<small>1</small> … v<small>n</small>) → v</em> falls <em>name</em> eine primitive Funktion <em>f</em> ist und <em>f(v<small>1</small> … v<small>n</small>) = v</em>
-  `,
-  'Const': `
-    <cap>Const</cap>: <em>name → v</em> falls <em>(<strong>define</strong> name v)</em> in Umgebung.
-  `,
-  'Cond-True': `
-    <cap>Cond</cap>-True: <em>(<strong>cond</strong> [<strong>#true</strong> e] …) → e</em>
-  `,
-  'Cond-False': `
-    <cap>Cond</cap>-False: <em>(<strong>cond</strong> [<strong>#false</strong> e<small>1</small>] [e<small>2</small> e<small>3</small>] …) → (<strong>cond</strong> [e<small>2</small> e<small>3</small>] …)</em>
-  `,
-  'Struct-Make': `
-    <cap>Struct</cap>-make: <em>(<strong>make</strong>-name v<small>1</small> … v<small>n</small>) → &lt;<strong>make</strong>-name v<small>1</small> … v<small>n</small>&gt;</em>
-    falls <em>(<strong>define-struct</strong> name (name<small>1</small> … name<small>n</small>))</em> in Umgebung
-  `,
-  'Struct-Select': `
-    <cap>Struct</cap>-select: <em>(name-name<small>i</small> &lt;<strong>make</strong>-name v<small>1</small> … v<small>n</small>&gt;) → v<small>i</small></em>
-    falls <em>(<strong>define-struct</strong> name (name<small>1</small> … name<small>n</small>))</em> in Umgebung
-  `,
-  'Struct-PredTrue': `
-    <cap>Struct</cap>-predtrue: <em>(name? &lt;<strong>make</strong>-name …&gt;) → <strong>#true</strong></em>
-  `,
-  'Struct-PredFalse': `
-    <cap>Struct</cap>-predfalse: <em>(name? v) → <strong>#false</strong></em> falls <em>v</em> nicht <em>&lt;<strong>make</strong>-name …&gt;</em> ist
-  `,
-  'Prog': `
-    <cap>Prog</cap>: Ein Programm wird von links nach rechts ausgeführt und startet mit der leeren Umgebung. Ist das nächste
-Programmelement eine Funktions- oder StrukturdeWinition, so wird diese DeWinition in die Umgebung
-aufgenommen und die Ausführung mit dem nächsten Programmelement in der erweiterten Umgebung
-fortgesetzt. Ist das nächste Programmelement ein Ausdruck, so wird dieser gemäß der unten stehenden
-Regeln in der aktuellen Umgebung zu einem Wert ausgewert. Ist das nächste Programmelement eine
-Konstantendefinition <em>(<strong>define</strong> x e)</em>, so wird in der aktuellen Umgebung zunächst <em>e</em> zu einem Wert <em>v</em>
-ausgewertet und dann <em>(<strong>define</strong> x v)</em> zur aktuellen Umgebung hinzugefügt.
-  `
+  'Kong': {
+    'name': `<cap>Kong</cap>`,
+    'text': `
+      <em>E[e<small>1</small>] → E[e<small>2</small>] falls e<small>1</small> → e<small>2</small></em><br>
+      <em>‹E› ::= []<br>
+      &nbsp;&nbsp;&nbsp;| (‹name› ‹v›* ‹E› ‹e›*)<br>
+      &nbsp;&nbsp;&nbsp;| (<strong>cond</strong> [‹E› ‹e› ]{[ ‹e› ‹e›]}*)</em>
+    `
+  },
+  'Fun': {
+    'name': `<cap>Fun</cap>`,
+    'text': `
+      <em>(name v<small>1</small> … v<small>n</small>) →
+      e[name<small>1</small> := v<small>1</small> … name<small>n</small> := v<small>n</small> ]</em>
+      falls
+      <em>(</em> <strong>define</strong> <em>(name name<small>1</small> … name<small>n</small>) e)</em> in Umgebung
+    `
+  },
+  'Prim': {
+    'name': `<cap>Prim</cap>`,
+    'text': `
+      <em>(name v<small>1</small> … v<small>n</small>) → v</em> falls
+      <em>name</em> eine primitive Funktion <em>f</em> ist und
+      <em>f(v<small>1</small> … v<small>n</small>) = v</em>
+    `
+  },
+  'Const': {
+    'name': `<cap>Const</cap>`,
+    'text': `
+      <em>name → v</em> falls <em>(<strong>define</strong> name v)</em> in Umgebung.
+    `
+  },
+  'Cond-True': {
+    'name': `<cap>Cond</cap>-True`,
+    'text': `
+      <em>(<strong>cond</strong> [<strong>#true</strong> e] …) → e</em>
+    `
+  },
+  'Cond-False': {
+    'name': `<cap>Cond</cap>-False`,
+    'text': `
+      <em>(<strong>cond</strong> [<strong>#false</strong> e<small>1</small>]
+         [e<small>2</small> e<small>3</small>] …) →
+         (<strong>cond</strong> [e<small>2</small> e<small>3</small>] …)</em>
+    `
+  },
+  'Struct-Make': {
+    'name': `<cap>Struct</cap>-make`,
+    'text': `
+      <em>(<strong>make</strong>-name v<small>1</small> … v<small>n</small>) →
+      &lt;<strong>make</strong>-name v<small>1</small> … v<small>n</small>&gt;</em>
+      falls <em>(<strong>define-struct</strong> name (name<small>1</small> … name<small>n</small>))</em> in Umgebung
+    `
+  },
+  'Struct-Select': {
+    'name': `<cap>Struct</cap>-select`,
+    'text': `
+      <em>(name-name<small>i</small> &lt;<strong>make</strong>-name
+        v<small>1</small> … v<small>n</small>&gt;) → v<small>i</small></em>
+        falls <em>(<strong>define-struct</strong> name
+          (name<small>1</small> … name<small>n</small>))</em> in Umgebung
+    `
+  },
+  'Struct-PredTrue': {
+    'name': `<cap>Struct</cap>-predtrue`,
+    'text': `
+      <em>(name? &lt;<strong>make</strong>-name …&gt;) → <strong>#true</strong></em>
+    `
+  },
+  'Struct-PredFalse': {
+    'name': `<cap>Struct</cap>-predfalse`,
+    'text': `
+      <em>(name? v) → <strong>#false</strong></em> falls <em>v</em> nicht
+      <em>&lt;<strong>make</strong>-name …&gt;</em> ist
+    `
+  },
+  'Prog': {
+    'name': `<cap>Prog</cap>`,
+    'text': `
+      Ein Programm wird von links nach rechts ausgeführt und startet mit der
+      leeren Umgebung. Ist das nächste Programmelement eine Funktions- oder
+      Strukturdefinition, so wird diese DeWinition in die Umgebung aufgenommen
+      und die Ausführung mit dem nächsten Programmelement in der erweiterten
+      Umgebung fortgesetzt. Ist das nächste Programmelement ein Ausdruck, so
+      wird dieser gemäß der unten stehenden Regeln in der aktuellen Umgebung zu
+      einem Wert ausgewert. Ist das nächste Programmelement eine
+      Konstantendefinition <em>(<strong>define</strong> x e)</em>, so wird in
+      der aktuellen Umgebung zunächst <em>e</em> zu einem Wert <em>v</em>
+      ausgewertet und dann <em>(<strong>define</strong> x v)</em> zur aktuellen
+      Umgebung hinzugefügt.
+    `
+  },
 }
