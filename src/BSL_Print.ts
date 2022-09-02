@@ -146,3 +146,91 @@ export const testprogram: BSL_AST.program = [
     ]
   }
 ];
+
+// indent code that is wider than maxLength characters
+export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = 'text'): string {
+  // extract terms and their theoretical indentation level
+  let terms: {term: string, level: number}[] = [];
+  let level = 0;
+  let nextLevel = 0;
+  let maxLevel = 0;
+  let acc = '';
+  let inString = false;
+  code.split('').forEach(char => {
+    if(inString && char !== '"') {
+      acc += char;
+      return;
+    }
+    switch(char) {
+      case '(':
+      case '[':
+        nextLevel++;
+        acc += char;
+        return;
+      case ')':
+      case ']':
+        nextLevel--;
+        acc += char;
+        return;
+      case '"':
+        inString = !inString;
+        acc += char;
+        return;
+      case ' ':
+      case '\n':
+      case '\t':
+        terms.push({term: acc, level: level});
+        if (level > maxLevel) maxLevel = level;
+        acc = '';
+        level = nextLevel;
+        return;
+      default:
+        acc += char;
+        return;
+    }
+  });
+  if(acc !== '') {
+    terms.push({term: acc, level: level});
+    if (level > maxLevel) maxLevel = level;
+  }
+  console.log(terms);
+  // append terms starting from the inside
+  const joiner = mode === 'html' ? '<br>' : `
+`;
+  for(let level = maxLevel; level > 0; level--) {
+    // group terms
+    const newTerms: {term:string, level:number, subterms:string[]}[] = [];
+    terms.forEach(t => {
+      if (t.level < level) {
+        newTerms.push({...t, subterms: []});
+      } else {
+        newTerms[newTerms.length - 1].subterms.push(t.term);
+      }
+    });
+    // append and check if we need to start indenting
+    terms = newTerms.map(t => {
+      const alreadyIndenting = t.subterms.some(s => s.includes(joiner));
+      if(alreadyIndenting ||
+        `${t.term} ${t.subterms.join(' ')}`.length + t.level > maxWidth) {
+        const sub = t.subterms.map(s => `${mode === 'html' ? repeat('&nbsp;', level) : repeat(' ', level)}${s}`);
+        const joiner = mode === 'html' ? '<br>' : `
+`;
+        const all = `${t.term}${sub.length > 0 ? joiner : ''}${sub.join(joiner)}`;
+        return {term: all, level: t.level};
+      } else {
+        return {term: `${t.term}${t.subterms.length > 0 ? ' ': ''}${t.subterms.join(' ')}`, level: t.level};
+      }
+    });
+    console.log(terms);
+  }
+  // now there should be only top level terms left
+  return terms.map(t => t.term).join(joiner);
+}
+
+function repeat(s: string, n: number):string {
+  let acc = '';
+  for(let i = 0; i < n; i++) {
+    acc += s;
+  }
+  return acc;
+}

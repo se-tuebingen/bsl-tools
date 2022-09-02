@@ -22,6 +22,7 @@ export function processSteppers() {
   Array.from(document.getElementsByTagName('stepper')).map(el => {
     try {
       const program : BSL_AST.program = parse(dirtify(el.innerHTML));
+      console.log(BSL_Print.indent(BSL_Print.pprint(program), 30));
       setUpStepperGui(program, el as HTMLElement);
     } catch (e:any) {
       let error;
@@ -120,7 +121,7 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
 
     const str =
     `<div class="stepper">
-    
+
        <div class="box environment">
          <div class="boxlabel">${dictionary[lang]['environment']}</div>
          ${stepperTree.map(renderDefinition).join('')}
