@@ -1,0 +1,92 @@
+<html>
+
+<head>
+  <title>BSL Small Step Interpreter Tests</title>
+  <script>
+    let scriptNode = document.createElement('script');
+    if (window.location.href.startsWith('file://')) {
+      console.log('detected local dev testing, loading bsl_tools.js from dist');
+      scriptNode.src = '../../dist/bsl_tools.js';
+    } else {
+      scriptNode.src = 'bsl_tools.js';
+    }
+    document.getElementsByTagName('head')[0].appendChild(scriptNode);
+  </script>
+  <style>
+    h2,
+    h3 {
+      text-align: center;
+    }
+
+    h2,
+    h3 {
+      margin-top: 7vh;
+    }
+
+    h3 {
+      font-size: 16pt;
+    }
+  </style>
+</head>
+
+  <body>
+    <h2>Small-Step-Interpreter-Stepper for Racket</h2>
+   <h3>First example</h3>
+    <stepper>
+      (* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+    </stepper>
+    <h3>Second example</h3>
+    <stepper>
+      (+ 2 (+ (+ 9 8) 3)(- 5 9) 2)
+    </stepper>
+    <h3>Cond example #1</h3>
+    <stepper>
+      (cond [#true (+ 1 2)])
+    </stepper>
+    <h3>Cond example #2</h3>
+    <stepper>
+      (cond [#false "isThree"] [#true 3])
+    </stepper>
+    <h3>Cond example #3</h3>
+    <stepper>
+      (cond [(and #true #false) "isThree"]
+      [#false 3]
+      [(or #true #false) (* 2 3 4)])
+    </stepper>
+    <h3>Cond example #4</h3>
+    <stepper>
+      (cond [(and #true #false) "maybe"]
+      [#false 3]
+      [(or #false #false) (* 2 3 4)])
+    </stepper>
+    <h3>Cond example #5</h3>
+    <stepper>
+      (cond
+        [(cond
+        [(and #false #true) #false]
+        [#false 3]
+        [(or #true #false) #true])
+        "isThree"]
+      [#false 3]
+      [(or #true #false) (* 2 3 4)])
+    </stepper>
+    <h3>PROG example</h3>
+    <stepper>
+      (define x (+ 40 2))
+      (define y "hallo")
+      </stepper>
+    <h3>multiple expression example #1</h3>
+    <stepper>
+      (+ 2 4)
+      (+ 3 2)
+      (+ 4 5)
+    </stepper>
+   <!-- <h2>Error Tests</h2>
+    <h3>Call without defined function</h3>
+    <stepper>
+      (call 1 2 3)
+    </stepper>
+
+  </body>
+
+</html>
