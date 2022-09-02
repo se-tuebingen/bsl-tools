@@ -98,7 +98,7 @@ export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition, 
                 env: newEnv,
                 result: def,
                 rule: {
-                    type: SI_STRUCT.Production.ProgRule, 
+                    type: SI_STRUCT.Production.ProgRule,
                     definition: def},
             });
             return stepList;
@@ -286,6 +286,9 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | Error {
         const condResult = cond(r);
         if (condResult == undefined) {
             const newOptions = r.options.slice(1);
+            if(newOptions.length < 1) {
+              return Error('error: no Cond-Option applies');
+            }
             const newExpr: BSL_AST.Cond = {
                 type: BSL_AST.Production.CondExpression,
                 options: newOptions,
