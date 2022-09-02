@@ -163,6 +163,9 @@ export function isProgStep(obj:any): obj is ProgStep {
 export function isStep(obj: any):obj is Step {
     return obj.type === Production.ExprStep || obj.type === Production.DefinitionStep;
 }
+export function isDefinitionStep(obj: any): obj is DefinitionStep {
+    return obj.type === Production.DefinitionStep;
+}
 export function isExprStep(obj: any): obj is ExprStep {
     return obj.type === Production.ExprStep;
 }

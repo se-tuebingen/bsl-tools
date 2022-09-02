@@ -42,6 +42,7 @@ div.stepper {
   border-radius: 0.5em;
   position: relative;
   min-width: 600px;
+  margin-bottom: 1.5em;
 }
 .stepper .boxlabel {
   position: absolute;
@@ -89,8 +90,21 @@ div.stepper {
 .stepper .prev-button {
   top: -1em;
 }
+/* second child because of box label */
+.stepper .step:nth-child(2) .prev-button {
+  top: -5em;
+}
+.stepper .step:nth-child(2) .prev-button::after {
+  content: ' (PROG)';
+}
 .stepper .next-button {
   bottom: -1em;
+}
+.stepper .step:last-child .next-button {
+  bottom: -4em;
+}
+.stepper .step:last-child .next-button::after {
+  content: ' (PROG)';
 }
 .stepper .icon {
   display: inline-block;
@@ -99,9 +113,12 @@ div.stepper {
 .stepper .split-result .icon {
   opacity: 70%;
 }
+.stepper [data-visible="false"] {
+  display: none;
+}
 
 /* ######### code and rules ####### */
-.stepper .split-result, .stepper .plug-result {
+.stepper .code {
   font-family: 'Fira Sans', monospace;
   color: var(--text-grey);
 }

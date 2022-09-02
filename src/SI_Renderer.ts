@@ -15,7 +15,7 @@ import { default as minus_icon } from './ressources/icons/minus-solid.svg';
 import { default as circle_info } from './ressources/icons/circle-info-solid.svg';
 import { default as circle_xmark } from './ressources/icons/circle-xmark-solid.svg';
 // html helpers
-import { getParentClassRecursive } from './DOM_Helpers';
+import { getParentClassRecursive, navigateDOM } from './DOM_Helpers';
 
 // ######### main function processing steppers ###########
 export function processSteppers() {
@@ -93,12 +93,22 @@ const dictionary = {
   'en': {
     'current evaluation': 'Current Evaluation',
     'next step': 'Next Step',
-    'previous step': 'Previous Step'
+    'previous step': 'Previous Step',
+    'environment': 'Environment',
+    'remaining program': 'Remaining Program',
+    'start evaluation': 'Start Evaluation',
+    'evaluation finished': 'Evaluation Finished',
+    'go back': 'Go Back'
   },
   'de': {
     'current evaluation': 'Aktuelle Auswertung',
     'next step': 'Nächster Schritt',
-    'previous step': 'Vorheriger Schritt'
+    'previous step': 'Vorheriger Schritt',
+    'environment': 'Umgebung',
+    'remaining program': 'Übriges Programm',
+    'start evaluation': 'Auswertung Starten',
+    'evaluation finished': 'Auswertung Beendet',
+    'go back': 'Schritt zurück'
   },
 };
 
@@ -110,12 +120,181 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
 
     const str =
     `<div class="stepper">
-        <div class="box">
-          <div class="boxlabel">${dictionary[lang]['current evaluation']}</div>
-          ${stepperTree[0].stepList.filter(SI_STRUCT.isExprStep).map((el, i) => renderStep(i, el, lang)).join('')}
-        </div>
+    
+       <div class="box environment">
+         <div class="boxlabel">${dictionary[lang]['environment']}</div>
+         ${stepperTree.map(renderDefinition).join('')}
+       </div>
+
+       <div class="box expression-steps"
+            data-progstep="-1"
+            data-visible="true">
+         <div class="boxlabel">${dictionary[lang]['current evaluation']}</div>
+         <div class="step"
+              data-currentStep="true">
+           <div class="next-button"
+                onclick="gotoExpression(event, 1)">
+             ${dictionary[lang]['start evaluation']} <img class="icon" src="${angle_down}">
+           </div>
+         </div>
+       </div>
+
+       ${stepperTree.map((el, i) => renderExpressionSteps(el, i, lang)).join('')}
+
+       <div class="box expression-steps"
+            data-progstep="${stepperTree.length}"
+            data-visible="false">
+         <div class="boxlabel">${dictionary[lang]['current evaluation']}</div>
+         <div class="step"
+              data-currentStep="true">
+            <div class="code">${dictionary[lang]['evaluation finished']}</div>
+            <div class="prev-button"
+                 onclick="gotoExpression(event, -1)">
+              ${dictionary[lang]['go back']} <img class="icon" src="${angle_up}">
+            </div>
+         </div>
+       </div>
+
+       <div class="box program">
+         <div class="boxlabel">${dictionary[lang]['remaining program']}</div>
+         ${stepperTree.map(renderOriginalExpression).join('')}
+       </div>
+
     </div>`;
     return str;
+}
+(window as any).gotoExpression = (e: Event, a: number) => {
+  navigateExpression(e, a);
+}
+// render what remains of an expression after evaluation
+function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number): string {
+  const lastStep = progStep.stepList[progStep.stepList.length - 1];
+  if (SI_STRUCT.isDefinitionStep(lastStep)) {
+    return `
+      <div class="step code"
+           data-progstep="${idx}"
+           data-visible="false">
+        ${BSL_Print.printDefinition(lastStep.result)}
+      </div>
+    `;
+  } else {
+    return '';
+  }
+}
+
+// render the part of the original Program that is being represented by a progstep
+function renderOriginalExpression(progStep: SI_STRUCT.ProgStep, idx: number): string {
+  const firstStep = progStep.stepList[0];
+  let code = '';
+  if (SI_STRUCT.isDefinitionStep(firstStep)) {
+    code = BSL_Print.printDefinition(firstStep.result);
+  } else {
+    const context:Context =
+      SI_STRUCT.isKong(firstStep.rule) ?
+        printContext(firstStep.rule.context)
+        : {left:'', right:''};
+    const redexRule =
+      SI_STRUCT.isKong(firstStep.rule) ?
+        firstStep.rule.redexRule
+        : firstStep.rule;
+    const redex: string =
+      printRedex(redexRule.redex);
+    if (!context.right.startsWith(')')) context.right = ` ${context.right}`;
+    code = `${context.left}${redex}${context.right}`;
+  }
+  return `
+    <div class="step code"
+         data-progstep="${idx}"
+         data-visible="true">
+      ${code}
+    </div>
+  `;
+}
+// one stepper for one expression
+function renderExpressionSteps(progStep: SI_STRUCT.ProgStep, idx: number, lang: implementedLanguage): string {
+  return `
+    <div class="box expression-steps"
+         data-progstep="${idx}"
+         data-visible="false">
+      <div class="boxlabel">${dictionary[lang]['current evaluation']}</div>
+      ${progStep.stepList.filter(SI_STRUCT.isExprStep).length > 0 ?
+          progStep.stepList.filter(SI_STRUCT.isExprStep).map((el, i) => renderStep(i, el, lang)).join('')
+          : `
+          <div class="step"
+               data-step="0"
+               data-currentStep="true"
+               data-collapsed="false">
+            <div class="prev-button"
+                 onclick="prevStep(event)">
+              ${dictionary[lang]['previous step']} <img class="icon" src="${angle_up}">
+            </div>
+            <div class="next-button"
+                 onclick="nextStep(event)">
+              ${dictionary[lang]['next step']} <img class="icon" src="${angle_down}">
+            </div>
+
+            <div class="split-result code">
+              ${BSL_Print.printDefinition(progStep.stepList.filter(SI_STRUCT.isDefinitionStep)[0].result)}
+            </div>
+          </div>
+          `
+      }
+    </div>
+  `;
+}
+// navigate between expressions
+function navigateExpression(e: Event, amount: number): void {
+  const el = e.target as HTMLElement;
+  const expressionDiv = getParentClassRecursive(el, 'expression-steps');
+  if(!expressionDiv) {
+    console.error('found no parent with class .expression-steps', el);
+    return;
+  }
+  const idxString = expressionDiv.getAttribute('data-progstep');
+  if(!idxString) {
+    console.error('div with class .expression-steps has no data-progstep attribute', expressionDiv);
+    return;
+  }
+  const idx = parseInt(idxString);
+  const targetIdx = idx + amount;
+  if(targetIdx < -1) {
+    console.error(`cannot navigate to progStep ${targetIdx}: does not exist`);
+    return;
+  }
+  // set visibility in environment
+  navigateDOM([expressionDiv], '../.environment/div').map(def => {
+    const idxString = def.getAttribute('data-progstep');
+    if(idxString) {
+      if(parseInt(idxString) < targetIdx) {
+        def.setAttribute('data-visible', 'true');
+      } else {
+        def.setAttribute('data-visible', 'false');
+      }
+    }
+  });
+  // set visibility in program
+  navigateDOM([expressionDiv], '../.program/div').map(prog => {
+    const idxString = prog.getAttribute('data-progstep');
+    if(idxString) {
+      if(parseInt(idxString) <= targetIdx) {
+        prog.setAttribute('data-visible', 'false');
+      } else {
+        prog.setAttribute('data-visible', 'true');
+      }
+    }
+  });
+  // show correct stepper
+  navigateDOM([expressionDiv], '../.expression-steps').map(e => {
+    const idxString = e.getAttribute('data-progstep');
+    if(idxString) {
+      if(parseInt(idxString) === targetIdx) {
+        e.setAttribute('data-visible', 'true');
+      } else {
+        e.setAttribute('data-visible', 'false');
+      }
+    }
+  });
+
 }
 
 // one individual step
@@ -151,7 +330,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
         ${dictionary[lang]['next step']} <img class="icon" src="${angle_down}">
       </div>
 
-      <div class="split-result">${
+      <div class="split-result code">${
           context.left
         } <span class="hole">${redex}</span>${
           context.right
@@ -163,7 +342,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
               onclick="collapse(event)"
       ></div>
 
-      <div class="plug-result"
+      <div class="plug-result code"
            data-info-collapsed="true">${
           // if context is not empty, we are applying KONG
           context.left !== '' ? `<span class="rule rule-name left-arrowed kong">${rules['Kong']['name']}</span>` : ''
@@ -196,6 +375,9 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
     currentStep.setAttribute('data-collapsed', 'true');
     currentStep.nextElementSibling.setAttribute('data-currentStep', 'true');
     currentStep.nextElementSibling.setAttribute('data-collapsed','false');
+  } else if (currentStep && !currentStep.nextElementSibling) {
+    // continue with next expression
+    navigateExpression(e, 1);
   }
 }
 (window as any).prevStep = (e: Event) => {
@@ -207,7 +389,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
   } else {
     const position = currentStep.getAttribute('data-step');
     if(position === '0') {
-      console.log('todo: implement going back a progstep');
+      navigateExpression(e, -1);
       return;
     } else if(currentStep.previousElementSibling) {
       currentStep.setAttribute('data-currentStep', 'false');

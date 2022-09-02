@@ -10,7 +10,7 @@ export function printDefOrExpr(eod: BSL_AST.defOrExpr) {
     return printE(eod);
   }
 }
-export function printDefinition(d: BSL_AST.definition) {
+export function printDefinition(d: BSL_AST.definition): string {
   if(BSL_AST.isFunDef(d)) {
     return `(define (${printName(d.name)} ${d.args.map(printName).join(' ')}) ${printE(d.body)})`;
   } else if(BSL_AST.isConstDef(d)) {
@@ -19,6 +19,7 @@ export function printDefinition(d: BSL_AST.definition) {
     return `(define-struct ${printName(d.binding)} (${d.properties.map(printName).join(' ')}))`
   } else {
     console.error('Invalid input to printDefinition');
+    return '';
   }
 }
 export function printE(e: BSL_AST.expr): string {
