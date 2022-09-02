@@ -1,7 +1,7 @@
 /* ######### colors ####### */
 .stepper {
   /* --branch-color: #666; */
-  --step-background: #ebf0f4; /* racket azure */
+  --box-background: #ebf0f4; /* racket azure */
   --box-border: #0d3657;
   --button-border: #0d3657;
   --text-grey: #444; /* like in scribble */
@@ -33,23 +33,24 @@ div.stepper {
   flex-direction: column;
   margin: 1vh auto;
 }
-/* ##### block ###### */
-.stepper .steps {
-  background-color: var(--step-background);
+/* ##### boxes ###### */
+.stepper .box {
+  background-color: var(--box-background);
   padding: 0.5em;
   padding-top: 1em;
   border: 1px solid var(--box-border);
   border-radius: 0.5em;
   position: relative;
+  min-width: 600px;
 }
-.stepper .blocklabel {
+.stepper .boxlabel {
   position: absolute;
   top: -1em;
   left: 0.5em;
   padding: 0.25em;
   border: 0px solid transparent;
   border-radius: 0.25em;
-  background-color: var(--step-background);
+  background-color: var(--box-background);
   color: var(--box-border);
 
 }
@@ -112,7 +113,7 @@ div.stepper {
 .stepper .hole {
   display: inline-block;
   background-color: var(--hole-yellow);
-  border: 1px solid var(--text-grey);
+  /* border: 1px solid var(--text-grey); */
   color: var(--text-grey);
   padding-left: 0.25em;
   padding-right: 0.25em;
@@ -131,7 +132,7 @@ div.stepper {
   white-space: nowrap;
 }
 .stepper .kong {
-  top: calc(1px - 2.5em) !important; /* account for difference to hole height (1px border)*/
+  /*top: calc(1px - 2.5em) !important; /* account for difference to hole height (1px border)*/
   padding-left: 0;
   background-color: rgba(255,255,255,0.5);
 }

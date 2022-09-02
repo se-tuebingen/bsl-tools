@@ -110,8 +110,8 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
 
     const str =
     `<div class="stepper">
-        <div class="steps">
-          <div class="blocklabel">${dictionary[lang]['current evaluation']}</div>
+        <div class="box">
+          <div class="boxlabel">${dictionary[lang]['current evaluation']}</div>
           ${stepperTree[0].stepList.filter(SI_STRUCT.isExprStep).map((el, i) => renderStep(i, el, lang)).join('')}
         </div>
     </div>`;
@@ -178,7 +178,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
             rules[ruleName]['name']
           }</span>: <span class="rule-description"><span class="hole">${
             redex
-            }</span> = <span class="hole hole-result">${
+            }</span> → <span class="hole hole-result">${
               result
             }</span></span></span></span>${
           context.right
@@ -201,11 +201,23 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
 (window as any).prevStep = (e: Event) => {
   const button = e.target as HTMLElement;
   const currentStep = getParentClassRecursive(button, 'step');
-  if(currentStep && currentStep.previousElementSibling) {
-    currentStep.setAttribute('data-currentStep', 'false');
-    currentStep.setAttribute('data-collapsed', 'true');
-    currentStep.previousElementSibling.setAttribute('data-currentStep', 'true');
-    currentStep.previousElementSibling.setAttribute('data-collapsed', 'false');
+  if(!currentStep) {
+    console.error('prevStep not called from within an element of the .step class');
+    return;
+  } else {
+    const position = currentStep.getAttribute('data-step');
+    if(position === '0') {
+      console.log('todo: implement going back a progstep');
+      return;
+    } else if(currentStep.previousElementSibling) {
+      currentStep.setAttribute('data-currentStep', 'false');
+      currentStep.setAttribute('data-collapsed', 'true');
+      currentStep.previousElementSibling.setAttribute('data-currentStep', 'true');
+      currentStep.previousElementSibling.setAttribute('data-collapsed', 'false');
+    } else {
+      console.error('prevStep called on a step with no previous html element');
+      return;
+    }
   }
 }
 (window as any).collapse = (e: Event) => {
@@ -241,9 +253,9 @@ function printContext(ctx: SI_STRUCT.Context, acc: Context = {left: '', right: '
       `${ctx.args.map(BSL_Print.printE).join(' ')})${acc.right}`;
   } else if (SI_STRUCT.isCondContext(ctx)) {
     acc.left =
-      `${acc.left}(cond`;
+      `${acc.left}(cond [`;
     acc.right =
-      `${ctx.options.map(BSL_Print.printOption).join(' ')})${acc.right}`;
+      ` ${BSL_Print.printE(ctx.options[0].result)}] ${ctx.options.slice(1).map(BSL_Print.printOption).join(' ')})${acc.right}`;
   } else {
     console.error('Printing this context is not implemented yet', ctx);
     throw(`Printing ${ctx['type']} context is not implemented yet!`);
