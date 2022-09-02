@@ -396,7 +396,7 @@ const rules = {
     'text': `
       Ein Programm wird von links nach rechts ausgeführt und startet mit der
       leeren Umgebung. Ist das nächste Programmelement eine Funktions- oder
-      Strukturdefinition, so wird diese DeWinition in die Umgebung aufgenommen
+      Strukturdefinition, so wird diese Definition in die Umgebung aufgenommen
       und die Ausführung mit dem nächsten Programmelement in der erweiterten
       Umgebung fortgesetzt. Ist das nächste Programmelement ein Ausdruck, so
       wird dieser gemäß der unten stehenden Regeln in der aktuellen Umgebung zu

@@ -287,7 +287,7 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | Error {
         if (condResult == undefined) {
             const newOptions = r.options.slice(1);
             if(newOptions.length < 1) {
-              return Error('error: no Cond-Option applies');
+              return Error('cond: all question results were false');
             }
             const newExpr: BSL_AST.Cond = {
                 type: BSL_AST.Production.CondExpression,
