@@ -1,7 +1,7 @@
 // ######### LAYOUT AST AS TREE DIAGRAM ########
 import * as BSL_AST from "./BSL_AST";
 import * as BSL_Print from "./BSL_Print";
-import {node, productionTree, dirtify} from "./Production_Tree";
+import {node, productionTree} from "./Production_Tree";
 import {parse} from "./BSL_Parser";
 import {default as error_css} from './ressources/error.css';
 
@@ -9,7 +9,7 @@ import {default as error_css} from './ressources/error.css';
 export function processBslTrees() {
   Array.from(document.getElementsByTagName('bsltree')).map(el => {
     try {
-      const program : BSL_AST.program = parse(dirtify(el.innerHTML));
+      const program : BSL_AST.program = parse(BSL_Print.dirtify(el.innerHTML));
       const root = programToNode(program);
       const quiz = el.getAttribute('quiz') === 'true' ? true : false;
       const lang = (el.getAttribute('lang') ? el.getAttribute('lang') : undefined) as string | undefined;

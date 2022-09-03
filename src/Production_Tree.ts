@@ -1,5 +1,6 @@
 import {navigateDOM, getParentTagRecursive, getParentClassRecursive} from "./DOM_Helpers";
 import {default as tree_css} from './ressources/tree.css';
+import {sanitize} from './BSL_Print';
 
 // #### main api #####
 // simple helper structure representing a printed tree
@@ -145,13 +146,6 @@ function renderNode(n: node, p: grammar, i:number=-1):string {
       }
     </li>
   `;
-}
-// preventing problems with brackets
-function sanitize(s: string):string {
-  return s.replaceAll('<','&lt;').replaceAll('>','&gt;');
-}
-export function dirtify(s: string):string {
-  return s.replaceAll('&lt;', '<').replaceAll('&gt;','>');
 }
 
 // ### block of code in node

@@ -1,5 +1,4 @@
 // parsing and processing code input
-import { dirtify } from './Production_Tree';
 import { parse } from './BSL_Parser';
 import * as BSL_AST from "./BSL_AST";
 import * as BSL_Print from './BSL_Print';
@@ -21,7 +20,7 @@ import { getParentClassRecursive, navigateDOM } from './DOM_Helpers';
 export function processSteppers() {
   Array.from(document.getElementsByTagName('stepper')).map(el => {
     try {
-      const program : BSL_AST.program = parse(dirtify(el.innerHTML));
+      const program : BSL_AST.program = parse(BSL_Print.dirtify(el.innerHTML));
       console.log(BSL_Print.indent(BSL_Print.pprint(program), 30));
       setUpStepperGui(program, el as HTMLElement);
     } catch (e:any) {
@@ -66,10 +65,10 @@ export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement): void 
         stepperTree: [],
     };
     const stepper = calculateProgram(program, emptyStepper);
-    console.log("stepper", stepper);
     if (stepper instanceof Error) {
       throw stepper;
     }
+    console.log("stepper", stepper);
     // set language
     let lang = el.getAttribute('lang');
     if (!lang) {
@@ -121,7 +120,7 @@ let charPxWidth = 12; // arbitrary default
 let maxWidthInChars = 80;
 function setCharPxWidth(el: HTMLElement): void {
   el.innerHTML = `
-    <div class="stepper">
+    <div class="stepper" style="width: 100%;">
       <div class="box">
         <div class="step code"
              data-currentStep="true">
@@ -131,16 +130,17 @@ function setCharPxWidth(el: HTMLElement): void {
     </div>
   `;
   const p = el.getElementsByTagName('p')[0];
-  if(!p) {
+  const stepper = el.getElementsByClassName('stepper')[0];
+  if(!p || !stepper) {
     console.error('failed to inject measuring HTML into', el);
     return;
   }
   charPxWidth = p.clientWidth / 'Loading...'.length;
   console.log(`Found that 1em is ${charPxWidth} wide`);
   const factor = 0.9;
-  maxWidthInChars = Math.round((factor * window.innerWidth) / charPxWidth);
+  maxWidthInChars = Math.round((factor * stepper.clientWidth) / charPxWidth);
   console.log(`
-    That means to fill ${factor} of the screen width,
+    That means to fill ${factor} of the available width,
     we may print at most ${maxWidthInChars} characters.
   `);
 }
@@ -205,7 +205,10 @@ function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number): string {
       <div class="step code"
            data-progstep="${idx}"
            data-visible="false">
-        ${BSL_Print.indent(BSL_Print.printDefinition(lastStep.result), maxWidthInChars, 'html')}
+        ${BSL_Print.indent(
+            BSL_Print.sanitize(
+              BSL_Print.printDefinition(lastStep.result)),
+            maxWidthInChars, 'html')}
       </div>
     `;
   } else {
@@ -237,7 +240,9 @@ function renderOriginalExpression(progStep: SI_STRUCT.ProgStep, idx: number): st
     <div class="step code"
          data-progstep="${idx}"
          data-visible="true">
-      ${BSL_Print.indent(code, maxWidthInChars, 'html')}
+      ${BSL_Print.indent(
+          BSL_Print.sanitize(code),
+          maxWidthInChars, 'html')}
     </div>
   `;
 }
@@ -330,7 +335,7 @@ function navigateExpression(e: Event, amount: number): void {
 
 // one individual step
 function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: implementedLanguage): string {
-  console.log(`Rendering step ${currentStep}`);
+  // console.log(`Rendering step ${currentStep}`);
   // acquire necessary information:
   // context and redex
   const context:Context =
@@ -340,10 +345,10 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
   const redexRule = SI_STRUCT.isKong(step.rule) ? step.rule.redexRule : step.rule;
   // result and rule name
   const redex: string =
-    printRedex(redexRule.redex);
+    BSL_Print.sanitize(printRedex(redexRule.redex));
   const result: string = SI_STRUCT.isValue(redexRule.result)
       ? `${redexRule.result}`
-      : BSL_Print.printE(redexRule.result);
+      : BSL_Print.sanitize(BSL_Print.printE(redexRule.result));
   const ruleName = redexRule.type;
   // prepare indented code expressions
   const code_before =
@@ -472,7 +477,10 @@ interface Context {
 }
 function printContext(ctx: SI_STRUCT.Context, acc: Context = {left: '', right: ''}): Context {
   if (SI_STRUCT.isHole(ctx)) {
-    return acc;
+    return {
+      left:BSL_Print.sanitize(acc.left),
+      right: BSL_Print.sanitize(acc.right)
+    };
   }
   if (SI_STRUCT.isAppContext(ctx)) {
     const leftEls = [BSL_Print.printName(ctx.op), ...ctx.values.map(v => `${v}`)];

@@ -1,4 +1,5 @@
-import {node, productionTree, dirtify, grammar} from "./Production_Tree";
+import {node, productionTree, grammar} from "./Production_Tree";
+import {dirtify} from './BSL_Print';
 
 export function processJsonTrees() {
   Array.from(document.getElementsByTagName('jsontree')).map(el => {

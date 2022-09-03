@@ -489,7 +489,32 @@ export function prim(r: SI_STRUCT.CallRedex): SI_STRUCT.Value | Error {
         } else {
             return Error("prim: 'not' needs boolean argument");
         }
-    } else {
+    }
+    // less than and greater than, to test HTML escaping
+    else if (['<','>','<=','>='].includes(r.name.symbol)) {
+      if(r.args.length !== 2) {
+        return Error(`prim: ${r.name.symbol} needs exactly two arguments`);
+      }
+      const left = r.args[0];
+      const right = r.args[1];
+      if(typeof left !== 'number' || typeof right !== 'number') {
+        return Error(`prim: ${r.name.symbol} needs two numbers, but received ${left} and ${right}`);
+      }
+      switch(r.name.symbol) {
+        case '<':
+          return left < right;
+        case '<=':
+          return left <= right;
+        case '>=':
+          return left >= right;
+        case '>':
+          return left > right;
+        default:
+          return true; // never reached but needed for compiler
+      }
+    }
+    // else throw error
+    else {
         return Error("prim: this function is not implemented");
     }
 }

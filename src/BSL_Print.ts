@@ -149,7 +149,7 @@ export const testprogram: BSL_AST.program = [
 
 // indent code that is wider than maxLength characters
 export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = 'text'): string {
-  console.log('Code before indentation', code);
+  // console.log('Code before indentation', code);
   // extract terms and their theoretical indentation level
   let terms: {term: string, level: number}[] = [];
   let level = 0;
@@ -202,7 +202,7 @@ export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = '
     terms.push({term: acc, level: level});
     if (level > maxLevel) maxLevel = level;
   }
-  console.log(terms);
+  // console.log(terms);
   // append terms starting from the inside
   const joiner = mode === 'html' ? '<br>' : `
 `;
@@ -236,7 +236,7 @@ export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = '
         return {term: unindented, level: t.level};
       }
     });
-    console.log(terms);
+    // console.log(terms);
   }
   // now there should be only top level terms left
   return terms.map(t => t.term).join(joiner);
@@ -255,4 +255,12 @@ function htmlIgnoringLength(s: string): number {
   const testDiv: HTMLElement = document.createElement('div');
   testDiv.innerHTML = s;
   return testDiv.textContent ? testDiv.textContent.length : 0;
+}
+
+// #### preventing problems with brackets
+export function sanitize(s: string):string {
+  return s.replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+export function dirtify(s: string):string {
+  return s.replaceAll('&lt;', '<').replaceAll('&gt;','>');
 }
