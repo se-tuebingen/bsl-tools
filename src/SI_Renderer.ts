@@ -356,31 +356,26 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
       `${context.left}<span class="hole">${redex}</span>${context.right}`,
       maxWidthInChars,
       'html');
-  const code_after_empty =
+  const code_after =
     BSL_Print.indent(
       `${context.left}<span class="hole hole-result">${
         result
-       }<span id="replaceme"></span></span>${context.right}`,
+       }</span>${context.right}`,
       maxWidthInChars,
       'html');
-  const code_after =
-    // adding rule explanation here so we can align it with result hole
-    code_after_empty.replace(
-      '<span id="replaceme"></span>',
-      `<span class="rule left-arrowed">
-         <span class="rule-name">${
-           rules[ruleName]['name']
-         }</span>:
-         <span class="rule-description">
-           <span class="hole">${
-             redex
-           }</span> →
-           <span class="hole hole-result">${
-             result
-           }</span>
-         </span>
-       </span>`
-    );
+
+  // find out where to position the rule arrow so that it points at the hole
+  const code_before_hole =
+    code_after.slice(0,code_after.indexOf('<span class="hole hole-result">'))
+              .split('<br>')
+              .reverse()[0];
+  console.log('code before hole:', code_before_hole);
+  const hole_position = code_before_hole ? BSL_Print.dirtify(code_before_hole).length : 0;
+  const KONG_WIDTH = 4;
+  const left_offset_arrow =
+    context.left.length > 0 && hole_position < KONG_WIDTH
+    ? KONG_WIDTH
+    : hole_position;
 
   return `
     <div class="step"
@@ -407,14 +402,44 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
       ></div>
 
       <div class="plug-result code"
-           data-info-collapsed="true">${
-          // if context is not empty, we are applying KONG
-          context.left !== '' ? `<span class="rule rule-name left-arrowed kong">${rules['Kong']['name']}</span>` : ''
-        }${
+           data-info-collapsed="true">
+        <div>
+          ${// if context is not empty, we are applying KONG
+            context.left !== '' ?
+              `<span class="rule rule-name left-arrowed kong">
+                 ${rules['Kong']['name']}
+              </span>` : ''}
+
+          <span class="rule left-arrowed one-rule"
+                style="--one-rule-margin-left: ${left_offset_arrow * charPxWidth}px">
+             <span class="rule-name">${
+               rules[ruleName]['name']
+             }</span>:
+             <span class="rule-description">
+               <span class="hole">${
+                 redex
+               }</span> →
+               <span class="hole hole-result">${
+                 result
+               }</span>
+             </span>
+           </span>
+
+           <img src="${circle_info}"
+                class="icon info-toggle info-expand"
+                onclick="expandInfo(event)">
+           <img src="${circle_xmark}"
+                class="icon info-toggle info-collapse"
+                onclick="collapseInfo(event)">
+
+        </div>
+        ${
           renderRuleInformation(ruleName, context.left !== '')
-        }${
+        }
+        <div>${
           code_after
-      }</div>
+        }</div>
+      </div>
 
     </div>
   `;
@@ -519,13 +544,7 @@ function printRedex(redex: SI_STRUCT.Redex): string {
 // rendering the rule tip
 function renderRuleInformation(rule: availableRules, kong: boolean):string {
   const ruleInfo = rules[rule];
-  return `<img src="${circle_info}"
-               class="icon info-toggle info-expand"
-               onclick="expandInfo(event)"
-         ><img src="${circle_xmark}"
-               class="icon info-toggle info-collapse"
-               onclick="collapseInfo(event)"
-         ><div class="rule-info">${
+  return `<div class="rule-info">${
            kong ? `
             <div class="rule-info-text-container">
               <div class="rule-info-rule-name">${rules['Kong']['name']}</div>
@@ -544,9 +563,6 @@ function renderRuleInformation(rule: availableRules, kong: boolean):string {
   const p = getParentClassRecursive(t, 'plug-result');
   if(!p) return;
   p.setAttribute('data-info-collapsed', 'false');
-  const info = p.querySelector('.rule-info');
-  if(!info) return;
-  p.style.cssText = `--rule-info-height: ${info.getBoundingClientRect().height}px`;
 }
 (window as any).collapseInfo = (e: Event) => {
   const t = e.target as HTMLElement;

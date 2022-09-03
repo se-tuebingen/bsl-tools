@@ -262,5 +262,5 @@ export function sanitize(s: string):string {
   return s.replaceAll('<','&lt;').replaceAll('>','&gt;');
 }
 export function dirtify(s: string):string {
-  return s.replaceAll('&lt;', '<').replaceAll('&gt;','>');
+  return s.replaceAll('&lt;', '<').replaceAll('&gt;','>').replaceAll('&nbsp;', ' ');
 }

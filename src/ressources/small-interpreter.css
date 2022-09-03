@@ -42,6 +42,7 @@ div.stepper {
   border-radius: 0.5em;
   position: relative;
   min-width: 600px;
+  max-width: 100%;
   margin-bottom: 1.5em;
 }
 .stepper .boxlabel {
@@ -123,7 +124,6 @@ div.stepper {
   color: var(--text-grey);
 }
 .stepper .plug-result {
-  margin-top: 3.5em;
   position: relative;
   z-index: 2;
 }
@@ -140,18 +140,23 @@ div.stepper {
   background-color: var(--hole-green);
 }
 .stepper .rule {
-  display: block;
-  position: absolute;
-  left: 0;
-  top: -2.5em;
+  display: inline-block;
+  position: relative;
   padding-left: .5em;
   width: fit-content;
   white-space: nowrap;
+  margin-top: 1em;
+  margin-bottom: 1.5em;
 }
 .stepper .kong {
-  /*top: calc(1px - 2.5em) !important; /* account for difference to hole height (1px border)*/
+  position: absolute;
+  left: 0;
+  top: 0;
   padding-left: 0;
   background-color: rgba(255,255,255,0.5);
+}
+.stepper .one-rule {
+  margin-left: var(--one-rule-margin-left, 4em);
 }
 .stepper .rule-description {
   font-family: 'Fira Mono', monospace;
@@ -189,9 +194,9 @@ div.stepper {
 }
 /* rule info */
 .stepper .info-toggle {
-  position: absolute;
-  top: -2em;
-  right: 0;
+  margin-top: 1em;
+  margin-bottom: 1.5em;
+  float: right;
 }
 .stepper .info-toggle:hover {
   cursor: pointer;
@@ -253,11 +258,4 @@ div.stepper {
 }
 .stepper .plug-result[data-info-collapsed="false"] .info-expand {
   display: none;
-}
-/* adjust rule position */
-.stepper .plug-result[data-info-collapsed="false"] .rule {
-  top: calc(-2.5em - var(--rule-info-height, 0px));
-}
-.stepper .plug-result[data-info-collapsed="false"] .kong {
-  top: -2.5em;
 }
