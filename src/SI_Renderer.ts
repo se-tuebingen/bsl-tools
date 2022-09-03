@@ -82,6 +82,8 @@ export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement): void 
       `);
       lang = 'en';
     }
+    // get width of single character for dynamic maxwidth indentation
+    setCharPxWidth(el);
     // render and attach
     el.innerHTML = renderStepper(stepper, lang as implementedLanguage);
 }
@@ -114,6 +116,34 @@ const dictionary = {
 };
 
 // ####### RENDER FUNCTIONS #######
+// helper for getting width of em in px
+let charPxWidth = 12; // arbitrary default
+let maxWidthInChars = 80;
+function setCharPxWidth(el: HTMLElement): void {
+  el.innerHTML = `
+    <div class="stepper">
+      <div class="box">
+        <div class="step code"
+             data-currentStep="true">
+          <p style="display: inline-block;">Loading...</p>
+        </div>
+      </div>
+    </div>
+  `;
+  const p = el.getElementsByTagName('p')[0];
+  if(!p) {
+    console.error('failed to inject measuring HTML into', el);
+    return;
+  }
+  charPxWidth = p.clientWidth / 'Loading...'.length;
+  console.log(`Found that 1em is ${charPxWidth} wide`);
+  const factor = 0.9;
+  maxWidthInChars = Math.round((factor * window.innerWidth) / charPxWidth);
+  console.log(`
+    That means to fill ${factor} of the screen width,
+    we may print at most ${maxWidthInChars} characters.
+  `);
+}
 
 // main function
 function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): string{
@@ -175,7 +205,7 @@ function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number): string {
       <div class="step code"
            data-progstep="${idx}"
            data-visible="false">
-        ${BSL_Print.printDefinition(lastStep.result)}
+        ${BSL_Print.indent(BSL_Print.printDefinition(lastStep.result), maxWidthInChars, 'html')}
       </div>
     `;
   } else {
@@ -207,7 +237,7 @@ function renderOriginalExpression(progStep: SI_STRUCT.ProgStep, idx: number): st
     <div class="step code"
          data-progstep="${idx}"
          data-visible="true">
-      ${code}
+      ${BSL_Print.indent(code, maxWidthInChars, 'html')}
     </div>
   `;
 }
@@ -315,8 +345,38 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
       ? `${redexRule.result}`
       : BSL_Print.printE(redexRule.result);
   const ruleName = redexRule.type;
-  // add whitespace to context if necessary
-  if (!context.right.startsWith(')')) context.right = ` ${context.right}`;
+  // prepare indented code expressions
+  const code_before =
+    BSL_Print.indent(
+      `${context.left}<span class="hole">${redex}</span>${context.right}`,
+      maxWidthInChars,
+      'html');
+  const code_after_empty =
+    BSL_Print.indent(
+      `${context.left}<span class="hole hole-result">${
+        result
+       }<span id="replaceme"></span></span>${context.right}`,
+      maxWidthInChars,
+      'html');
+  const code_after =
+    // adding rule explanation here so we can align it with result hole
+    code_after_empty.replace(
+      '<span id="replaceme"></span>',
+      `<span class="rule left-arrowed">
+         <span class="rule-name">${
+           rules[ruleName]['name']
+         }</span>:
+         <span class="rule-description">
+           <span class="hole">${
+             redex
+           }</span> →
+           <span class="hole hole-result">${
+             result
+           }</span>
+         </span>
+       </span>`
+    );
+
   return `
     <div class="step"
          data-step="${currentStep}"
@@ -332,9 +392,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
       </div>
 
       <div class="split-result code">${
-          context.left
-        } <span class="hole">${redex}</span>${
-          context.right
+          code_before
         }<img class="icon expander"
               src="${plus_icon}"
               onclick="expand(event)"
@@ -350,18 +408,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
         }${
           renderRuleInformation(ruleName, context.left !== '')
         }${
-          context.left
-        } <span class="hole hole-result">${
-          result
-          // adding rule explanation here so we can align it with result hole
-          }<span class="rule left-arrowed"><span class="rule-name">${
-            rules[ruleName]['name']
-          }</span>: <span class="rule-description"><span class="hole">${
-            redex
-            }</span> → <span class="hole hole-result">${
-              result
-            }</span></span></span></span>${
-          context.right
+          code_after
       }</div>
 
     </div>
@@ -427,18 +474,23 @@ function printContext(ctx: SI_STRUCT.Context, acc: Context = {left: '', right: '
   if (SI_STRUCT.isHole(ctx)) {
     return acc;
   }
-  if (acc.left) acc.left = `${acc.left} `;
-  if (acc.right) acc.right = ` ${acc.right}`;
   if (SI_STRUCT.isAppContext(ctx)) {
+    const leftEls = [BSL_Print.printName(ctx.op), ...ctx.values.map(v => `${v}`)];
     acc.left =
-      `${acc.left}(${BSL_Print.printName(ctx.op)} ${ctx.values.map(v => `${v}`).join(' ')}`;
+      `${acc.left}(${leftEls.join(' ')} `;
     acc.right =
-      `${ctx.args.map(BSL_Print.printE).join(' ')})${acc.right}`;
+       ctx.args.length > 0 ?
+      ` ${ctx.args.map(BSL_Print.printE).join(' ')})${acc.right}`
+      : `)${acc.right}`;
   } else if (SI_STRUCT.isCondContext(ctx)) {
     acc.left =
       `${acc.left}(cond [`;
+    const rest = [
+      `${BSL_Print.printE(ctx.options[0].result)}]`,
+      ...ctx.options.slice(1).map(BSL_Print.printOption)
+    ];
     acc.right =
-      ` ${BSL_Print.printE(ctx.options[0].result)}] ${ctx.options.slice(1).map(BSL_Print.printOption).join(' ')})${acc.right}`;
+      ` ${rest.join(' ')})${acc.right}`;
   } else {
     console.error('Printing this context is not implemented yet', ctx);
     throw(`Printing ${ctx['type']} context is not implemented yet!`);

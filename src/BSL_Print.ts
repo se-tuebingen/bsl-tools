@@ -149,6 +149,7 @@ export const testprogram: BSL_AST.program = [
 
 // indent code that is wider than maxLength characters
 export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = 'text'): string {
+  console.log('Code before indentation', code);
   // extract terms and their theoretical indentation level
   let terms: {term: string, level: number}[] = [];
   let level = 0;
@@ -156,8 +157,13 @@ export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = '
   let maxLevel = 0;
   let acc = '';
   let inString = false;
+  let inTag = false;
   code.split('').forEach(char => {
     if(inString && char !== '"') {
+      acc += char;
+      return;
+    }
+    if(inTag && char !== '>') {
       acc += char;
       return;
     }
@@ -165,29 +171,32 @@ export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = '
       case '(':
       case '[':
         nextLevel++;
-        acc += char;
-        return;
+        break;
       case ')':
       case ']':
         nextLevel--;
-        acc += char;
-        return;
+        break;
       case '"':
         inString = !inString;
-        acc += char;
-        return;
+        break;
+      case '<':
+        inTag = mode === 'html';
+        break;
+      case '>':
+        if(mode === 'html') inTag = false;
+        break;
       case ' ':
       case '\n':
       case '\t':
+        if(!acc) return;
         terms.push({term: acc, level: level});
         if (level > maxLevel) maxLevel = level;
         acc = '';
         level = nextLevel;
         return;
-      default:
-        acc += char;
-        return;
     }
+    acc += char;
+    return;
   });
   if(acc !== '') {
     terms.push({term: acc, level: level});
@@ -212,8 +221,10 @@ export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = '
       const alreadyIndenting = t.subterms.some(s => s.includes(joiner));
       const unindented =
         `${t.term}${t.subterms.length > 0 ? ' ': ''}${t.subterms.join(' ')}`;
+      const unindentedLength =
+        mode === 'html' ? htmlIgnoringLength(unindented) : unindented.length;
       if(alreadyIndenting ||
-         unindented.length + t.level > maxWidth) {
+         unindentedLength + t.level > maxWidth) {
         const parts = t.subterms.map(s =>
           `${mode === 'html' ? repeat('&nbsp;', level) : repeat(' ', level)}${s}`);
         parts.unshift(t.term);
@@ -231,10 +242,17 @@ export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = '
   return terms.map(t => t.term).join(joiner);
 }
 
+// repeat a string s n times
 function repeat(s: string, n: number):string {
   let acc = '';
   for(let i = 0; i < n; i++) {
     acc += s;
   }
   return acc;
+}
+// measure the length of a string while ignoring html
+function htmlIgnoringLength(s: string): number {
+  const testDiv: HTMLElement = document.createElement('div');
+  testDiv.innerHTML = s;
+  return testDiv.textContent ? testDiv.textContent.length : 0;
 }
