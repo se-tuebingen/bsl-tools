@@ -210,15 +210,19 @@ export function indent(code: string, maxWidth: number, mode: 'html' | 'text' = '
     // append and check if we need to start indenting
     terms = newTerms.map(t => {
       const alreadyIndenting = t.subterms.some(s => s.includes(joiner));
+      const unindented =
+        `${t.term}${t.subterms.length > 0 ? ' ': ''}${t.subterms.join(' ')}`;
       if(alreadyIndenting ||
-        `${t.term} ${t.subterms.join(' ')}`.length + t.level > maxWidth) {
-        const sub = t.subterms.map(s => `${mode === 'html' ? repeat('&nbsp;', level) : repeat(' ', level)}${s}`);
+         unindented.length + t.level > maxWidth) {
+        const parts = t.subterms.map(s =>
+          `${mode === 'html' ? repeat('&nbsp;', level) : repeat(' ', level)}${s}`);
+        parts.unshift(t.term);
         const joiner = mode === 'html' ? '<br>' : `
-`;
-        const all = `${t.term}${sub.length > 0 ? joiner : ''}${sub.join(joiner)}`;
+`; // literal newline to be safe
+        const all = `${parts.join(joiner)}`;
         return {term: all, level: t.level};
       } else {
-        return {term: `${t.term}${t.subterms.length > 0 ? ' ': ''}${t.subterms.join(' ')}`, level: t.level};
+        return {term: unindented, level: t.level};
       }
     });
     console.log(terms);
