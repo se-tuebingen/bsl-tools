@@ -376,6 +376,11 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
     context.left.length > 0 && hole_position < KONG_WIDTH
     ? KONG_WIDTH
     : hole_position;
+  // find out if we have place to repeat the holes
+  const space_left =                 // 3 for the arrow, 2 for the icon ---v
+    maxWidthInChars - left_offset_arrow - rules[ruleName]['name'].length - 5;
+  const renderHolesInRule =
+    redex.length + result.length <= space_left;
 
   return `
     <div class="step"
@@ -414,15 +419,18 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
                 style="--one-rule-margin-left: ${left_offset_arrow * charPxWidth}px">
              <span class="rule-name">${
                rules[ruleName]['name']
-             }</span>:
-             <span class="rule-description">
-               <span class="hole">${
-                 redex
-               }</span> →
-               <span class="hole hole-result">${
-                 result
-               }</span>
-             </span>
+             }</span>${
+               renderHolesInRule ?
+               `:
+               <span class="rule-description">
+                 <span class="hole rule-hole">${
+                   redex
+                 }</span> →
+                 <span class="hole hole-result rule-hole">${
+                   result
+                 }</span>
+               </span>` : ''
+             }
            </span>
 
            <img src="${circle_info}"
