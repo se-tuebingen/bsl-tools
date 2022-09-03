@@ -562,12 +562,12 @@ div.stepper {
 }
 .stepper .rule-info-rule-name {
   position: absolute;
-  left: -5em;
+  left: -6em;
   top: 0;
 }
 .stepper .rule-info-text-container {
   position: relative;
-  margin-left: 5em;
+  margin-left: 6em;
   margin-bottom: 1em;
 }
 /* .stepper .rule-info strong {
