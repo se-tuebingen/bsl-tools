@@ -258,3 +258,6 @@ div.stepper {
 .stepper .plug-result[data-info-collapsed="false"] .rule {
   top: calc(-2.5em - var(--rule-info-height, 0px));
 }
+.stepper .plug-result[data-info-collapsed="false"] .kong {
+  top: -2.5em;
+}
