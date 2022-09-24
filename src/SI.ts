@@ -6,7 +6,7 @@ import * as SI_STRUCT from "./SI_STRUCT";
 // calculateAllSteps (for the whole program)
 export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.Stepper): SI_STRUCT.Stepper | Error {
     const copyProgram = JSON.parse(JSON.stringify(program));
-    const env: SI_STRUCT.Environment = new Map();
+    const env: SI_STRUCT.Environment = {};
     while (copyProgram.length > 0) {
         //program.forEach
         let stepperTree: SI_STRUCT.ProgStep[] = stepper.stepperTree;
@@ -54,59 +54,42 @@ export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.St
 // calculate ProgStep
 // line is a line of program code -> ProgStep | Error
 export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition, env: SI_STRUCT.Environment): SI_STRUCT.ProgStep | Error {
-        if (BSL_AST.isExpr(defOrExpr)) {
-            let stepList = calculateExprSteps(defOrExpr);
-            if (stepList instanceof Error) {
-                return stepList;
-            } else {
-                return {
-                    type: SI_STRUCT.Production.ProgStep,
-                    stepList: stepList,
-                };
-            }
-        } else{
-            console.log("definition", defOrExpr);
-            console.log("prog", calculateDefSteps(defOrExpr, env))
-            let stepList = calculateDefSteps(defOrExpr, env);
-            if (stepList instanceof Error) {
-                return stepList;
-            } else {
-                return {
-                    type: SI_STRUCT.Production.ProgStep,
-                    stepList: stepList,
-                };
-            }
+    if (BSL_AST.isExpr(defOrExpr)) {
+        let stepList = calculateExprSteps(defOrExpr);
+        if (stepList instanceof Error) {
+            return stepList;
+        } else {
+            return {
+                type: SI_STRUCT.Production.ProgStep,
+                stepList: stepList,
+            };
+        }
+    } else {
+        console.log("definition", defOrExpr);
+        console.log("prog", calculateDefSteps(defOrExpr, env))
+        let stepList = calculateDefSteps(defOrExpr, env);
+        if (stepList instanceof Error) {
+            return stepList;
+        } else {
+            return {
+                type: SI_STRUCT.Production.ProgStep,
+                stepList: stepList,
+            };
         }
     }
+}
 //prog
 //definition, Environment => SI_STRUCT.DefStep
- export function calculateDefSteps(
+export function calculateDefSteps(
     def: BSL_AST.definition,
     env: SI_STRUCT.Environment
 ): SI_STRUCT.DefinitionStep[] | Error {
     if (BSL_AST.isConstDef(def)) {
         const name = def.name;
-        const value = def.value;
-        if (name.symbol in env) {
-            return Error("prog: name already bound");
-        } else {
-            const newEnv = new Map(env);
-            env.set(name.symbol, value);
-            let stepList: SI_STRUCT.DefinitionStep[] = [];
-            stepList.push({
-                type: SI_STRUCT.Production.DefinitionStep,
-                env: newEnv,
-                result: def,
-                rule: {
-                    type: SI_STRUCT.Production.ProgRule,
-                    definition: def},
-            });
-            return stepList;
-        }
+        const expr = def.value;
+        return Error("error: const definition not implemented");
     } else if (BSL_AST.isFunDef(def)) {
         const name = def.name;
-        const args = def.args;
-        const body = def.body;
         if (name.symbol in env) {
             return Error("prog: name already bound");
         } else {
@@ -182,20 +165,12 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
         let posFound = false;
         const valueMap = args.map((arg, i) => {
             if (!posFound && BSL_AST.isLiteral(arg)) {
-                return "left";
+                valueLst.push(arg.value);
             } else if (!posFound && !BSL_AST.isLiteral(arg)) {
                 posFound = true;
                 pos = i;
-                return "middle";
             } else {
-                return "right";
-            }
-        });
-        valueMap.forEach((el, i) => {
-            if (el == "left") {
-                valueLst.push((args[i] as BSL_AST.Literal).value);
-            } else if (el == "right") {
-                exprLst.push(args[i]);
+                exprLst.push(arg);
             }
         });
         // if there is no context, all arguments are values and the result is a value
@@ -286,8 +261,8 @@ export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | Error {
         const condResult = cond(r);
         if (condResult == undefined) {
             const newOptions = r.options.slice(1);
-            if(newOptions.length < 1) {
-              return Error('cond: all question results were false');
+            if (newOptions.length < 1) {
+                return Error('cond: all question results were false');
             }
             const newExpr: BSL_AST.Cond = {
                 type: BSL_AST.Production.CondExpression,
@@ -325,7 +300,7 @@ export function plug(
         //console.log("plug: oneRule", oneRule);
         return {
             type: SI_STRUCT.Production.ExprStep,
-            env: new Map(),
+            env: {},
             rule: oneRule,
             result: oneRule.result,
         };
@@ -360,7 +335,7 @@ export function plug(
                 //console.log("finalExpr", finalExpr);
                 return {
                     type: SI_STRUCT.Production.ExprStep,
-                    env: new Map(),
+                    env: {},
                     rule: {
                         type: SI_STRUCT.Production.Kong,
                         context: c,
@@ -384,7 +359,7 @@ export function plug(
                 };
                 return {
                     type: SI_STRUCT.Production.ExprStep,
-                    env: new Map(),
+                    env: {},
                     rule: {
                         type: SI_STRUCT.Production.Kong,
                         context: c,
@@ -491,27 +466,27 @@ export function prim(r: SI_STRUCT.CallRedex): SI_STRUCT.Value | Error {
         }
     }
     // less than and greater than, to test HTML escaping
-    else if (['<','>','<=','>='].includes(r.name.symbol)) {
-      if(r.args.length !== 2) {
-        return Error(`prim: ${r.name.symbol} needs exactly two arguments`);
-      }
-      const left = r.args[0];
-      const right = r.args[1];
-      if(typeof left !== 'number' || typeof right !== 'number') {
-        return Error(`prim: ${r.name.symbol} needs two numbers, but received ${left} and ${right}`);
-      }
-      switch(r.name.symbol) {
-        case '<':
-          return left < right;
-        case '<=':
-          return left <= right;
-        case '>=':
-          return left >= right;
-        case '>':
-          return left > right;
-        default:
-          return true; // never reached but needed for compiler
-      }
+    else if (['<', '>', '<=', '>='].includes(r.name.symbol)) {
+        if (r.args.length !== 2) {
+            return Error(`prim: ${r.name.symbol} needs exactly two arguments`);
+        }
+        const left = r.args[0];
+        const right = r.args[1];
+        if (typeof left !== 'number' || typeof right !== 'number') {
+            return Error(`prim: ${r.name.symbol} needs two numbers, but received ${left} and ${right}`);
+        }
+        switch (r.name.symbol) {
+            case '<':
+                return left < right;
+            case '<=':
+                return left <= right;
+            case '>=':
+                return left >= right;
+            case '>':
+                return left > right;
+            default:
+                return true; // never reached but needed for compiler
+        }
     }
     // else throw error
     else {

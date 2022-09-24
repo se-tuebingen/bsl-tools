@@ -17,7 +17,8 @@ export enum Production {
     CondTrue = "CondTrue",
     CondFalse = "CondFalse",
     ProgRule = "ProgRule",
-    Kong = "Kong"
+    Kong = "Kong",
+    Closure = "Closure"
 }
 
 export interface Stepper {
@@ -46,6 +47,7 @@ export interface DefinitionStep {
     type: Production.DefinitionStep;
     env: Environment;
     rule: ProgRule;
+    exprSteps: ExprStep[];
     result: BSL_AST.definition;
 }
 
@@ -109,9 +111,14 @@ export interface CondContext {
 export interface Hole {
     type: Production.Hole;
 }
+export type Value = number | string | boolean | `'()` /*| Closure*/;
 
-export type Value = number | string | boolean | `'()`;
-
+export interface Closure{
+    type: "Closure";
+    env: Environment;
+    params: BSL_AST.Name[];
+    body: BSL_AST.expr;
+}
 //######## OneRule(s) ########a
 export interface Prim {
     type: Production.Prim;
@@ -148,9 +155,9 @@ export interface Kong {
 
 
 // ENVIRONMENT
-// interface Environment :Map = {[key: string]: Value};
 
-export type Environment = Map<string, Value | BSL_AST.expr>; // BSL_AST.expr zuerst auswerten (call by value)
+export type Environment = { [key: string]: Value };
+// BSL_AST.expr zuerst auswerten (call by value)
 // ##########################
 
 // runtime type checking
