@@ -6,39 +6,21 @@ import * as SI_STRUCT from "./SI_STRUCT";
 // calculateAllSteps (for the whole program)
 export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.Stepper): SI_STRUCT.Stepper | Error {
     const copyProgram = JSON.parse(JSON.stringify(program));
-    const env: SI_STRUCT.Environment = {};
+    let env: SI_STRUCT.Environment = {};
     while (copyProgram.length > 0) {
         //program.forEach
         let stepperTree: SI_STRUCT.ProgStep[] = stepper.stepperTree;
         let defOrExpr = copyProgram.shift();
-        /*if (BSL_AST.isExpr(defOrExpr)) {
-            let stepList = calculateExprSteps(defOrExpr, stepperTree);
-            if (stepList instanceof Error) {
-                return stepList;
-            } else {
-                stepperTree = stepList;
-            }
-        } else if (BSL_AST.isDefinition(defOrExpr)) {
-            console.log("definition", defOrExpr);
-            console.log("prog", prog(defOrExpr, env))
-            let stepList = prog(defOrExpr, env);
-            if (stepList instanceof Error) {
-                return stepList;
-            } else {
-                let progResult = stepList;
-                stepperTree.push(progResult);
-                //return Error("error: definition not implemented");
-            }
-        }
-        stepper.stepperTree = stepperTree; */
         //NEW APPROACH
         let progStep = calculateProgStep(defOrExpr, env);
         if (progStep instanceof Error) {
             return progStep;
         } else {
+            env = progStep.stepList[progStep.stepList.length - 1].env;
             stepperTree.push(progStep);
         }
         console.log("progStep", progStep);
+        console.log("env", env);
         stepper.stepperTree = stepperTree;
     }
     const newStepper: SI_STRUCT.Stepper = {
@@ -55,7 +37,7 @@ export function calculateProgram(program: BSL_AST.program, stepper: SI_STRUCT.St
 // line is a line of program code -> ProgStep | Error
 export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition, env: SI_STRUCT.Environment): SI_STRUCT.ProgStep | Error {
     if (BSL_AST.isExpr(defOrExpr)) {
-        let stepList = calculateExprSteps(defOrExpr);
+        let stepList = calculateExprSteps(defOrExpr, env);
         if (stepList instanceof Error) {
             return stepList;
         } else {
@@ -66,7 +48,7 @@ export function calculateProgStep(defOrExpr: BSL_AST.expr | BSL_AST.definition, 
         }
     } else {
         console.log("definition", defOrExpr);
-        console.log("prog", calculateDefSteps(defOrExpr, env))
+        console.log("calculateDefSteps", calculateDefSteps(defOrExpr, env))
         let stepList = calculateDefSteps(defOrExpr, env);
         if (stepList instanceof Error) {
             return stepList;
@@ -97,7 +79,7 @@ export function calculateDefSteps(
                 result: def
             }];
         } else {
-            let stepList = calculateExprSteps(expr);
+            let stepList = calculateExprSteps(expr, env);
             if (stepList instanceof Error) {
                 return stepList;
             } else {
@@ -135,14 +117,15 @@ export function calculateDefSteps(
 // calculateExprSteps
 // expr, steppResult[] => exprStep[] | Error
 export function calculateExprSteps(
-    expr: BSL_AST.expr | SI_STRUCT.Value
+    expr: BSL_AST.expr | SI_STRUCT.Value,
+    env: SI_STRUCT.Environment
 ): SI_STRUCT.ExprStep[] | Error {
     let stepList: SI_STRUCT.ExprStep[] = [];
     if (SI_STRUCT.isValue(expr)) {
         return stepList;
     } else {
         while (!SI_STRUCT.isValue(expr)) {
-            const step = evaluateExpression(expr)
+            const step = evaluateExpression(expr, env)
             if (SI_STRUCT.isValue(step)) {
                 expr = step;
             } else if (SI_STRUCT.isExprStep(step)) {
@@ -158,14 +141,14 @@ export function calculateExprSteps(
 
 //evaluateExpression
 
-export function evaluateExpression(expr: BSL_AST.expr): SI_STRUCT.ExprStep | SI_STRUCT.Value | Error {
+export function evaluateExpression(expr: BSL_AST.expr, env: SI_STRUCT.Environment): SI_STRUCT.ExprStep | SI_STRUCT.Value | Error {
     if (BSL_AST.isLiteral(expr)) {
         return expr.value;
     } else {
         const splitExpr = split(expr);
         //console.log("splitExpr", splitExpr);
         if (SI_STRUCT.isSplit(splitExpr)) {
-            const stepExpr = step(splitExpr.redex);
+            const stepExpr = step(splitExpr.redex, env);
             //console.log("stepExpr", stepExpr);
             if (SI_STRUCT.isOneRule(stepExpr)) {
                 const exprStep = plug(stepExpr, splitExpr.context);
@@ -278,7 +261,7 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
 
 // step
 // Redex => OneRule | Error
-export function step(r: SI_STRUCT.Redex): SI_STRUCT.OneRule | Error {
+export function step(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): SI_STRUCT.OneRule | Error {
     if (SI_STRUCT.isCallRedex(r)) {
         const primResult = prim(r);
         if (SI_STRUCT.isValue(primResult)) {

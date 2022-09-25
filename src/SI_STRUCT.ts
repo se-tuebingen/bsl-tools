@@ -100,7 +100,7 @@ export interface CondContext {
 export interface Hole {
     type: Production.Hole;
 }
-export type Value = number | string | boolean | `'()` /*| Closure*/;
+export type Value = number | string | boolean | `'()`  /*| Closure*/;
 
 export type Closure = FunClosure | StructClosure;
 export interface FunClosure{
