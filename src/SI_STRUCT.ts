@@ -18,7 +18,8 @@ export enum Production {
     CondFalse = "CondFalse",
     ProgRule = "ProgRule",
     Kong = "Kong",
-    Closure = "Closure"
+    FunClosure = "FunClosure",
+    StructClosure = "StructClosure"
 }
 
 export interface Stepper {
@@ -36,18 +37,12 @@ export interface Stepper {
 // Step[]
 // Step is type = ExprStep | DefinitionStep
 export type Step = ExprStep | DefinitionStep;
-/* export interface ExprStep {
-    type: Production.ExprStep;
-    env: Environment;
-    splitResult: SplitResult;
-    plugResult: PlugResult;
-    currentStep: number;
-} */
+
 export interface DefinitionStep {
     type: Production.DefinitionStep;
     env: Environment;
     rule: ProgRule;
-    exprSteps: ExprStep[];
+    evalSteps: ExprStep[];
     result: BSL_AST.definition;
 }
 
@@ -57,12 +52,6 @@ export interface ExprStep {
    rule: Kong | OneRule;
    result: BSL_AST.expr | Value;
 }
-/* export interface DefinitionStep {
-    type: Production.DefinitionStep;
-    env: Environment;
-    definition: BSL_AST.definition;
-    currentStep: number;
-} */
 
 
 export type SplitResult = Split | Value;
@@ -113,11 +102,16 @@ export interface Hole {
 }
 export type Value = number | string | boolean | `'()` /*| Closure*/;
 
-export interface Closure{
-    type: "Closure";
+export type Closure = FunClosure | StructClosure;
+export interface FunClosure{
+    type: Production.FunClosure;
     env: Environment;
     params: BSL_AST.Name[];
     body: BSL_AST.expr;
+}
+export interface StructClosure{
+    type: Production.StructClosure;
+    params: BSL_AST.Name[];
 }
 //######## OneRule(s) ########a
 export interface Prim {
