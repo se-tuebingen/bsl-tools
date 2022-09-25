@@ -87,16 +87,49 @@ export function calculateDefSteps(
     if (BSL_AST.isConstDef(def)) {
         const name = def.name;
         const expr = def.value;
-        return Error("error: const definition not implemented");
+        if (SI_STRUCT.isValue(expr)) {
+            env[name.symbol] = expr;
+            return [{
+                type: SI_STRUCT.Production.DefinitionStep,
+                env: env,
+                rule: { type: SI_STRUCT.Production.ProgRule, definition: def },
+                evalSteps: [],
+                result: def
+            }];
+        } else {
+            let stepList = calculateExprSteps(expr);
+            if (stepList instanceof Error) {
+                return stepList;
+            } else {
+                const value = stepList[stepList.length - 1].result;
+                if (SI_STRUCT.isValue(value)) {
+                    env[name.symbol] = value;
+                    const newDef: BSL_AST.ConstDef = {
+                        type: BSL_AST.Production.ConstantDefinition,
+                        name: name,
+                        value: { type: BSL_AST.Production.Literal, value: value }
+                    }
+                    return [{
+                        type: SI_STRUCT.Production.DefinitionStep,
+                        env: env,
+                        rule: { type: SI_STRUCT.Production.ProgRule, definition: newDef },
+                        evalSteps: stepList,
+                        result: newDef
+                    }];
+                } else {
+                    return Error("calculateDefSteps: Last ExprStep is an Expr, not a Value");
+                }
+            }
+        }
     } else if (BSL_AST.isFunDef(def)) {
         const name = def.name;
         if (name.symbol in env) {
-            return Error("prog: name already bound");
+            return Error("calculateDefSteps: name already bound");
         } else {
-            return Error("prog: function definition not defined");
+            return Error("calculateDefSteps: function definition not defined");
         }
     } else {
-        return Error("prog: struct definition not defined");
+        return Error("calculateDefSteps: struct definition not defined");
     }
 }
 // calculateExprSteps

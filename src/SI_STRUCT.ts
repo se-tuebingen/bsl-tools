@@ -43,7 +43,7 @@ export interface DefinitionStep {
     env: Environment;
     rule: ProgRule;
     evalSteps: ExprStep[];
-    result: BSL_AST.definition;
+    result: BSL_AST.definition; //evaluated definition, which is given to env
 }
 
 export interface ExprStep {
@@ -119,7 +119,7 @@ export interface Prim {
     redex: CallRedex;
     result: Value;
 }
-export type CondRule = CondTrue | CondFalse;
+export type CondRule = CondTrue | CondFalse /* | CondError*/;
 export interface CondTrue{
     type: Production.CondTrue;
     redex:CondRedex;
