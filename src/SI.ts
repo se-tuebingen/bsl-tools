@@ -155,7 +155,7 @@ export function evaluateExpression(expr: BSL_AST.expr, env: SI_STRUCT.Environmen
             const stepExpr = step(splitExpr.redex, env);
             //console.log("stepExpr", stepExpr);
             if (SI_STRUCT.isOneRule(stepExpr)) {
-                const exprStep = plug(stepExpr, splitExpr.context);
+                const exprStep = plug(stepExpr, splitExpr.context, env);
                 console.log("exprStep", exprStep);
                 if (SI_STRUCT.isExprStep(exprStep)) {
                     return exprStep;
@@ -178,17 +178,24 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
     if (BSL_AST.isCall(expr)) {
         const name = expr.name;
         const args = expr.args;
-        const valueLst: SI_STRUCT.Value[] = [];
+        const valueLst: (SI_STRUCT.Value | SI_STRUCT.Id)[] = [];
         const exprLst: BSL_AST.expr[] = [];
         // find position with map
         let pos = -1;
         let posFound = false;
         args.map((arg, i) => {
+            //if the argument is a value, add it to the value list
             if (!posFound && BSL_AST.isLiteral(arg)) {
                 valueLst.push(arg.value);
-            } else if (!posFound && !BSL_AST.isLiteral(arg)) {
+                //else if the argument is a name, add it to the value list
+            } else if (!posFound && BSL_AST.isName(arg)) {
+                let newId: SI_STRUCT.Id = { type: SI_STRUCT.Production.Id, symbol: arg.symbol };
+                valueLst.push(newId);
+                //else if the argument is neither a value nor a name, set the position
+            } else if (!posFound && !BSL_AST.isLiteral(arg) && !BSL_AST.isName(arg)) {
                 posFound = true;
                 pos = i;
+                // else the argument is an expression, add it to the expression list
             } else {
                 exprLst.push(arg);
             }
@@ -255,10 +262,10 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
                 return splitResult;
             }
         }
-    } /*else if (BSL_AST.isName(expr)) {
+    } else if (BSL_AST.isName(expr)) {
         console.log("split: expr is  Name");
         return Error("split: expr is Name");
-    }*/ else {
+    } else {
         return Error("split: something unexpected occured");
     }
 }
@@ -268,7 +275,13 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
 export function step(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): SI_STRUCT.OneRule | Error {
     // before stepping check if the redex has no names in it
     // if it has, lookup in environment and construct Rule (Const, Fun, or Struct)
-        if (SI_STRUCT.isCallRedex(r)) {
+    if (SI_STRUCT.isCallRedex(r)) {
+        //check if all args do not contain names
+        const allArgsAreValues = r.args.every((arg) => {
+            return SI_STRUCT.isValue(arg);
+        });
+        if (allArgsAreValues) {
+            console.log("step: CallRedex has no names");
             const primResult = prim(r);
             if (SI_STRUCT.isValue(primResult)) {
                 return {
@@ -279,42 +292,57 @@ export function step(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): SI_STRUCT.
             } else {
                 return Error("step: prim is not applicable");
             }
-        } else if (SI_STRUCT.isCondRedex(r)) {
-            const condResult = cond(r);
-            if (condResult == undefined) {
-                const newOptions = r.options.slice(1);
-                if (newOptions.length < 1) {
-                    return Error('step: cond: all question results were false');
-                }
-                const newExpr: BSL_AST.Cond = {
-                    type: BSL_AST.Production.CondExpression,
-                    options: newOptions,
-                };
-                return {
-                    type: SI_STRUCT.Production.CondFalse,
-                    redex: r,
-                    result: newExpr,
-                };
-            } else if (BSL_AST.isExpr(condResult)) {
-                return {
-                    type: SI_STRUCT.Production.CondTrue,
-                    redex: r,
-                    result: condResult,
-                };
-            } else {
-                return Error("step: cond is not applicable");
-            }
-
         } else {
-            return Error("step: redex is neither a call nor cond");
+            console.log("step: env:" + JSON.stringify(env));
+            const substRed:BSL_AST.expr | Error = substConst(r, env);
+            if (substRed instanceof Error) {
+                return substRed;
+            }else{
+                return {
+                    type: SI_STRUCT.Production.Const,
+                    redex: r,
+                    result: substRed,
+                }
         }
+    }
+    } else if (SI_STRUCT.isCondRedex(r)) {
+        //check if condition is a value
+        const condResult = cond(r);
+        if (condResult == undefined) {
+            const newOptions = r.options.slice(1);
+            if (newOptions.length < 1) {
+                return Error('step: cond: all question results were false');
+            }
+            const newExpr: BSL_AST.Cond = {
+                type: BSL_AST.Production.CondExpression,
+                options: newOptions,
+            };
+            return {
+                type: SI_STRUCT.Production.CondFalse,
+                redex: r,
+                result: newExpr,
+            };
+        } else if (BSL_AST.isExpr(condResult)) {
+            return {
+                type: SI_STRUCT.Production.CondTrue,
+                redex: r,
+                result: condResult,
+            };
+        } else {
+            return Error("step: cond is not applicable");
+        }
+
+    } else {
+        return Error("step: redex is neither a call nor cond");
+    }
 }
 
 // plug
 // plug(oneRule, c: Context): ExprStep | Error
 export function plug(
     oneRule: SI_STRUCT.OneRule,
-    c: SI_STRUCT.Context
+    c: SI_STRUCT.Context,
+    env: SI_STRUCT.Environment
 ): SI_STRUCT.ExprStep | Error {
     //check if context is a Hole
     if (SI_STRUCT.isHole(c)) {
@@ -328,7 +356,7 @@ export function plug(
         };
     } else {
         //Apply OneRule with KONG RULE
-        const plugResult = plug(oneRule, c.ctx);
+        const plugResult = plug(oneRule, c.ctx, env);
         //console.log("plug: plugResult", plugResult);
         if (SI_STRUCT.isStep(plugResult)) {
             //AppContext
@@ -345,6 +373,12 @@ export function plug(
                             value: arg,
                         };
                         return newArg;
+                    } else if (SI_STRUCT.isId(arg)) {
+                        const newArg: BSL_AST.Name = {
+                            type: BSL_AST.Production.Symbol,
+                            symbol: arg.symbol,
+                        };
+                        return newArg;
                     } else {
                         return arg;
                     }
@@ -357,7 +391,7 @@ export function plug(
                 //console.log("finalExpr", finalExpr);
                 return {
                     type: SI_STRUCT.Production.ExprStep,
-                    env: {},
+                    env: env,
                     rule: {
                         type: SI_STRUCT.Production.Kong,
                         context: c,
@@ -381,7 +415,7 @@ export function plug(
                 };
                 return {
                     type: SI_STRUCT.Production.ExprStep,
-                    env: {},
+                    env: env,
                     rule: {
                         type: SI_STRUCT.Production.Kong,
                         context: c,
@@ -531,8 +565,35 @@ function cond(r: SI_STRUCT.CondRedex): BSL_AST.expr | undefined | Error {
         return Error("error: condition is not a boolean");
     }
 }
-/*subst
-function subst(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): SI_STRUCT.SubstRule {
+
+function substConst(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): BSL_AST.expr | Error {
+    if (SI_STRUCT.isCallRedex(r)) {
+        // get the identifier argument
+        const idLst: SI_STRUCT.Id[] = r.args.filter((el) => SI_STRUCT.isId(el));
+        const id: SI_STRUCT.Id = idLst[0];
+        const value = lookupEnv(env, id.symbol);
+        if (value instanceof Error) {
+            return value;
+        } else {
+            const newArgs:BSL_AST.expr[] = r.args.map((el) => {
+                if (SI_STRUCT.isId(el) && el.symbol === id.symbol) {
+                    let newLit:BSL_AST.Literal = { type: BSL_AST.Production.Literal, value: value};
+                    return newLit;
+                } else if (SI_STRUCT.isId(el)) {
+                    let newName:BSL_AST.Name = { type: BSL_AST.Production.Symbol, symbol: el.symbol}; 
+                    return newName;
+                }else{
+                    let newLit: BSL_AST.Literal = { type: BSL_AST.Production.Literal, value: el};
+                    return newLit;
+                }
+            });
+            return { type: BSL_AST.Production.FunctionCall, name: r.name, args: newArgs }
+        }
+    } else if (SI_STRUCT.isCondRedex(r)) {
+        return Error("error: not implemented yet");
+    } else {
+        return Error("error: not a redex");
+    }
 }
 
 //fun
@@ -542,7 +603,7 @@ function funRule() {
 
 //struct
 function structRule() { }
-*/
+
 // ####### Environment Functions #######
 
 function addToEnv(env: SI_STRUCT.Environment, name: string, value: SI_STRUCT.Value): SI_STRUCT.Environment | Error {

@@ -77,7 +77,7 @@ export type Redex = CallRedex | CondRedex /* | ConstRedex */;
 export interface CallRedex {
     type: Production.CallRedex;
     name: BSL_AST.Name;
-    args: Value[];
+    args: (Value | Id)[];
 }
 
 export interface CondRedex {
@@ -96,7 +96,7 @@ export type Context = AppContext | CondContext | Hole;
 export interface AppContext {
     type: Production.AppContext;
     op: BSL_AST.Name;
-    values: Value[];
+    values: (Value | Id)[];
     ctx: Context;
     args: BSL_AST.expr[];
 }
@@ -144,15 +144,13 @@ export interface ProgRule {
     type: Production.ProgRule;
     definition: BSL_AST.definition;
 }
-export type SubstRule = Const /*| Fun | Struct*/;
-
 export interface Const {
     type: Production.Const;
-    id: Id;
-    result: Value;
+    redex: Redex;
+    result: BSL_AST.expr | Value;
 }
 
-export type OneRule = Prim | CondRule | SubstRule; /*| ProgRule*/
+export type OneRule = Prim | CondRule | Const; /*| ProgRule*/
 
 // ####### ProgStepRule(s) ########
 export interface Kong {
@@ -213,13 +211,16 @@ export function isSplit(obj: any): obj is Split {
     return obj.type === Production.PlugResult;
 } */
 export function isOneRule(obj: any): obj is OneRule {
-    return obj.type === Production.Prim || (obj.type === Production.CondTrue || obj.type === Production.CondFalse);
+    return obj.type === Production.Prim || (obj.type === Production.CondTrue || obj.type === Production.CondFalse) || obj.type === Production.Const;
 }
 export function isPrim(obj: any): obj is Prim {
     return obj.type === Production.Prim;
 }
 export function isCondRule(obj: any): obj is CondRule {
     return obj.type === Production.CondTrue || obj.type === Production.CondFalse;
+}
+export function isConst(obj: any): obj is Const {
+    return obj.type === Production.Const;
 }
 export function isKong(obj: any): obj is Kong {
     return obj.type === Production.Kong;
