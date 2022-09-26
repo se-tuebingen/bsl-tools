@@ -9,6 +9,7 @@ export enum Production {
     PlugResult = "PlugResult",
     CallRedex = "CallRedex",
     CondRedex = "CondRedex",
+    ConstRedex = "ConstRedex",
     CondOption = "CondOption",
     AppContext = "AppContext",
     CondContext = "CondContext",
@@ -17,9 +18,11 @@ export enum Production {
     CondTrue = "CondTrue",
     CondFalse = "CondFalse",
     ProgRule = "ProgRule",
+    Const = "Const",
     Kong = "Kong",
     FunClosure = "FunClosure",
-    StructClosure = "StructClosure"
+    StructClosure = "StructClosure",
+    Id = "Identifier",
 }
 
 export interface Stepper {
@@ -69,7 +72,7 @@ export interface Split {
 } */
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
 // ####### REDEX #######
-export type Redex = CallRedex | CondRedex;
+export type Redex = CallRedex | CondRedex /* | ConstRedex */;
 
 export interface CallRedex {
     type: Production.CallRedex;
@@ -82,6 +85,11 @@ export interface CondRedex {
     options: BSL_AST.Clause[];
 }
 
+// export interface ConstRedex{
+//     type: Production.ConstRedex;
+//     id: BSL_AST.Name;
+//     expr: BSL_AST.expr;
+// }
 // ####### Context #######
 export type Context = AppContext | CondContext | Hole;
 
@@ -100,12 +108,14 @@ export interface CondContext {
 export interface Hole {
     type: Production.Hole;
 }
-export type Value = number | string | boolean | `'()`  /*| Closure*/;
-
+export type Value = number | string | boolean | `'()` /*| Closure | StructValue*/;
+export interface Id{
+    type: Production.Id;
+    symbol: string;
+}
 export type Closure = FunClosure | StructClosure;
 export interface FunClosure{
     type: Production.FunClosure;
-    env: Environment;
     params: BSL_AST.Name[];
     body: BSL_AST.expr;
 }
@@ -134,7 +144,15 @@ export interface ProgRule {
     type: Production.ProgRule;
     definition: BSL_AST.definition;
 }
-export type OneRule = Prim | CondRule; /*| ProgRule*/
+export type SubstRule = Const /*| Fun | Struct*/;
+
+export interface Const {
+    type: Production.Const;
+    id: Id;
+    result: Value;
+}
+
+export type OneRule = Prim | CondRule | SubstRule; /*| ProgRule*/
 
 // ####### ProgStepRule(s) ########
 export interface Kong {
@@ -207,5 +225,8 @@ export function isKong(obj: any): obj is Kong {
     return obj.type === Production.Kong;
 }
 export function isValue(obj: any): obj is Value {
-    return typeof obj === "number" || typeof obj === "string" || typeof obj === "boolean" || obj === `'()`;
+    return typeof obj === 'number' || typeof obj === 'string' || typeof obj === 'boolean' || obj === `'()` //|| isClosure(obj);
+}
+export function isId(obj: any): obj is Id {
+    return obj.type === Production.Id;
 }
