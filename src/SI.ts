@@ -527,24 +527,22 @@ function cond(r: SI_STRUCT.CondRedex): BSL_AST.expr | undefined | Error {
 }
 
 
-/* OLD CODE */
+// ####### Environment Functions #######
 
-/* for (let i = pos + 1; i < args.length; i++) {
-    let arg = args[i];
-    if (BSL_AST.isExpr(arg)) {
-        exprLst.push(arg);
+function addToEnv(env: SI_STRUCT.Environment, name: string, value: SI_STRUCT.Value): SI_STRUCT.Environment | Error {
+    if (env[name] === undefined) {
+        const newEnv = { ...env };
+        newEnv[name] = value;
+        return newEnv;
     } else {
-        return new Error("split: argument is not an expression " + arg + i);
+        return Error("addToEnv: name already exists in environment");
     }
-} */
-/* for (let i = 0; i < args.length; i++) {
-    let arg = args[i];
-    if (BSL_AST.isLiteral(arg)) {
-        valueLst.push(arg.value);
-    } else if (SI_STRUCT.isValue(arg)) {
-        valueLst.push(arg);
+}
+
+function lookupEnv(env: SI_STRUCT.Environment, name: string): SI_STRUCT.Value | Error {
+    if (name in env) {
+        return env[name];
     } else {
-        pos = i;
-        break;
+        return Error("lookupEnv: name is not bound in environment");
     }
-} */
+}
