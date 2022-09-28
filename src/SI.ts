@@ -69,15 +69,21 @@ export function calculateDefSteps(
     if (BSL_AST.isConstDef(def)) {
         const name = def.name;
         const expr = def.value;
-        if (SI_STRUCT.isValue(expr)) {
-            env[name.symbol] = expr;
-            return [{
-                type: SI_STRUCT.Production.DefinitionStep,
-                env: env,
-                rule: { type: SI_STRUCT.Production.ProgRule, definition: def },
-                evalSteps: [],
-                result: def
-            }];
+        console.log("name", name + "expr", expr);
+        if (BSL_AST.isLiteral(expr)) {
+            const value = expr.value;
+            const newEnv = addToEnv(env, name.symbol, value);
+            if (newEnv instanceof Error) {
+                return newEnv;
+            } else {
+                return [{
+                    type: SI_STRUCT.Production.DefinitionStep,
+                    env: newEnv,
+                    rule: { type: SI_STRUCT.Production.ProgRule, definition: def },
+                    evalSteps: [],
+                    result: def
+                }];
+            }
         } else {
             let stepList = calculateExprSteps(expr, env);
             if (stepList instanceof Error) {
@@ -294,17 +300,17 @@ export function step(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): SI_STRUCT.
             }
         } else {
             console.log("step: env:" + JSON.stringify(env));
-            const substRed:BSL_AST.expr | Error = substConst(r, env);
+            const substRed: BSL_AST.expr | Error = substConst(r, env);
             if (substRed instanceof Error) {
                 return substRed;
-            }else{
+            } else {
                 return {
                     type: SI_STRUCT.Production.Const,
                     redex: r,
                     result: substRed,
                 }
+            }
         }
-    }
     } else if (SI_STRUCT.isCondRedex(r)) {
         //check if condition is a value
         const condResult = cond(r);
@@ -573,15 +579,15 @@ function substConst(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): BSL_AST.exp
         if (value instanceof Error) {
             return value;
         } else {
-            const newArgs:BSL_AST.expr[] = r.args.map((el) => {
+            const newArgs: BSL_AST.expr[] = r.args.map((el) => {
                 if (SI_STRUCT.isId(el) && el.symbol === id.symbol) {
-                    let newLit:BSL_AST.Literal = { type: BSL_AST.Production.Literal, value: value};
+                    let newLit: BSL_AST.Literal = { type: BSL_AST.Production.Literal, value: value };
                     return newLit;
                 } else if (SI_STRUCT.isId(el)) {
-                    let newName:BSL_AST.Name = { type: BSL_AST.Production.Symbol, symbol: el.symbol}; 
+                    let newName: BSL_AST.Name = { type: BSL_AST.Production.Symbol, symbol: el.symbol };
                     return newName;
-                }else{
-                    let newLit: BSL_AST.Literal = { type: BSL_AST.Production.Literal, value: el};
+                } else {
+                    let newLit: BSL_AST.Literal = { type: BSL_AST.Production.Literal, value: el };
                     return newLit;
                 }
             });
