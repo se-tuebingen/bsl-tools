@@ -346,18 +346,16 @@ export function plug(
 ): SI_STRUCT.ExprStep | Error {
     //check if context is a Hole
     if (SI_STRUCT.isHole(c)) {
-        // Apply OneRule
-        //console.log("plug: oneRule", oneRule);
+
         return {
             type: SI_STRUCT.Production.ExprStep,
-            env: {},
+            env: env,
             rule: oneRule,
             result: oneRule.result,
         };
     } else {
         //Apply OneRule with KONG RULE
         const plugResult = plug(oneRule, c.ctx, env);
-        //console.log("plug: plugResult", plugResult);
         if (SI_STRUCT.isStep(plugResult)) {
             //AppContext
             if (SI_STRUCT.isAppContext(c)) {
@@ -388,7 +386,7 @@ export function plug(
                     name: c.op,
                     args: newArgs,
                 };
-                //console.log("finalExpr", finalExpr);
+                console.log("plug: env: " + JSON.stringify(env));
                 return {
                     type: SI_STRUCT.Production.ExprStep,
                     env: env,
