@@ -346,7 +346,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
   // result and rule name
   const redex: string =
     BSL_Print.sanitize(printRedex(redexRule.redex));
-  const result: string = SI_STRUCT.isValue(redexRule.result)
+  const result: string = SI_STRUCT.isValue(redexRule.result) || redexRule.result instanceof Error
       ? `${redexRule.result}`
       : BSL_Print.sanitize(BSL_Print.printE(redexRule.result));
   const ruleName = redexRule.type;
@@ -580,7 +580,7 @@ function renderRuleInformation(rule: availableRules, kong: boolean):string {
 // ### rules ###
 // as taken from overview-reduction-and-equivalence.pdf, i.e. the script
 // to be displayed as reference
-type availableRules = 'Kong' | 'Fun' | 'Prim' | 'Const' | 'CondTrue' | 'CondFalse' | 'StructMake' | 'StructSelect' | 'StructPredTrue' | 'StructPredFalse' | 'ProgRule';
+type availableRules = 'Kong' | 'Fun' | 'Prim' | 'Const' | 'CondTrue' | 'CondFalse' | 'CondError' | 'StructMake' | 'StructSelect' | 'StructPredTrue' | 'StructPredFalse' | 'ProgRule';
 const rules = {
   'Kong': {
     'name': `<cap>Kong</cap>`,
@@ -626,6 +626,13 @@ const rules = {
       <em>(<strong>cond</strong> [<strong>#false</strong> e<small>1</small>]
          [e<small>2</small> e<small>3</small>] …) →
          (<strong>cond</strong> [e<small>2</small> e<small>3</small>] …)</em>
+    `
+  },
+  'CondError': {
+    'name': `<cap>Cond</cap>-Error`,
+    'text': `
+      <em>(<strong>cond</strong> [e<small>1</small> e<small>2</small>] …) →
+          (<strong>error</strong> "cond: all conditions false")</em>
     `
   },
   'StructMake': {

@@ -17,6 +17,7 @@ export enum Production {
     Prim = "Prim",
     CondTrue = "CondTrue",
     CondFalse = "CondFalse",
+    CondError = "CondError",
     ProgRule = "ProgRule",
     Const = "Const",
     Kong = "Kong",
@@ -53,7 +54,7 @@ export interface ExprStep {
    type: Production.ExprStep;
    env: Environment;
    rule: Kong | OneRule;
-   result: BSL_AST.expr | Value;
+   result: BSL_AST.expr | Value | Error;
 }
 
 
@@ -129,7 +130,7 @@ export interface Prim {
     redex: CallRedex;
     result: Value;
 }
-export type CondRule = CondTrue | CondFalse /* | CondError*/;
+export type CondRule = CondTrue | CondFalse  | CondError;
 export interface CondTrue{
     type: Production.CondTrue;
     redex:CondRedex;
@@ -140,10 +141,16 @@ export interface CondFalse{
     redex:CondRedex;
     result: BSL_AST.Cond;
 }
+export interface CondError{
+    type: Production.CondError;
+    redex:CondRedex;
+    result: Error;
+}
 export interface ProgRule {
     type: Production.ProgRule;
     definition: BSL_AST.definition;
 }
+
 export interface Const {
     type: Production.Const;
     redex: Redex;
@@ -211,7 +218,7 @@ export function isSplit(obj: any): obj is Split {
     return obj.type === Production.PlugResult;
 } */
 export function isOneRule(obj: any): obj is OneRule {
-    return obj.type === Production.Prim || (obj.type === Production.CondTrue || obj.type === Production.CondFalse) || obj.type === Production.Const;
+    return obj.type === Production.Prim || (obj.type === Production.CondTrue || obj.type === Production.CondFalse || obj.type === Production.CondError) || obj.type === Production.Const;
 }
 export function isPrim(obj: any): obj is Prim {
     return obj.type === Production.Prim;
