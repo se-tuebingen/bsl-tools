@@ -97,9 +97,14 @@
       (+ (* 2 x) (- y 4))
     </stepper>
     <stepper>
-      
+      (define y #true)
+      (cond [(and y #false) (+ x 2)]
+      [#false 3]
+      [(or #true #false) (* 2 3 4)])
     </stepper>
-
+          <!--(define x (cond [#true 3]))-->
+<!--       
+-->
    <!-- <h2>Error Tests</h2>
     <h3>Call without defined function</h3>
     <stepper>

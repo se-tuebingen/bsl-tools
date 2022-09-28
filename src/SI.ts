@@ -241,7 +241,7 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
     } else if (BSL_AST.isCond(expr)) {
         const clause = expr.options[0];
         // if condition is already reduced, build CondRedex
-        if (BSL_AST.isLiteral(clause.condition)) {
+        if (BSL_AST.isLiteral(clause.condition) || BSL_AST.isName(clause.condition)) {
             return {
                 type: SI_STRUCT.Production.Split,
                 redex: {
@@ -269,7 +269,7 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
             }
         }
     } else if (BSL_AST.isName(expr)) {
-        console.log("split: expr is  Name");
+        console.log("split: expr is Name");
         return Error("split: expr is Name");
     } else {
         return Error("split: something unexpected occured");
@@ -312,32 +312,44 @@ export function step(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): SI_STRUCT.
             }
         }
     } else if (SI_STRUCT.isCondRedex(r)) {
-        //check if condition is a value
-        const condResult = cond(r);
-        if (condResult == undefined) {
-            const newOptions = r.options.slice(1);
-            if (newOptions.length < 1) {
-                return Error('step: cond: all question results were false');
+        //check if condition is a name
+        if (BSL_AST.isLiteral(r.options[0].condition)) {
+            const condResult = cond(r);
+            if (condResult == undefined) {
+                const newOptions = r.options.slice(1);
+                if (newOptions.length < 1) {
+                    return Error('step: cond: all question results were false');
+                }
+                const newExpr: BSL_AST.Cond = {
+                    type: BSL_AST.Production.CondExpression,
+                    options: newOptions,
+                };
+                return {
+                    type: SI_STRUCT.Production.CondFalse,
+                    redex: r,
+                    result: newExpr,
+                };
+            } else if (BSL_AST.isExpr(condResult)) {
+                return {
+                    type: SI_STRUCT.Production.CondTrue,
+                    redex: r,
+                    result: condResult,
+                };
+            } else {
+                return Error("step: cond is not applicable");
             }
-            const newExpr: BSL_AST.Cond = {
-                type: BSL_AST.Production.CondExpression,
-                options: newOptions,
-            };
-            return {
-                type: SI_STRUCT.Production.CondFalse,
-                redex: r,
-                result: newExpr,
-            };
-        } else if (BSL_AST.isExpr(condResult)) {
-            return {
-                type: SI_STRUCT.Production.CondTrue,
-                redex: r,
-                result: condResult,
-            };
         } else {
-            return Error("step: cond is not applicable");
+            const substRed: BSL_AST.expr | Error = substConst(r, env);
+            if (substRed instanceof Error) {
+                return substRed;
+            } else {
+                return {
+                    type: SI_STRUCT.Production.Const,
+                    redex: r,
+                    result: substRed,
+                }
+            }
         }
-
     } else {
         return Error("step: redex is neither a call nor cond");
     }
@@ -594,9 +606,32 @@ function substConst(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): BSL_AST.exp
             return { type: BSL_AST.Production.FunctionCall, name: r.name, args: newArgs }
         }
     } else if (SI_STRUCT.isCondRedex(r)) {
-        return Error("error: not implemented yet");
+        const name = r.options[0].condition;
+        if (BSL_AST.isName(name)) {
+            const value = lookupEnv(env, name.symbol);
+            if (value instanceof Error) {
+                return value;
+            } else {
+                let newLit: BSL_AST.Literal = { 
+                    type: BSL_AST.Production.Literal, 
+                    value: value 
+                };
+                let newOpt: BSL_AST.Clause = { 
+                    type: BSL_AST.Production.CondOption, 
+                    condition: newLit, 
+                    result: r.options[0].result 
+                };
+                let newCond: BSL_AST.Cond = { 
+                    type: BSL_AST.Production.CondExpression, 
+                    options: [newOpt] 
+                };
+                return newCond;
+            }
+        } else {
+            return Error("substConst: condition is not a name");
+        }
     } else {
-        return Error("error: not a redex");
+        return Error("substConst: not a redex");
     }
 }
 
