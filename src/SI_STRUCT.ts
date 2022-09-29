@@ -109,13 +109,13 @@ export interface CondContext {
 export interface Hole {
     type: Production.Hole;
 }
-export type Value = number | string | boolean | `'()` /*| Closure | StructValue*/;
+export type Value = number | string | boolean | `'()` /*| FunValue/*| Closure | StructValue*/;
 export interface Id{
     type: Production.Id;
     symbol: string;
 }
-export type Closure = FunClosure | StructClosure;
-export interface FunClosure{
+/*export type Closure = FunClosure | StructClosure;*/
+export interface FunValue{
     type: Production.FunClosure;
     params: BSL_AST.Name[];
     body: BSL_AST.expr;

@@ -653,9 +653,10 @@ function substConst(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): BSL_AST.exp
 }
 
 //fun
-function funRule() {
+/*function substFun(r:SI_STRUCT.CallRedex, env: SI_STRUCT.Environment): BSL_AST.expr | Error {
+    
 
-}
+}*/
 
 //struct
 function structRule() { }
