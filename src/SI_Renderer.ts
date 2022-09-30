@@ -383,7 +383,6 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
     code_after.slice(0,code_after.indexOf('<span class="hole hole-result">'))
               .split('<br>')
               .reverse()[0];
-  console.log('code before hole:', code_before_hole);
   const hole_position = code_before_hole ? BSL_Print.dirtify(code_before_hole).length : 0;
   const KONG_WIDTH = 4;
   const left_offset_arrow =
