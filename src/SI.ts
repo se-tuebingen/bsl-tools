@@ -271,8 +271,23 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
             }
         }
     } else if (BSL_AST.isName(expr)) {
-        console.log("split: expr is Name");
-        return Error("split: expr is Name");
+        return {
+            type: SI_STRUCT.Production.Split,
+            context: hole,
+            redex: {
+                type: SI_STRUCT.Production.NameRedex,
+                symbol: expr.symbol
+            },
+        };
+    } else if (BSL_AST.isLiteral(expr)) {
+        return {
+            type: SI_STRUCT.Production.Split,
+            context: hole,
+            redex: {
+                type: SI_STRUCT.Production.LiteralRedex,
+                value: expr.value
+            },
+        };
     } else {
         return Error("split: something unexpected occured");
     }
@@ -336,7 +351,7 @@ export function step(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): SI_STRUCT.
                     redex: r,
                     result: newExpr,
                 };
-            } else if (BSL_AST.isExpr(condResult)) {
+            } else if (BSL_AST.isExpr(condResult) || SI_STRUCT.isValue(condResult)) {
                 return {
                     type: SI_STRUCT.Production.CondTrue,
                     redex: r,
@@ -357,8 +372,19 @@ export function step(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): SI_STRUCT.
                 }
             }
         }
+    } else if (SI_STRUCT.isNameRedex(r)) {
+        const substRed: BSL_AST.expr | Error = substConst(r, env);
+        if (substRed instanceof Error) {
+            return substRed;
+        } else {
+            return {
+                type: SI_STRUCT.Production.Const,
+                redex: r,
+                result: substRed,
+            }
+        }
     } else {
-        return Error("step: redex is neither a call nor cond");
+        return Error("step: redex is neither a call nor cond nor name");
     }
 }
 
@@ -581,10 +607,11 @@ export function prim(name: BSL_AST.Name, args: SI_STRUCT.Value[]): SI_STRUCT.Val
 
 // cond
 // cond Redex =>  BSL_AST.expr | false
-function cond(r: SI_STRUCT.CondRedex): BSL_AST.expr | undefined | Error {
+function cond(r: SI_STRUCT.CondRedex): BSL_AST.expr | SI_STRUCT.Value | undefined | Error {
     const clause = r.options[0];
     if (BSL_AST.isLiteral(clause.condition) && clause.condition.value == true) {
-        return clause.result;
+        const result = BSL_AST.isLiteral(clause.result) ? clause.result.value : clause.result;
+        return result;
     } else if (
         BSL_AST.isLiteral(clause.condition) &&
         clause.condition.value == false
@@ -647,14 +674,35 @@ function substConst(r: SI_STRUCT.Redex, env: SI_STRUCT.Environment): BSL_AST.exp
         } else {
             return Error("substConst: condition is not a name");
         }
+    } else if (SI_STRUCT.isNameRedex(r)) {
+        const value = lookupEnv(env, r.symbol);
+        if (value instanceof Error) {
+            return value;
+        } else {
+            let newLit: BSL_AST.Literal = {
+                type: BSL_AST.Production.Literal,
+                value: value
+            };
+            return newLit;
+        }
     } else {
-        return Error("substConst: not a redex");
+        return Error("substConst: redex is not a call or cond or name");
     }
 }
 
 //fun
 /*function substFun(r:SI_STRUCT.CallRedex, env: SI_STRUCT.Environment): BSL_AST.expr | Error {
-    
+    const value: SI_STRUCT.Value = lookupEnv(env, r.name.symbol);
+    if (value instanceof Error) {
+        return value;
+    } else if (SI_STRUCT.isFun(value)) {
+        const param = value.param;
+        const body = value.body;
+        if (r.args.length == param.length) {
+        //Do SHIT
+        }else{
+            return Error("substFun: number of arguments doesn't match");
+        }
 
 }*/
 

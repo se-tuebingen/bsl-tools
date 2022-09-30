@@ -9,7 +9,8 @@ export enum Production {
     PlugResult = "PlugResult",
     CallRedex = "CallRedex",
     CondRedex = "CondRedex",
-    ConstRedex = "ConstRedex",
+    NameRedex = "NameRedex",
+    LiteralRedex = "LiteralRedex",
     CondOption = "CondOption",
     AppContext = "AppContext",
     CondContext = "CondContext",
@@ -21,8 +22,8 @@ export enum Production {
     ProgRule = "ProgRule",
     Const = "Const",
     Kong = "Kong",
-    FunClosure = "FunClosure",
-    StructClosure = "StructClosure",
+    FunValue = "FunValue",
+    StructValue = "StructValue",
     Id = "Identifier",
 }
 
@@ -73,7 +74,7 @@ export interface Split {
 } */
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
 // ####### REDEX #######
-export type Redex = CallRedex | CondRedex /* | ConstRedex */;
+export type Redex = CallRedex | CondRedex  | NameRedex | LiteralRedex;
 
 export interface CallRedex {
     type: Production.CallRedex;
@@ -86,11 +87,14 @@ export interface CondRedex {
     options: BSL_AST.Clause[];
 }
 
-// export interface ConstRedex{
-//     type: Production.ConstRedex;
-//     id: BSL_AST.Name;
-//     expr: BSL_AST.expr;
-// }
+ export interface NameRedex{
+     type: Production.NameRedex;
+     symbol: string;
+ }
+ export interface LiteralRedex{
+    type: Production.LiteralRedex;
+    value: boolean | string | number | `'()`;
+ }
 // ####### Context #######
 export type Context = AppContext | CondContext | Hole;
 
@@ -116,12 +120,12 @@ export interface Id{
 }
 /*export type Closure = FunClosure | StructClosure;*/
 export interface FunValue{
-    type: Production.FunClosure;
+    type: Production.FunValue;
     params: BSL_AST.Name[];
     body: BSL_AST.expr;
 }
-export interface StructClosure{
-    type: Production.StructClosure;
+export interface StructValue{
+    type: Production.StructValue;
     params: BSL_AST.Name[];
 }
 //######## OneRule(s) ########a
@@ -178,6 +182,7 @@ export type Environment = { [key: string]: Value };
 // ##########################
 
 // runtime type checking
+// Stepper and Steps
 export function isStepper(obj:any): obj is Stepper {
     return obj.type === Production.Stepper;
 }
@@ -193,11 +198,18 @@ export function isDefinitionStep(obj: any): obj is DefinitionStep {
 export function isExprStep(obj: any): obj is ExprStep {
     return obj.type === Production.ExprStep;
 }
+//Redex
 export function isCallRedex(obj: any): obj is CallRedex {
     return obj.type === Production.CallRedex;
 }
 export function isCondRedex(obj: any): obj is CondRedex {
     return obj.type === Production.CondRedex;
+}
+export function isNameRedex(obj: any): obj is NameRedex {
+    return obj.type === Production.NameRedex;
+}
+export function isLiteralRedex(obj: any): obj is LiteralRedex {
+    return obj.type === Production.LiteralRedex;
 }
 export function isHole(obj: any): obj is Hole {
     return obj.type === Production.Hole;
