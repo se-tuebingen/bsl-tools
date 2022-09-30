@@ -541,7 +541,7 @@ function printContext(ctx: SI_STRUCT.Context, acc: Context = {left: '', right: '
 // recursive definition of printing the redex
 function printRedex(redex: SI_STRUCT.Redex): string {
   if (SI_STRUCT.isCallRedex(redex)) {
-    return `(${BSL_Print.printName(redex.name)} ${redex.args.join(' ')})`;
+    return `(${BSL_Print.printName(redex.name)} ${redex.args.map(arg => SI_STRUCT.isValue(arg) ? `${arg}` : printIdentifier(arg)).join(' ')})`;
   } else if (SI_STRUCT.isCondRedex(redex)) {
     return `(cond ${redex.options.map(BSL_Print.printOption).join(' ')})`;
   } else if (SI_STRUCT.isNameRedex(redex)){
@@ -549,6 +549,10 @@ function printRedex(redex: SI_STRUCT.Redex): string {
   }else{
     throw "Invalid Input to printRedex";
   }
+}
+// Print Identifier
+function printIdentifier(id: SI_STRUCT.Id): string {
+  return id.symbol;
 }
 
 // rendering the rule tip
