@@ -546,8 +546,6 @@ function printRedex(redex: SI_STRUCT.Redex): string {
     return `(cond ${redex.options.map(BSL_Print.printOption).join(' ')})`;
   } else if (SI_STRUCT.isNameRedex(redex)){
     return redex.symbol;
-  }else if(SI_STRUCT.isLiteralRedex(redex)){
-    return `${redex.value}`;
   }else{
     throw "Invalid Input to printRedex";
   }

@@ -10,7 +10,6 @@ export enum Production {
     CallRedex = "CallRedex",
     CondRedex = "CondRedex",
     NameRedex = "NameRedex",
-    LiteralRedex = "LiteralRedex",
     CondOption = "CondOption",
     AppContext = "AppContext",
     CondContext = "CondContext",
@@ -74,7 +73,7 @@ export interface Split {
 } */
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
 // ####### REDEX #######
-export type Redex = CallRedex | CondRedex  | NameRedex | LiteralRedex;
+export type Redex = CallRedex | CondRedex  | NameRedex;
 
 export interface CallRedex {
     type: Production.CallRedex;
@@ -90,10 +89,6 @@ export interface CondRedex {
  export interface NameRedex{
      type: Production.NameRedex;
      symbol: string;
- }
- export interface LiteralRedex{
-    type: Production.LiteralRedex;
-    value: boolean | string | number | `'()`;
  }
 // ####### Context #######
 export type Context = AppContext | CondContext | Hole;
@@ -208,9 +203,7 @@ export function isCondRedex(obj: any): obj is CondRedex {
 export function isNameRedex(obj: any): obj is NameRedex {
     return obj.type === Production.NameRedex;
 }
-export function isLiteralRedex(obj: any): obj is LiteralRedex {
-    return obj.type === Production.LiteralRedex;
-}
+
 export function isHole(obj: any): obj is Hole {
     return obj.type === Production.Hole;
 }
