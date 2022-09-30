@@ -284,6 +284,8 @@ function renderExpressionSteps(progStep: SI_STRUCT.ProgStep, idx: number, lang: 
 // navigate between expressions
 function navigateExpression(e: Event, amount: number): void {
   const el = e.target as HTMLElement;
+  // el will be a button
+  const oldButtonPosition = el.getBoundingClientRect().y;
   const expressionDiv = getParentClassRecursive(el, 'expression-steps');
   if(!expressionDiv) {
     console.error('found no parent with class .expression-steps', el);
@@ -328,7 +330,15 @@ function navigateExpression(e: Event, amount: number): void {
     if(idxString) {
       if(parseInt(idxString) === targetIdx) {
         e.setAttribute('data-visible', 'true');
-        e.scrollIntoView({behavior:'smooth'});
+        // move prev/next-button to stay under mouse
+        Array.from(e.children).filter(c =>
+          c.getAttribute('data-currentstep') === 'true'
+        ).map(c => {
+          const newButton = c.querySelector(amount > 0 ? '.next-button' : '.prev-button');
+          if (!newButton) return;
+          const newButtonPosition = newButton.getBoundingClientRect().y;
+          window.scrollBy(0, newButtonPosition - oldButtonPosition);
+        });
       } else {
         e.setAttribute('data-visible', 'false');
       }
@@ -459,20 +469,26 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
 // event handlers
 (window as any).nextStep = (e: Event) => {
   const button = e.target as HTMLElement;
+  const oldButtonPosition = button.getBoundingClientRect().y;
   const currentStep = getParentClassRecursive(button, 'step');
   if(currentStep && currentStep.nextElementSibling) {
     currentStep.setAttribute('data-currentStep', 'false');
     currentStep.setAttribute('data-collapsed', 'true');
-    // currentStep.scrollIntoView({behavior:'smooth'});
     currentStep.nextElementSibling.setAttribute('data-currentStep', 'true');
     currentStep.nextElementSibling.setAttribute('data-collapsed','false');
-  } else if (currentStep && !currentStep.nextElementSibling) {
+    // move "next" button under mouse
+    const newButton = currentStep.nextElementSibling.querySelector('.next-button');
+    if (!newButton) return;
+    const newButtonPosition = newButton.getBoundingClientRect().y;
+    window.scrollBy(0, newButtonPosition - oldButtonPosition);
+} else if (currentStep && !currentStep.nextElementSibling) {
     // continue with next expression
     navigateExpression(e, 1);
   }
 }
 (window as any).prevStep = (e: Event) => {
   const button = e.target as HTMLElement;
+  const oldButtonPosition = button.getBoundingClientRect().y;
   const currentStep = getParentClassRecursive(button, 'step');
   if(!currentStep) {
     console.error('prevStep not called from within an element of the .step class');
@@ -485,9 +501,13 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
     } else if(currentStep.previousElementSibling) {
       currentStep.setAttribute('data-currentStep', 'false');
       currentStep.setAttribute('data-collapsed', 'true');
-      // currentStep.scrollIntoView({behavior:'smooth'});
       currentStep.previousElementSibling.setAttribute('data-currentStep', 'true');
       currentStep.previousElementSibling.setAttribute('data-collapsed', 'false');
+      // move "prev" button to be under mouse
+      const newButton = currentStep.previousElementSibling.querySelector('.prev-button');
+      if (!newButton) return;
+      const newButtonPosition = newButton.getBoundingClientRect().y;
+      window.scrollBy(0, newButtonPosition - oldButtonPosition);
     } else {
       console.error('prevStep called on a step with no previous html element');
       return;
