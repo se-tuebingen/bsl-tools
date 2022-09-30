@@ -22,15 +22,12 @@ div.stepper {
 /* ##### boxes ###### */
 .stepper .box {
   text-align: left;
-  display: inline-block;
   background-color: var(--box-background);
   padding: 0.5em;
   padding-top: 1em;
   border: 1px solid var(--box-border);
   border-radius: 0.5em;
   position: relative;
-  min-width: 600px;
-  max-width: 100%;
   margin-bottom: 1.5em;
 }
 .stepper .boxlabel {

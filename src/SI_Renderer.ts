@@ -156,7 +156,6 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
          <div class="boxlabel">${dictionary[lang]['environment']}</div>
          ${stepperTree.map(renderDefinition).join('')}
        </div>
-       <br>
 
        <div class="box expression-steps"
             data-progstep="-1"
@@ -186,8 +185,6 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
             </div>
          </div>
        </div>
-
-       <br>
 
        <div class="box program">
          <div class="boxlabel">${dictionary[lang]['remaining program']}</div>
