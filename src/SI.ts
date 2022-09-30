@@ -204,33 +204,28 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
     if (BSL_AST.isCall(expr)) {
         const name = expr.name;
         const args = expr.args;
-        const valueLst: (SI_STRUCT.Value | SI_STRUCT.Id)[] = [];
+        const valueLst: SI_STRUCT.Value[] = [];
+        let recExpr: BSL_AST.expr = {} as BSL_AST.expr;
         const exprLst: BSL_AST.expr[] = [];
+        // local function split into value and expr
+        // => Either(Value[], (Value[],expr, expr[]))
         // find position with map
-        let pos = -1;
         let posFound = false;
-        args.map((arg, i) => {
+        args.map((arg) => {
             //if the argument is a value, add it to the value list
             if (!posFound && BSL_AST.isLiteral(arg)) {
                 valueLst.push(arg.value);
-                //else if the argument is a name, add it to the value list
-            } else if (!posFound && BSL_AST.isName(arg)) {
-                let newId: SI_STRUCT.Id = {
-                    type: SI_STRUCT.Production.Id,
-                    symbol: arg.symbol,
-                };
-                valueLst.push(newId);
                 //else if the argument is neither a value nor a name, set the position
-            } else if (!posFound && !BSL_AST.isLiteral(arg) && !BSL_AST.isName(arg)) {
+            } else if (!posFound) {
                 posFound = true;
-                pos = i;
+                recExpr = arg;
                 // else the argument is an expression, add it to the expression list
             } else {
                 exprLst.push(arg);
             }
         });
         // if there is no context, all arguments are values and the result is a value
-        if (pos == -1) {
+        if (posFound == false) {
             const redex: SI_STRUCT.CallRedex = {
                 type: SI_STRUCT.Production.CallRedex,
                 name: name,
@@ -243,8 +238,7 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
             };
             // else there is a context and the result is an expression
         } else {
-            const expr: BSL_AST.expr = args[pos];
-            const splitResult = split(expr);
+            const splitResult = split(recExpr);
             if (SI_STRUCT.isSplit(splitResult)) {
                 return {
                     type: SI_STRUCT.Production.Split,
@@ -265,8 +259,7 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
         const clause = expr.options[0];
         // if condition is already reduced, build CondRedex
         if (
-            BSL_AST.isLiteral(clause.condition) ||
-            BSL_AST.isName(clause.condition)
+            BSL_AST.isLiteral(clause.condition)
         ) {
             return {
                 type: SI_STRUCT.Production.Split,
