@@ -14,15 +14,15 @@
 }
 /* ####### general layout ####### */
 div.stepper {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  text-align: center;
   font-size: 1.2em;
   box-sizing: border-box;
   font-family: sans-serif;
 }
 /* ##### boxes ###### */
 .stepper .box {
+  text-align: left;
+  display: inline-block;
   background-color: var(--box-background);
   padding: 0.5em;
   padding-top: 1em;

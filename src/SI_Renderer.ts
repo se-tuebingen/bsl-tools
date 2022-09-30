@@ -156,6 +156,7 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
          <div class="boxlabel">${dictionary[lang]['environment']}</div>
          ${stepperTree.map(renderDefinition).join('')}
        </div>
+       <br>
 
        <div class="box expression-steps"
             data-progstep="-1"
@@ -185,6 +186,8 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
             </div>
          </div>
        </div>
+
+       <br>
 
        <div class="box program">
          <div class="boxlabel">${dictionary[lang]['remaining program']}</div>
@@ -325,6 +328,7 @@ function navigateExpression(e: Event, amount: number): void {
     if(idxString) {
       if(parseInt(idxString) === targetIdx) {
         e.setAttribute('data-visible', 'true');
+        e.scrollIntoView({behavior:'smooth'});
       } else {
         e.setAttribute('data-visible', 'false');
       }
@@ -459,6 +463,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
   if(currentStep && currentStep.nextElementSibling) {
     currentStep.setAttribute('data-currentStep', 'false');
     currentStep.setAttribute('data-collapsed', 'true');
+    // currentStep.scrollIntoView({behavior:'smooth'});
     currentStep.nextElementSibling.setAttribute('data-currentStep', 'true');
     currentStep.nextElementSibling.setAttribute('data-collapsed','false');
   } else if (currentStep && !currentStep.nextElementSibling) {
@@ -480,6 +485,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
     } else if(currentStep.previousElementSibling) {
       currentStep.setAttribute('data-currentStep', 'false');
       currentStep.setAttribute('data-collapsed', 'true');
+      // currentStep.scrollIntoView({behavior:'smooth'});
       currentStep.previousElementSibling.setAttribute('data-currentStep', 'true');
       currentStep.previousElementSibling.setAttribute('data-collapsed', 'false');
     } else {
