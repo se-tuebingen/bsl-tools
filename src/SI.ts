@@ -17,7 +17,7 @@ export function calculateProgram(
         if (progStep instanceof Error) {
             return progStep;
         } else {
-            env = progStep.stepList[progStep.stepList.length - 1].env;
+            env = progStep.env;
             stepperTree.push(progStep);
         }
         console.log("progStep", progStep);
@@ -41,27 +41,31 @@ export function calculateProgStep(
     env: SI_STRUCT.Environment
 ): SI_STRUCT.ProgStep | Error {
     if (BSL_AST.isExpr(defOrExpr)) {
-        let stepList = calculateExprSteps(defOrExpr, env);
-        console.log("stepList", stepList);
-        if (stepList instanceof Error) {
-            return stepList;
+        const evalStep = calculateEvalSteps(defOrExpr, env);
+        console.log("exprStep:", evalStep);
+        if (evalStep instanceof Error) {
+            return evalStep;
         } else {
+            const result = evalStep[evalStep.length - 1].result;
+            if(BSL_AST.isExpr(result)){
+                return new Error("Result is not a value")
+            }else{
             return {
-                type: SI_STRUCT.Production.ProgStep,
-                stepList: stepList,
+                type: SI_STRUCT.Production.ExprStep,
+                env: evalStep[evalStep.length - 1].env,
+                evalSteps: evalStep,
+                result: result,
             };
+        }
         }
     } else {
         console.log("definition", defOrExpr);
-        console.log("calculateDefSteps", calculateDefSteps(defOrExpr, env));
-        let stepList = calculateDefSteps(defOrExpr, env);
-        if (stepList instanceof Error) {
-            return stepList;
+        const defStep = calculateDefSteps(defOrExpr, env);
+        if (defStep instanceof Error) {
+            return defStep;
         } else {
-            return {
-                type: SI_STRUCT.Production.ProgStep,
-                stepList: stepList,
-            };
+            console.log("defStep", defStep);
+            return defStep;
         }
     }
 }
@@ -70,7 +74,7 @@ export function calculateProgStep(
 export function calculateDefSteps(
     def: BSL_AST.definition,
     env: SI_STRUCT.Environment
-): SI_STRUCT.DefinitionStep[] | Error {
+): SI_STRUCT.DefinitionStep | Error {
     if (BSL_AST.isConstDef(def)) {
         const name = def.name;
         const expr = def.value;
@@ -81,18 +85,15 @@ export function calculateDefSteps(
             if (newEnv instanceof Error) {
                 return newEnv;
             } else {
-                return [
-                    {
-                        type: SI_STRUCT.Production.DefinitionStep,
-                        env: newEnv,
-                        rule: { type: SI_STRUCT.Production.ProgRule, definition: def },
-                        evalSteps: [],
-                        result: def,
-                    },
-                ];
+                return {
+                    type: SI_STRUCT.Production.DefinitionStep,
+                    env: newEnv,
+                    evalSteps: [],
+                    result: def,
+                };
             }
         } else {
-            let stepList = calculateExprSteps(expr, env);
+            let stepList = calculateEvalSteps(expr, env);
             if (stepList instanceof Error) {
                 return stepList;
             } else {
@@ -107,18 +108,12 @@ export function calculateDefSteps(
                             name: name,
                             value: { type: BSL_AST.Production.Literal, value: value },
                         };
-                        return [
-                            {
-                                type: SI_STRUCT.Production.DefinitionStep,
-                                env: newEnv,
-                                rule: {
-                                    type: SI_STRUCT.Production.ProgRule,
-                                    definition: newDef,
-                                },
-                                evalSteps: stepList,
-                                result: newDef,
-                            },
-                        ];
+                        return {
+                            type: SI_STRUCT.Production.DefinitionStep,
+                            env: newEnv,
+                            evalSteps: stepList,
+                            result: newDef,
+                        };
                     }
                 } else {
                     return Error(
@@ -140,17 +135,17 @@ export function calculateDefSteps(
 }
 // calculateExprSteps
 // expr, steppResult[] => exprStep[] | Error
-export function calculateExprSteps(
+export function calculateEvalSteps(
     expr: BSL_AST.expr,
     env: SI_STRUCT.Environment
-): SI_STRUCT.ExprStep[] | Error {
-    let stepList: SI_STRUCT.ExprStep[] = [];
+): SI_STRUCT.EvalStep[] | Error {
+    let stepList: SI_STRUCT.EvalStep[] = [];
     let currentExpr: BSL_AST.expr | SI_STRUCT.Value = expr;
     while (!SI_STRUCT.isValue(currentExpr)) {
         const step = evaluateExpression(currentExpr, env);
         if (SI_STRUCT.isValue(step)) {
             currentExpr = step;
-        } else if (SI_STRUCT.isExprStep(step)) {
+        } else if (SI_STRUCT.isEvalStep(step)) {
             if (step.result instanceof Error) {
                 stepList.push(step);
                 break;
@@ -170,7 +165,7 @@ export function calculateExprSteps(
 export function evaluateExpression(
     expr: BSL_AST.expr,
     env: SI_STRUCT.Environment
-): SI_STRUCT.ExprStep | SI_STRUCT.Value | Error {
+): SI_STRUCT.EvalStep | SI_STRUCT.Value | Error {
     if (BSL_AST.isLiteral(expr)) {
         console.log("evaluateExpression: Literal", expr);
         return expr.value;
@@ -183,7 +178,7 @@ export function evaluateExpression(
             if (SI_STRUCT.isOneRule(stepExpr)) {
                 const exprStep = plug(stepExpr, splitExpr.context, env);
                 console.log("exprStep", exprStep);
-                if (SI_STRUCT.isExprStep(exprStep)) {
+                if (SI_STRUCT.isEvalStep(exprStep)) {
                     return exprStep;
                 } else {
                     return exprStep;
@@ -405,12 +400,12 @@ export function plug(
     oneRule: SI_STRUCT.OneRule,
     c: SI_STRUCT.Context,
     env: SI_STRUCT.Environment
-): SI_STRUCT.ExprStep | Error {
+): SI_STRUCT.EvalStep | Error {
     //check if context is a Hole
     console.log("plug: oneRule: " + JSON.stringify(oneRule));
     if (SI_STRUCT.isHole(c)) {
         return {
-            type: SI_STRUCT.Production.ExprStep,
+            type: SI_STRUCT.Production.EvalStep,
             env: env,
             rule: oneRule,
             result: oneRule.result,
@@ -418,7 +413,7 @@ export function plug(
     } else {
         //Apply OneRule with KONG RULE
         const exprStep = plug(oneRule, c.ctx, env);
-        if (SI_STRUCT.isStep(exprStep)) {
+        if (SI_STRUCT.isEvalStep(exprStep)) {
             // Result is RuleError
             if (exprStep.result instanceof Error) {
                 return exprStep;
@@ -450,7 +445,7 @@ export function plug(
                     };
                     console.log("plug: env: " + JSON.stringify(env));
                     return {
-                        type: SI_STRUCT.Production.ExprStep,
+                        type: SI_STRUCT.Production.EvalStep,
                         env: env,
                         rule: {
                             type: SI_STRUCT.Production.Kong,
@@ -476,7 +471,7 @@ export function plug(
                         options: newOptions,
                     };
                     return {
-                        type: SI_STRUCT.Production.ExprStep,
+                        type: SI_STRUCT.Production.EvalStep,
                         env: env,
                         rule: {
                             type: SI_STRUCT.Production.Kong,

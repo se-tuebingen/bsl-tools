@@ -2,9 +2,9 @@ import * as BSL_AST from "./BSL_AST";
 
 export enum Production {
     Stepper = "Stepper",
-    ProgStep = "ProgStep",
     ExprStep = "ExprStep",
     DefinitionStep = "DefinitionStep",
+    EvalStep = "EvalStep",
     Split = "Split",
     PlugResult = "PlugResult",
     CallRedex = "CallRedex",
@@ -33,30 +33,36 @@ export interface Stepper {
     stepperTree:  ProgStep[];
 }
 // ProgStep represents a line of code in a BSL program
- export interface ProgStep {
-     type: Production.ProgStep;
-     stepList: Step[];
- }
+//  export interface ProgStep {
+//      type: Production.ProgStep;
+//      stepList: Step[];
+//  }
 
 // Step[]
 // Step is type = ExprStep | DefinitionStep
-export type Step = ExprStep | DefinitionStep;
+export type ProgStep = ExprStep | DefinitionStep;
 
+// DefinitionStep has ProgRule
 export interface DefinitionStep {
     type: Production.DefinitionStep;
     env: Environment;
-    rule: ProgRule;
-    evalSteps: ExprStep[];
+    evalSteps: EvalStep[];
     result: BSL_AST.definition; //evaluated definition, which is given to env
 }
-
 export interface ExprStep {
-   type: Production.ExprStep;
+    type: Production.ExprStep;
+    env: Environment;
+    evalSteps: EvalStep[];
+    result: Value | Error;
+}
+
+export interface EvalStep {
+   type: Production.EvalStep;
    env: Environment;
    rule: Kong | OneRule;
    result: BSL_AST.expr | Value | Error;
 }
-
+// LOCAL-Rule für ISL
 
 export type SplitResult = Split | Value;
 
@@ -113,7 +119,6 @@ export interface Id{
     type: Production.Id;
     symbol: string;
 }
-/*export type Closure = FunClosure | StructClosure;*/
 export interface FunValue{
     type: Production.FunValue;
     params: BSL_AST.Name[];
@@ -181,17 +186,14 @@ export type Environment = { [key: string]: Value };
 export function isStepper(obj:any): obj is Stepper {
     return obj.type === Production.Stepper;
 }
-export function isProgStep(obj:any): obj is ProgStep {
-    return obj.type === Production.ProgStep;
-}
-export function isStep(obj: any):obj is Step {
-    return obj.type === Production.ExprStep || obj.type === Production.DefinitionStep;
+export function isExprStep(obj:any): obj is ExprStep {
+    return obj.type === Production.ExprStep;
 }
 export function isDefinitionStep(obj: any): obj is DefinitionStep {
     return obj.type === Production.DefinitionStep;
 }
-export function isExprStep(obj: any): obj is ExprStep {
-    return obj.type === Production.ExprStep;
+export function isEvalStep(obj: any): obj is EvalStep {
+    return obj.type === Production.EvalStep;
 }
 //Redex
 export function isCallRedex(obj: any): obj is CallRedex {
