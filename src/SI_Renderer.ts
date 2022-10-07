@@ -357,7 +357,7 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
   // result and rule name
   const redex: string =
     BSL_Print.sanitize(printRedex(redexRule.redex));
-  const result: string = SI_STRUCT.isValue(redexRule.result)
+  const result: string = SI_STRUCT.isValue(redexRule.result) || redexRule.result instanceof Error
       ? `${redexRule.result}`
       : BSL_Print.sanitize(BSL_Print.printE(redexRule.result));
   const ruleName = redexRule.type;
@@ -563,12 +563,18 @@ function printContext(ctx: SI_STRUCT.Context, acc: Context = {left: '', right: '
 // recursive definition of printing the redex
 function printRedex(redex: SI_STRUCT.Redex): string {
   if (SI_STRUCT.isCallRedex(redex)) {
-    return `(${BSL_Print.printName(redex.name)} ${redex.args.join(' ')})`;
+    return `(${BSL_Print.printName(redex.name)} ${redex.args.map(arg => SI_STRUCT.isValue(arg) ? `${arg}` : printIdentifier(arg)).join(' ')})`;
   } else if (SI_STRUCT.isCondRedex(redex)) {
     return `(cond ${redex.options.map(BSL_Print.printOption).join(' ')})`;
-  } else {
+  } else if (SI_STRUCT.isNameRedex(redex)){
+    return redex.symbol;
+  }else{
     throw "Invalid Input to printRedex";
   }
+}
+// Print Identifier
+function printIdentifier(id: SI_STRUCT.Id): string {
+  return id.symbol;
 }
 
 // rendering the rule tip
@@ -602,7 +608,7 @@ function renderRuleInformation(rule: availableRules, kong: boolean):string {
 // ### rules ###
 // as taken from overview-reduction-and-equivalence.pdf, i.e. the script
 // to be displayed as reference
-type availableRules = 'Kong' | 'Fun' | 'Prim' | 'Const' | 'CondTrue' | 'CondFalse' | 'StructMake' | 'StructSelect' | 'StructPredTrue' | 'StructPredFalse' | 'ProgRule';
+type availableRules = 'Kong' | 'Fun' | 'Prim' | 'Const' | 'CondTrue' | 'CondFalse' | 'CondError' | 'StructMake' | 'StructSelect' | 'StructPredTrue' | 'StructPredFalse' | 'ProgRule';
 const rules = {
   'Kong': {
     'name': `<cap>Kong</cap>`,
@@ -648,6 +654,13 @@ const rules = {
       <em>(<strong>cond</strong> [<strong>#false</strong> e<small>1</small>]
          [e<small>2</small> e<small>3</small>] …) →
          (<strong>cond</strong> [e<small>2</small> e<small>3</small>] …)</em>
+    `
+  },
+  'CondError': {
+    'name': `<cap>Cond</cap>-Error`,
+    'text': `
+      <em>(<strong>cond</strong> [e<small>1</small> e<small>2</small>] …) →
+          (<strong>error</strong> "cond: all conditions false")</em>
     `
   },
   'StructMake': {

@@ -206,3 +206,42 @@ locally (served via `file://`).
 
 - Darstellung Skriptnah
 - Idee: Game-Like stats in Quiz Mode
+
+## visualisation
+### Values
+Value is a representation for legitimate Output
+- Literals (boolean, string, number, empty list, StructValue)
+- ClosureValue? (Function-Definition in Environment or Struct-Definition in Environment)
+
+### PROG with CONST
+(define x 2)
+(+ x (+ x (- 2 2)))
+ENV = []
+
+=> PROG
+
+(+ x (+ x (- 2 2)))
+ENV = ["x": 2]
+
+=> KONG MIT PRIM
+
+(+ x (+ x 0))
+ENV = ["x": 2]
+
+=> (KONG MIT) CONST
+
+(+ x (+ 2 0))
+
+=> KONG MIT PRIM
+
+(+ x 2)
+
+=> CONST
+
+(+ 2 2)
+
+=> PRIM
+
+4
+
+### Second Example
