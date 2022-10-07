@@ -154,7 +154,7 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
 
        <div class="box environment">
          <div class="boxlabel">${dictionary[lang]['environment']}</div>
-         ${stepperTree.map(renderDefinition).join('')}
+         ${stepperTree.filter(SI_STRUCT.isDefinitionStep).map(renderDefinition).join('')}
        </div>
 
        <div class="box expression-steps"
@@ -170,7 +170,7 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
          </div>
        </div>
 
-       ${stepperTree.map((el, i) => renderExpressionSteps(el, i, lang)).join('')}
+       ${stepperTree.map((el, i) => renderEvalSteps(el, i, lang)).join('')}
 
        <div class="box expression-steps"
             data-progstep="${stepperTree.length}"
@@ -198,31 +198,25 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
   navigateExpression(e, a);
 }
 // render what remains of an expression after evaluation
-function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number): string {
-  const lastStep = progStep.stepList[progStep.stepList.length - 1];
-  if (SI_STRUCT.isDefinitionStep(lastStep)) {
-    return `
-      <div class="step code"
-           data-progstep="${idx}"
-           data-visible="false">
-        ${BSL_Print.indent(
-            BSL_Print.sanitize(
-              BSL_Print.printDefinition(lastStep.result)),
-            maxWidthInChars, 'html')}
-      </div>
-    `;
-  } else {
-    return '';
-  }
+function renderDefinition(progStep: SI_STRUCT.DefinitionStep, idx: number): string {
+  return `
+    <div class="step code"
+         data-progstep="${idx}"
+         data-visible="false">
+      ${BSL_Print.indent(
+          BSL_Print.sanitize(
+            BSL_Print.printDefinition(progStep.result)),
+          maxWidthInChars, 'html')}
+    </div>
+  `;
 }
 
 // render the part of the original Program that is being represented by a progstep
 function renderOriginalExpression(progStep: SI_STRUCT.ProgStep, idx: number): string {
-  const firstStep = progStep.stepList[0];
-  let code = '';
-  if (SI_STRUCT.isDefinitionStep(firstStep)) {
-    code = BSL_Print.printDefinition(firstStep.result);
-  } else {
+  let code;
+  if(progStep.evalSteps.length > 0) {
+    // manually render out expression from context and redex
+    const firstStep = progStep.evalSteps[0];
     const context:Context =
       SI_STRUCT.isKong(firstStep.rule) ?
         printContext(firstStep.rule.context)
@@ -235,6 +229,12 @@ function renderOriginalExpression(progStep: SI_STRUCT.ProgStep, idx: number): st
       printRedex(redexRule.redex);
     if (!context.right.startsWith(')')) context.right = ` ${context.right}`;
     code = `${context.left}${redex}${context.right}`;
+  } else if (SI_STRUCT.isDefinitionStep(progStep)) {
+    // no steps -> simply print result
+    code = BSL_Print.printDefinition(progStep.result);
+  } else {
+    // expression without evaluation steps? That's a value!
+    code = `${progStep.result}`;
   }
   return `
     <div class="step code"
@@ -247,34 +247,37 @@ function renderOriginalExpression(progStep: SI_STRUCT.ProgStep, idx: number): st
   `;
 }
 // one stepper for one expression
-function renderExpressionSteps(progStep: SI_STRUCT.ProgStep, idx: number, lang: implementedLanguage): string {
+function renderEvalSteps(progStep: SI_STRUCT.ProgStep, idx: number, lang: implementedLanguage): string {
   return `
     <div class="box expression-steps"
          data-progstep="${idx}"
          data-visible="false">
       <div class="boxlabel">${dictionary[lang]['current evaluation']}</div>
-      ${progStep.stepList.filter(SI_STRUCT.isExprStep).length > 0 ?
-          progStep.stepList.filter(SI_STRUCT.isExprStep).map((el, i) => renderStep(i, el, lang)).join('')
-          : `
-          <div class="step"
-               data-step="0"
-               data-currentStep="true"
-               data-collapsed="false">
-            <div class="prev-button"
-                 onclick="prevStep(event)">
-              ${dictionary[lang]['previous step']} <img class="icon" src="${angle_up}">
-            </div>
-            <div class="next-button"
-                 onclick="nextStep(event)">
-              ${dictionary[lang]['next step']} <img class="icon" src="${angle_down}">
-            </div>
+      ${
+          // all evaluation steps
+          progStep.evalSteps.map((el, i) => renderStep(i, el, lang)).join('')
+          // result
+       }
+      <div class="step"
+           data-step="${progStep.evalSteps.length}"
+           data-currentStep="${progStep.evalSteps.length === 0 ? 'true' : 'false'}"
+           data-collapsed="false">
+        <div class="prev-button"
+             onclick="prevStep(event)">
+          ${dictionary[lang]['previous step']} <img class="icon" src="${angle_up}">
+        </div>
+        <div class="next-button"
+             onclick="nextStep(event)">
+          ${dictionary[lang]['next step']} <img class="icon" src="${angle_down}">
+        </div>
 
-            <div class="split-result code">
-              ${BSL_Print.printDefinition(progStep.stepList.filter(SI_STRUCT.isDefinitionStep)[0].result)}
-            </div>
-          </div>
-          `
-      }
+        <div class="split-result code">
+          ${SI_STRUCT.isDefinitionStep(progStep)
+            ? BSL_Print.printDefinition(progStep.result)
+            : `${progStep.result}`
+          }
+        </div>
+      </div>
     </div>
   `;
 }
@@ -345,7 +348,7 @@ function navigateExpression(e: Event, amount: number): void {
 }
 
 // one individual step
-function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: implementedLanguage): string {
+function renderStep(currentStep: number, step: SI_STRUCT.EvalStep, lang: implementedLanguage): string {
   // console.log(`Rendering step ${currentStep}`);
   // acquire necessary information:
   // context and redex
@@ -357,9 +360,16 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
   // result and rule name
   const redex: string =
     BSL_Print.sanitize(printRedex(redexRule.redex));
-  const result: string = SI_STRUCT.isValue(redexRule.result) || redexRule.result instanceof Error
-      ? `${redexRule.result}`
-      : BSL_Print.sanitize(BSL_Print.printE(redexRule.result));
+  function renderResult(res: BSL_AST.expr | SI_STRUCT.Value | Error): string {
+    if(SI_STRUCT.isValue(res)) {
+      return `${context.left}<span class="hole hole-result">${res}</span>${context.right}`;
+    } else if(res instanceof Error) {
+      return `<span class="hole hole-result hole-error">"${res}"</span>`; // to prevent indentation issues
+    } else {
+      return `${context.left}<span class="hole hole-result">${BSL_Print.sanitize(BSL_Print.printE(res))}</span>${context.right}`;
+    }
+  }
+  const result: string = renderResult(redexRule.result);
   const ruleName = redexRule.type;
   // prepare indented code expressions
   const code_before =
@@ -369,15 +379,13 @@ function renderStep(currentStep: number, step: SI_STRUCT.ExprStep, lang: impleme
       'html');
   const code_after =
     BSL_Print.indent(
-      `${context.left}<span class="hole hole-result">${
-        result
-       }</span>${context.right}`,
+      result,
       maxWidthInChars,
       'html');
 
   // find out where to position the rule arrow so that it points at the hole
   const code_before_hole =
-    code_after.slice(0,code_after.indexOf('<span class="hole hole-result">'))
+    code_after.slice(0,code_after.indexOf('<span class="hole hole-result'))
               .split('<br>')
               .reverse()[0];
   const hole_position = code_before_hole ? BSL_Print.dirtify(code_before_hole).length : 0;

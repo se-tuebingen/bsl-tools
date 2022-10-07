@@ -7,6 +7,7 @@
   --text-grey: #444; /* like in scribble */
   --hole-yellow: #fdf68d; /* pale yellow */
   --hole-green: lightgreen;
+  --hole-red: lightpink;
   /* --highlight-border-connectors: lime;
   --wrong-background: red;
   --correct-background: lime;
@@ -123,6 +124,9 @@ div.stepper {
 }
 .stepper .hole-result {
   background-color: var(--hole-green);
+}
+.stepper .hole-error {
+  background-color: var(--hole-red);
 }
 .stepper .rule {
   display: inline-block;
