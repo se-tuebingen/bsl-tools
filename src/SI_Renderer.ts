@@ -154,7 +154,7 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
 
        <div class="box environment">
          <div class="boxlabel">${dictionary[lang]['environment']}</div>
-         ${stepperTree.filter(SI_STRUCT.isDefinitionStep).map(renderDefinition).join('')}
+         ${stepperTree.map(renderDefinition).join('')}
        </div>
 
        <div class="box expression-steps"
@@ -198,17 +198,23 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
   navigateExpression(e, a);
 }
 // render what remains of an expression after evaluation
-function renderDefinition(progStep: SI_STRUCT.DefinitionStep, idx: number): string {
-  return `
-    <div class="step code"
-         data-progstep="${idx}"
-         data-visible="false">
-      ${BSL_Print.indent(
-          BSL_Print.sanitize(
-            BSL_Print.printDefinition(progStep.result)),
-          maxWidthInChars, 'html')}
-    </div>
-  `;
+function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number): string {
+  // filtering at this position in order to keep correct implicit progStep index
+  if (SI_STRUCT.isDefinitionStep(progStep)) {
+    return `
+      <div class="step code"
+           data-progstep="${idx}"
+           data-visible="false">
+        ${BSL_Print.indent(
+            BSL_Print.sanitize(
+              BSL_Print.printDefinition(progStep.result)),
+            maxWidthInChars, 'html')}
+      </div>
+    `;
+  } else {
+    return '';
+  }
+
 }
 
 // render the part of the original Program that is being represented by a progstep
