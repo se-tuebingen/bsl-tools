@@ -82,7 +82,8 @@
   )
 )
 
-
+; helper for "nothing" in order to not break pdf rendering by outputting nothing
+(define nothing (nested-flow (style #f '()) '()))
 
 ; render bsl-string
 (define
@@ -99,6 +100,7 @@
       (strlist-or-str->str
         (synlst-or-val->strlist-or-str stx))
       )]
+      [else nothing]
      ;[latex (paragraph (style #f '()) (strlist-or-str->str(synlst-or-val->strlist-or-str stx)))]
   )]
   )
@@ -114,6 +116,7 @@
    (raise-argument-error 'lang "JSON-Tree #:lang needs to be an implemented language, currently either 'en' or 'de'" lang)]
   [(cond-block
       [html (paragraph (jsontree-tag-wrapper quiz lang) json)]
+      [else nothing]
      ;[latex (paragraph (style #f '()) (strlist-or-str->str(synlst-or-val->strlist-or-str stx)))]
   )]
   )
@@ -132,6 +135,7 @@
       (strlist-or-str->str
         (synlst-or-val->strlist-or-str stx))
       )]
+      [else nothing]
      ;[latex (paragraph (style #f '()) (strlist-or-str->str(synlst-or-val->strlist-or-str stx)))]
   )]
   )
