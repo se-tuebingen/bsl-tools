@@ -14,6 +14,11 @@ CSS for tree by Ross Angus
 https://www.cssscript.com/clean-tree-diagram/
 (Edited and extended)
 */
+/* ###### parent ###### */
+.tree-container {
+  text-align: center;
+  overflow-y: scroll;
+}
 
 /* ###### node layout ######## */
 .tree,
@@ -29,6 +34,8 @@ https://www.cssscript.com/clean-tree-diagram/
 .tree {
     margin: 0 0 1em;
     text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .tree,

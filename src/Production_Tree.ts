@@ -38,12 +38,13 @@ export function productionTree(
   }
   // render HTML
   target.innerHTML = `
+  <div class="tree-container">
     <ul class="tree ast">
       ${quiz
         ? renderQuizNode(root, lang as implementedLanguage, grammar as grammar)
         : renderNode(root, grammar as grammar)}
     </ul>
-  `;
+  </div>`;
   if (quiz) {
     // show first quiz node
     navigateDOM([target],'ul/li/ul/li').map(c =>
