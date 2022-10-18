@@ -234,7 +234,8 @@ function renderOriginalExpression(progStep: SI_STRUCT.ProgStep, idx: number): st
     code = BSL_Print.printDefinition(progStep.result);
   } else {
     // expression without evaluation steps? That's a value!
-    code = `${progStep.result}`;
+    code = `${progStep.result instanceof Error ?
+              progStep.result : BSL_Print.printValue(progStep.result)}`;
   }
   return `
     <div class="step code"
@@ -274,7 +275,8 @@ function renderEvalSteps(progStep: SI_STRUCT.ProgStep, idx: number, lang: implem
         <div class="split-result code">
           ${SI_STRUCT.isDefinitionStep(progStep)
             ? BSL_Print.printDefinition(progStep.result)
-            : `${progStep.result}`
+            : `${progStep.result instanceof Error ?
+                      progStep.result : BSL_Print.printValue(progStep.result)}`
           }
         </div>
       </div>
@@ -362,7 +364,9 @@ function renderStep(currentStep: number, step: SI_STRUCT.EvalStep, lang: impleme
     BSL_Print.sanitize(printRedex(redexRule.redex));
   function renderResult(res: BSL_AST.expr | SI_STRUCT.Value | Error): string {
     if(SI_STRUCT.isValue(res)) {
-      return `${context.left}<span class="hole hole-result">${res}</span>${context.right}`;
+      return `${context.left}<span class="hole hole-result">${
+        BSL_Print.printValue(res)
+      }</span>${context.right}`;
     } else if(res instanceof Error) {
       return `<span class="hole hole-result hole-error">"${res}"</span>`; // to prevent indentation issues
     } else {

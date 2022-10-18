@@ -30,16 +30,20 @@ export function printE(e: BSL_AST.expr): string {
   } else if(BSL_AST.isName(e)) {
     return printName(e);
   } else if(BSL_AST.isLiteral(e)) {
-    if(typeof(e.value) === 'string' && e.value !== `'()`) {
-      return `"${e.value}"`;
-    } else if(typeof(e.value) === 'boolean') {
-      return e.value ? '#true' : '#false';
-    } else {
-      return `${e.value}`;
-    }
+    return printValue(e.value);
   } else {
     console.error('Invalid input to printE');
     return `<${e}>`;
+  }
+}
+
+export function printValue(val: boolean | string | number) {
+  if(typeof(val) === 'string' && val !== `'()`) {
+    return `"${val}"`;
+  } else if(typeof(val) === 'boolean') {
+    return val ? '#true' : '#false';
+  } else {
+    return `${val}`;
   }
 }
 
