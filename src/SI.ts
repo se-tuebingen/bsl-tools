@@ -50,6 +50,7 @@ export function calculateProgStep(
               type: SI_STRUCT.Production.ExprStep,
               env: env,
               evalSteps: [],
+              originalDefOrExpr: defOrExpr,
               result: evaluateExpression(defOrExpr, env) as SI_STRUCT.Value
             };
         } else {
@@ -61,6 +62,7 @@ export function calculateProgStep(
                 type: SI_STRUCT.Production.ExprStep,
                 env: evalStep[evalStep.length - 1].env,
                 evalSteps: evalStep,
+                originalDefOrExpr: defOrExpr,
                 result: result,
             };
         }
@@ -96,6 +98,7 @@ export function calculateDefSteps(
                     type: SI_STRUCT.Production.DefinitionStep,
                     env: newEnv,
                     evalSteps: [],
+                    originalDefOrExpr: def,
                     result: def,
                 };
             }
@@ -119,6 +122,7 @@ export function calculateDefSteps(
                             type: SI_STRUCT.Production.DefinitionStep,
                             env: newEnv,
                             evalSteps: stepList,
+                            originalDefOrExpr: def,
                             result: newDef,
                         };
                     }

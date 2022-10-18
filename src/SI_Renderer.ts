@@ -219,42 +219,30 @@ function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number): string {
 
 // render the part of the original Program that is being represented by a progstep
 function renderOriginalExpression(progStep: SI_STRUCT.ProgStep, idx: number): string {
-  let code;
-  if(progStep.evalSteps.length > 0) {
-    // manually render out expression from context and redex
-    const firstStep = progStep.evalSteps[0];
-    const context:Context =
-      SI_STRUCT.isKong(firstStep.rule) ?
-        printContext(firstStep.rule.context)
-        : {left:'', right:''};
-    const redexRule =
-      SI_STRUCT.isKong(firstStep.rule) ?
-        firstStep.rule.redexRule
-        : firstStep.rule;
-    const redex: string =
-      printRedex(redexRule.redex);
-    if (!context.right.startsWith(')')) context.right = ` ${context.right}`;
-    code = `${context.left}${redex}${context.right}`;
-  } else if (SI_STRUCT.isDefinitionStep(progStep)) {
-    // no steps -> simply print result
-    code = BSL_Print.printDefinition(progStep.result);
-  } else {
-    // expression without evaluation steps? That's a value!
-    code = `${progStep.result instanceof Error ?
-              progStep.result : BSL_Print.printValue(progStep.result)}`;
-  }
   return `
     <div class="step code"
          data-progstep="${idx}"
          data-visible="true">
       ${BSL_Print.indent(
-          BSL_Print.sanitize(code),
+          BSL_Print.sanitize(BSL_Print.printDefOrExpr(progStep.originalDefOrExpr)),
           maxWidthInChars, 'html')}
     </div>
   `;
 }
 // one stepper for one expression
 function renderEvalSteps(progStep: SI_STRUCT.ProgStep, idx: number, lang: implementedLanguage): string {
+  function renderDefinitionContext(def: BSL_AST.definition): Context {
+    if(BSL_AST.isConstDef(def)) {
+      return {left: `(define ${def.name.symbol} `, right: ')'};
+    } else {
+      // does not matter, no eval steps here anyway
+      return {left: '', right: ''};
+    }
+  }
+  const ctx =
+    SI_STRUCT.isDefinitionStep(progStep)
+    ? renderDefinitionContext(progStep.originalDefOrExpr)
+    : {left: '', right: ''};
   return `
     <div class="box expression-steps"
          data-progstep="${idx}"
@@ -262,7 +250,7 @@ function renderEvalSteps(progStep: SI_STRUCT.ProgStep, idx: number, lang: implem
       <div class="boxlabel">${dictionary[lang]['current evaluation']}</div>
       ${
           // all evaluation steps
-          progStep.evalSteps.map((el, i) => renderStep(i, el, lang)).join('')
+          progStep.evalSteps.map((el, i) => renderStep(i, el, lang, {...ctx})).join('')
           // result
        }
       <div class="step"
@@ -356,14 +344,17 @@ function navigateExpression(e: Event, amount: number): void {
 }
 
 // one individual step
-function renderStep(currentStep: number, step: SI_STRUCT.EvalStep, lang: implementedLanguage): string {
+function renderStep(currentStep: number,
+                    step: SI_STRUCT.EvalStep,
+                    lang: implementedLanguage,
+                    ctx: Context = {left: '', right: ''}): string {
   // console.log(`Rendering step ${currentStep}`);
   // acquire necessary information:
   // context and redex
   const context:Context =
     SI_STRUCT.isKong(step.rule) ?
-      printContext(step.rule.context)
-      : {left:'', right:''};
+      printContext(step.rule.context, ctx)
+      : ctx;
   const redexRule = SI_STRUCT.isKong(step.rule) ? step.rule.redexRule : step.rule;
   // result and rule name
   const redex: string =
