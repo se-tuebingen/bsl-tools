@@ -11,7 +11,7 @@
 (require scribble/base)
 (require syntax/to-string)
 (require syntax/stx)
-(provide bsltree jsontree)
+(provide bsltree jsontree stepper)
 
 (define implemented-language (or/c "en" "de"))
 (define value (or/c boolean? string? number? '()))
@@ -48,6 +48,14 @@
     (js-addition "bsl_tools.js")
     (attributes (list (cons 'quiz (if quiz "true" "false"))
                       (cons 'lang lang)))
+  ))
+)
+(define
+  (stepper-tag-wrapper lang)
+  (style #f (list
+    (alt-tag "stepper")
+    (js-addition "bsl_tools.js")
+    (attributes (list (cons 'lang lang)))
   ))
 )
 
@@ -106,6 +114,24 @@
    (raise-argument-error 'lang "JSON-Tree #:lang needs to be an implemented language, currently either 'en' or 'de'" lang)]
   [(cond-block
       [html (paragraph (jsontree-tag-wrapper quiz lang) json)]
+     ;[latex (paragraph (style #f '()) (strlist-or-str->str(synlst-or-val->strlist-or-str stx)))]
+  )]
+  )
+)
+
+; render bsl-stepper
+(define
+  (stepper stx #:lang [lang "en"])
+  (cond
+  [(not (or (syntax? stx) (value? stx)))
+   (raise-argument-error 'bsltree "Stepper only accepts Syntax-Expressions or Values" stx)]
+  [(not (implemented-language lang))
+   (raise-argument-error 'lang "Stepper #:lang needs to be an implemented language, currently either 'en' or 'de'" lang)]
+  [(cond-block
+      [html (paragraph (stepper-tag-wrapper lang)
+      (strlist-or-str->str
+        (synlst-or-val->strlist-or-str stx))
+      )]
      ;[latex (paragraph (style #f '()) (strlist-or-str->str(synlst-or-val->strlist-or-str stx)))]
   )]
   )

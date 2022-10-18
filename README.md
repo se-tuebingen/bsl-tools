@@ -9,7 +9,23 @@ The current test build can be seen at <https://se-tuebingen.github.io/bsl-tools/
 
 ## How to use: HTML
 
-Currently, the only implemented module is the collapsible AST tree view, with an
+Currently, the collapsible AST tree view and the BSL-Stepper are implemented.
+To use the tools, you need to add the script anywhere in your document as
+follows:
+```html
+<!-- import the bsl_tools script somewhere on the page, ideally in the head -->
+<script src="bsl_tools.js"></script>
+```
+Note that if you add one or more of the following tools to your page, the script
+will add stylesheets to the `<head>` of your document which set styles for the
+`.stepper` and `.tree` classes.
+_We are working on better scoping those styles to prevent clashes with classes with the same name elsewhere in the document._
+
+**`<` and `>` need to be replaced with `&lt;` and `&gt;` in order to not break your HTML!**
+
+### AST tree view
+
+The collapsible AST tree view has an
 optional "quiz" mode that starts the tree collapsed and expands if you select
 the correct production and mark all subexpressions ('holes').
 
@@ -18,10 +34,6 @@ or you can provide your own JSON structure.
 
 The interface is as follows:
 ```html
-<!-- import the bsl_tools script somewhere on the page, ideally in the head -->
-<script src="bsl_tools.js"></script>
-
-<!-- anywhere else in the document -->
 <bsltree>
   (valid bsl syntax)
 </bsltree>
@@ -71,7 +83,36 @@ from all occurring productions.
 
 The `lang` attribute is only applicable for Quiz mode, since the regular tree does not display any text in natural language. Currently implemented codes are `en`(English, default) and `de`(German).
 
+### Stepper
+
+The stepper accepts valid BSL programs. It precomputes the evaluation steps
+and allows users to step through the evaluation of each expression until the
+program is finished.
+
+The interface is as follows:
+```html
+<stepper>
+  (valid bsl syntax)
+</stepper>
+
+<!-- for displaying user text in german, do -->
+<stepper lang="de">
+  (valid bsl syntax)
+</stepper>
+```
+
 ## How to use: Scribble
+
+To use the scribble module, you need to import it in your document:
+```racket
+(require bsl_tools.rkt)
+```
+The scribble module does only very little input sanitation and mostly just adds
+the JavaScript-Module to your rendered HTML as well as wrapping the input in
+the correct custom HTML tags. Both files (`bsl_tools.rkt` AND `bsl_tools.js`)
+need to be in the same folder as your scribble file so that everything works.
+
+### AST Tree View
 
 For the collapsible AST Production Trees, the interface in Scribble is as follows:
 
@@ -80,8 +121,6 @@ For the collapsible AST Production Trees, the interface in Scribble is as follow
 
 
 ```racket
-(require bsl_tools.rkt)
-
 @bsl-tree [
   #:quiz #t   @; optional keyword argument, default is #f
   #:lang "de" @; optional keyword argument, default is "en"
@@ -117,6 +156,32 @@ The JSON structure for non-BSL-Syntax needs to contain
 If you set the optional keyword argument `#:quiz` to `#t`, it will add `quiz="true"` which displays the tree in quiz mode.
 
 Similarly, the `#:lang` keyword argument can be used to set the language code. This is only applicable for Quiz mode, since the regular tree does not display any text in natural language. Currently implemented codes are `en`(English, default) and `de`(German).
+
+### Stepper
+
+The stepper accepts valid BSL programs. It precomputes the evaluation steps
+and allows users to step through the evaluation of each expression until the
+program is finished.
+
+Like with the tree view module, programs are entered as Racket Syntax Objects.
+
+```racket
+@stepper[
+  #'((* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+  (cond [(>= 5 5) "isThree"]
+  [#false 3]
+  [(or #true #false) (* 2 3 4)]))
+]
+
+; or for German, do
+@stepper[ #:lang "de"
+  #'((* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+  (cond [(>= 5 5) "isThree"]
+  [#false 3]
+  [(or #true #false) (* 2 3 4)]))
+]
+```
+
 
 ## BSL Abstract Syntax Tree
 
