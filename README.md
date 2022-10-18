@@ -121,7 +121,7 @@ For the collapsible AST Production Trees, the interface in Scribble is as follow
 
 
 ```racket
-@bsl-tree [
+@bsltree[
   #:quiz #t   @; optional keyword argument, default is #f
   #:lang "de" @; optional keyword argument, default is "en"
   #'((valid bsl syntax))
