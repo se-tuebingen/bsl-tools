@@ -45,6 +45,13 @@ export function calculateProgStep(
         console.log("exprStep:", evalStep);
         if (evalStep instanceof Error) {
             return evalStep;
+        } else if(evalStep.length === 0) {
+            return {
+              type: SI_STRUCT.Production.ExprStep,
+              env: env,
+              evalSteps: [],
+              result: evaluateExpression(defOrExpr, env) as SI_STRUCT.Value
+            };
         } else {
             const result = evalStep[evalStep.length - 1].result;
             if(BSL_AST.isExpr(result)){
