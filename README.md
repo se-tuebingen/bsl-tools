@@ -105,7 +105,7 @@ The interface is as follows:
 
 To use the scribble module, you need to import it in your document:
 ```racket
-(require bsl_tools.rkt)
+@(require "bsl_tools.rkt")
 ```
 The scribble module does only very little input sanitation and mostly just adds
 the JavaScript-Module to your rendered HTML as well as wrapping the input in
