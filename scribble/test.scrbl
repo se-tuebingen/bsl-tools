@@ -7,7 +7,8 @@
 In this manual we cover the functionality of BSL-Tools.
 @table-of-contents[]
 
-Here are some tests for the Show Feature of the Abstract Syntax Tree.
+Here are some tests for the Show Feature of the Abstract Syntax Tree, as well as
+for the BSL Stepper.
 
 @section{BSL Tree Tests}
 
@@ -167,3 +168,43 @@ Errors in JSON will not be caught by Scribble!
     ]
   }
 }
+
+@section{Stepper Tests}
+
+@subsection{English}
+@stepper[
+#'((* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+(cond [(>= 5 5) "isThree"]
+[#false 3]
+[(or #true #false) (* 2 3 4)])
+(cond
+  [(cond
+  [(and #false #true) #false]
+  [#false 3]
+  [(or #true #false) #false])
+  "isThree"]
+[#false 3]
+[(< 2 3) (* 2 3 4)])
+(define x (+ 40 2))
+(define y "hallo")
+(> 2 4))
+]
+
+@subsection{German}
+@stepper[ #:lang "de" 
+#'((* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+(cond [(>= 5 5) "isThree"]
+[#false 3]
+[(or #true #false) (* 2 3 4)])
+(cond
+  [(cond
+  [(and #false #true) #false]
+  [#false 3]
+  [(or #true #false) #false])
+  "isThree"]
+[#false 3]
+[(< 2 3) (* 2 3 4)])
+(define x (+ 40 2))
+(define y "hallo")
+(> 2 4))
+]
