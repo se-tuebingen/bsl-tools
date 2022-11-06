@@ -1,0 +1,69 @@
+<html>
+
+<head>
+  <title>BSL Small Step Interpreter Tests</title>
+  <script>
+    let scriptNode = document.createElement('script');
+    if (window.location.href.startsWith('file://')) {
+      console.log('detected local dev testing, loading bsl_tools.js from dist');
+      scriptNode.src = '../../dist/bsl_tools.js';
+    } else {
+      scriptNode.src = 'bsl_tools.js';
+    }
+    document.getElementsByTagName('head')[0].appendChild(scriptNode);
+  </script>
+  <style>
+    h2,
+    h3 {
+      text-align: center;
+    }
+
+    h2,
+    h3 {
+      margin-top: 7vh;
+    }
+
+    h3 {
+      font-size: 16pt;
+    }
+  </style>
+</head>
+
+  <body>
+    <h2>Small-Step-Interpreter-Stepper for Racket</h2>
+    <h3>FUN Example #1</h3>
+    <stepper>
+      (define (f x) (+ x 2))
+      (f 3)
+    </stepper>
+    <h3>FUN Example #2</h3>
+    <stepper>
+      (define y 20)
+      (define (f x) (+ x 2))
+      (f y)
+    </stepper>
+    <h3>FUN Example #3</h3>
+    <stepper>
+      (define y 40)
+      (define (f x) (+ x y))
+      (f 3)
+    </stepper>
+    <h3>FUN Example #4</h3>
+    <stepper>
+      (define y 40)
+      (define (f x y) (+ x y))
+      (f 3 2)
+    </stepper>
+
+          <!--(define x (cond [#true 3]))-->
+<!--
+-->
+   <!-- <h2>Error Tests</h2>
+    <h3>Call without defined function</h3>
+    <stepper>
+      (call 1 2 3)
+    </stepper>
+
+  </body>
+
+</html>
