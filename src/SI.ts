@@ -373,7 +373,7 @@ export function step(
       }
     } else {
       console.log("step: env:" + JSON.stringify(env));
-      const substRed: BSL_AST.expr | Error = substConst(r, env);
+      const substRed: BSL_AST.expr | SI_STRUCT.Value| Error = substConst(r, env);
       if (substRed instanceof Error) {
         return substRed;
       } else {
@@ -416,7 +416,7 @@ export function step(
         return Error("step: cond is not applicable");
       }
     } else {
-      const substRed: BSL_AST.expr | Error = substConst(r, env);
+      const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(r, env);
       if (substRed instanceof Error) {
         return substRed;
       } else {
@@ -428,7 +428,7 @@ export function step(
       }
     }
   } else if (SI_STRUCT.isNameRedex(r)) {
-    const substRed: BSL_AST.expr | Error = substConst(r, env);
+    const substRed: BSL_AST.expr| SI_STRUCT.Value | Error = substConst(r, env);
     if (substRed instanceof Error) {
       return substRed;
     } else {
@@ -686,7 +686,7 @@ function cond(
 function substConst(
   r: SI_STRUCT.Redex,
   env: SI_STRUCT.Environment
-): BSL_AST.expr | Error {
+): BSL_AST.expr | SI_STRUCT.Value | Error {
   if (SI_STRUCT.isCallRedex(r)) {
     // get the identifier argument
     const idLst: SI_STRUCT.Id[] = r.args.filter((el) =>
@@ -754,11 +754,7 @@ function substConst(
     if (value instanceof Error) {
       return value;
     } else {
-      let newLit: BSL_AST.Literal = {
-        type: BSL_AST.Production.Literal,
-        value: value,
-      };
-      return newLit;
+      return value;
     }
   } else {
     return Error("substConst: redex is not a call or cond or name");
