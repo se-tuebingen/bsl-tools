@@ -3,3 +3,4 @@ tests/scribble/output/**
 tests/javascript/bsl_tools.js
 tests/scribble/bsl_tools.js
 tests/scribble/bsl_tools.rkt
+dist/bsl_tools.js
