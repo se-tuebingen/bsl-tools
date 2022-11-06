@@ -135,8 +135,9 @@ export type Value =
   | number
   | string
   | boolean
-  | `'()` /*| FunValue/*| Closure | StructValue*/;
-export type EnvValue = Value | FunDef /* | StructDef*/;
+  | `'()` 
+  | BSL_AST.StructValue/*| FunValue/*| Closure */;
+export type EnvValue = Value | FunDef | StructDef;
 export interface Id {
   type: Production.Id;
   symbol: string;
@@ -148,7 +149,7 @@ export interface FunDef {
 }
 export interface StructDef {
   type: Production.StructDef;
-  params: BSL_AST.Name[];
+  properties: BSL_AST.Name[];
 }
 //######## OneRule(s) ########a
 export interface Prim {
@@ -271,12 +272,16 @@ export function isConst(obj: any): obj is Const {
 export function isKong(obj: any): obj is Kong {
   return obj.type === Production.Kong;
 }
+export function isStructValue(obj: any): obj is BSL_AST.StructValue {
+  return obj.type === Production.StructValue;
+}
 export function isValue(obj: any): obj is Value {
   return (
     typeof obj === "number" ||
     typeof obj === "string" ||
     typeof obj === "boolean" ||
-    obj === `'()`
+    obj === `'()` ||
+    isStructValue(obj)
   ); //|| isClosure(obj);
 }
 export function isFunDef(obj: any): obj is FunDef {

@@ -159,7 +159,40 @@ export function calculateDefSteps(
       }
     }
   } else {
-    return Error("calculateDefSteps: struct definition not defined");
+    const binding = def.binding;
+    const properties = def.properties;
+    // add StructDef to environment
+    const structDef: SI_STRUCT.StructDef = {
+      type: SI_STRUCT.Production.StructDef,
+      properties: properties,
+    };
+    const newEnv = addToEnv(env, binding.symbol, structDef);
+    if (newEnv instanceof Error) {
+      return newEnv;
+    } else {
+      // add predicate function, select function and make function to environment
+      // const makeFunName = "make-" + binding.symbol;
+      // const makeFunDef: SI_STRUCT.FunDef = {
+      //   type: SI_STRUCT.Production.FunDef,
+      //   params: properties,
+      //   body: {
+      //     type: BSL_AST.Production.Literal,
+      //     value: { type: SI_STRUCT.Production.Struct, properties: properties },
+      //   },
+      // };
+      // const predFunName = "pred-" + binding.symbol;
+      // const predFunDef: SI_STRUCT.FunDef = {
+      //   type: SI_STRUCT.Production.FunDef,
+
+      const defStep: SI_STRUCT.DefinitionStep = {
+        type: SI_STRUCT.Production.DefinitionStep,
+        env: newEnv,
+        evalSteps: [],
+        originalDefOrExpr: def,
+        result: def,
+      };
+      return defStep;
+    }
   }
 }
 // calculateExprSteps
@@ -373,7 +406,10 @@ export function step(
       }
     } else {
       console.log("step: env:" + JSON.stringify(env));
-      const substRed: BSL_AST.expr | SI_STRUCT.Value| Error = substConst(r, env);
+      const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(
+        r,
+        env
+      );
       if (substRed instanceof Error) {
         return substRed;
       } else {
@@ -416,7 +452,10 @@ export function step(
         return Error("step: cond is not applicable");
       }
     } else {
-      const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(r, env);
+      const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(
+        r,
+        env
+      );
       if (substRed instanceof Error) {
         return substRed;
       } else {
@@ -428,7 +467,7 @@ export function step(
       }
     }
   } else if (SI_STRUCT.isNameRedex(r)) {
-    const substRed: BSL_AST.expr| SI_STRUCT.Value | Error = substConst(r, env);
+    const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(r, env);
     if (substRed instanceof Error) {
       return substRed;
     } else {
