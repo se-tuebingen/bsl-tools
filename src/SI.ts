@@ -429,7 +429,17 @@ export function step(
       } else if (SI_STRUCT.isStructFun(funDef)) {
         //decide which struct Rule to use
         if (SI_STRUCT.isMakeFun(funDef)) {
-          return Error("step: make is not implemented yet");
+          const structVal = makeStruct(r.name, funDef, args);
+          if (structVal instanceof Error) {
+            return structVal;
+          } else {
+            const makeStr: SI_STRUCT.StructMake = {
+              type: SI_STRUCT.Production.StructMake,
+              redex: r,
+              result: structVal,
+            };
+            return makeStr;
+          }
         } else if (SI_STRUCT.isPredFun(funDef)) {
           return Error("step: pred is not implemented yet");
         } else {
@@ -871,8 +881,30 @@ function substFun(
   }
 }
 
-//struct
-function structRule() {}
+//structRules
+function makeStruct(
+  name: BSL_AST.Name,
+  funDef: SI_STRUCT.MakeFun,
+  args: SI_STRUCT.Value[]
+): BSL_AST.StructValue | Error {
+  const params = funDef.structDef.properties;
+  if (params.length == args.length) {
+    const structVal: BSL_AST.StructValue = {
+      type: BSL_AST.Production.StructValue,
+      structDef: name,
+      properties: args.map((arg) => {
+        const lit: BSL_AST.Literal = {
+          type: BSL_AST.Production.Literal,
+          value: arg,
+        };
+        return lit;
+      }),
+    };
+    return structVal;
+  } else {
+    return Error("makeStruct: number of arguments doesn't match");
+  }
+}
 
 //substExpr
 //substitute all names in an expression with the values of a given environment

@@ -21,6 +21,7 @@ export enum Production {
   ProgRule = "ProgRule",
   Const = "Const",
   Fun = "Fun",
+  StructMake = "StructMake",
   Kong = "Kong",
   FunDef = "FunEnv",
   StructDef = "StructDef",
@@ -207,7 +208,12 @@ export interface Fun {
   redex: CallRedex;
   result: BSL_AST.expr;
 }
-export type OneRule = Prim | CondRule | Const | Fun; /*| ProgRule*/
+export interface StructMake {
+  type: Production.StructMake;
+  redex: CallRedex;
+  result: Value;
+}
+export type OneRule = Prim | CondRule | Const | Fun | StructMake; /*| ProgRule*/
 
 // ####### ProgStepRule(s) ########
 export interface Kong {
@@ -275,7 +281,8 @@ export function isOneRule(obj: any): obj is OneRule {
     obj.type === Production.CondFalse ||
     obj.type === Production.CondError ||
     obj.type === Production.Const ||
-    obj.type === Production.Fun
+    obj.type === Production.Fun ||
+    obj.type === Production.StructMake
   );
 }
 export function isPrim(obj: any): obj is Prim {
