@@ -441,7 +441,26 @@ export function step(
             return makeStr;
           }
         } else if (SI_STRUCT.isPredFun(funDef)) {
-          return Error("step: pred is not implemented yet");
+          const predVal = predStruct(r.name, funDef, args);
+          if (predVal instanceof Error) {
+            return predVal;
+          } else {
+            if (predVal) {
+              const predStr: SI_STRUCT.StructPredTrue = {
+                type: SI_STRUCT.Production.StructPredTrue,
+                redex: r,
+                result: predVal,
+              };
+              return predStr;
+            } else {
+              const predStr: SI_STRUCT.StructPredFalse = {
+                type: SI_STRUCT.Production.StructPredFalse,
+                redex: r,
+                result: predVal,
+              };
+              return predStr;
+            }
+          }
         } else {
           return Error("step: select is not implemented yet");
         }
@@ -906,6 +925,33 @@ function makeStruct(
   }
 }
 
+function predStruct(
+  name: BSL_AST.Name,
+  funDef: SI_STRUCT.PredFun,
+  args: SI_STRUCT.Value[]
+): boolean | Error {
+  const params = funDef.structDef.properties;
+  if (args.length != 1) {
+    return Error("predStruct: number of arguments doesn't match");
+  } else {
+    if (!BSL_AST.isStructValue(args[0])) {
+      return Error("predStruct: argument is not a struct value");
+    } else {
+      const structVal = args[0];
+      const structName = structVal.structDef.symbol.slice(5);
+      const predName = name.symbol.slice(0, name.symbol.length - 1);
+      if (structName == predName) {
+        if (params.length == structVal.properties.length) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+  }
+}
 //substExpr
 //substitute all names in an expression with the values of a given environment
 function substExpr(
