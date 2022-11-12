@@ -22,9 +22,11 @@ export enum Production {
   Const = "Const",
   Fun = "Fun",
   Kong = "Kong",
-  FunDef = "FunDef",
+  FunDef = "FunEnv",
   StructDef = "StructDef",
-  StructValue = "StructValue",
+  MakeFun = "MakeFun",
+  PredFun = "PredFun",
+  SelectFun = "SelectFun",
   Id = "Identifier",
 }
 export enum PrimNames {
@@ -137,7 +139,8 @@ export type Value =
   | boolean
   | `'()` 
   | BSL_AST.StructValue/*| FunValue/*| Closure */;
-export type EnvValue = Value | FunDef | StructDef;
+
+export type EnvValue = Value | FunDef | StructDef | StructFun;
 export interface Id {
   type: Production.Id;
   symbol: string;
@@ -151,6 +154,21 @@ export interface StructDef {
   type: Production.StructDef;
   properties: BSL_AST.Name[];
 }
+export type StructFun = MakeFun | PredFun | SelectFun;
+
+export interface MakeFun {  
+  type: Production.MakeFun;
+  structDef: StructDef;
+}
+export interface PredFun {
+  type: Production.PredFun;
+  structDef: StructDef;
+}
+export interface SelectFun {
+  type: Production.SelectFun;
+  structDef: StructDef;
+}
+
 //######## OneRule(s) ########a
 export interface Prim {
   type: Production.Prim;
@@ -272,16 +290,14 @@ export function isConst(obj: any): obj is Const {
 export function isKong(obj: any): obj is Kong {
   return obj.type === Production.Kong;
 }
-export function isStructValue(obj: any): obj is BSL_AST.StructValue {
-  return obj.type === Production.StructValue;
-}
+
 export function isValue(obj: any): obj is Value {
   return (
     typeof obj === "number" ||
     typeof obj === "string" ||
     typeof obj === "boolean" ||
     obj === `'()` ||
-    isStructValue(obj)
+    BSL_AST.isStructValue(obj)
   ); //|| isClosure(obj);
 }
 export function isFunDef(obj: any): obj is FunDef {
@@ -292,4 +308,20 @@ export function isStructDef(obj: any): obj is StructDef {
 }
 export function isId(obj: any): obj is Id {
   return obj.type === Production.Id;
+}
+export function isStructFun(obj: any): obj is StructFun {
+  return (
+    obj.type === Production.MakeFun ||
+    obj.type === Production.PredFun ||
+    obj.type === Production.SelectFun
+  );
+}
+export function isMakeFun(obj: any): obj is MakeFun {
+  return obj.type === Production.MakeFun;
+}
+export function isPredFun(obj: any): obj is PredFun {
+  return obj.type === Production.PredFun;
+}
+export function isSelectFun(obj: any): obj is SelectFun {
+  return obj.type === Production.SelectFun;
 }

@@ -78,7 +78,7 @@ export function calculateProgStep(
     }
   }
 }
-//prog
+//calculateDefSteps
 //definition, Environment => SI_STRUCT.DefStep
 export function calculateDefSteps(
   def: BSL_AST.definition,
@@ -166,32 +166,57 @@ export function calculateDefSteps(
       type: SI_STRUCT.Production.StructDef,
       properties: properties,
     };
-    const newEnv = addToEnv(env, binding.symbol, structDef);
+    let newEnv = addToEnv(env, binding.symbol, structDef);
+    //check if newEnv is an Error before defining structFuns
     if (newEnv instanceof Error) {
       return newEnv;
     } else {
-      // add predicate function, select function and make function to environment
-      // const makeFunName = "make-" + binding.symbol;
-      // const makeFunDef: SI_STRUCT.FunDef = {
-      //   type: SI_STRUCT.Production.FunDef,
-      //   params: properties,
-      //   body: {
-      //     type: BSL_AST.Production.Literal,
-      //     value: { type: SI_STRUCT.Production.Struct, properties: properties },
-      //   },
-      // };
-      // const predFunName = "pred-" + binding.symbol;
-      // const predFunDef: SI_STRUCT.FunDef = {
-      //   type: SI_STRUCT.Production.FunDef,
-
-      const defStep: SI_STRUCT.DefinitionStep = {
-        type: SI_STRUCT.Production.DefinitionStep,
-        env: newEnv,
-        evalSteps: [],
-        originalDefOrExpr: def,
-        result: def,
+      const makeFunName = `make-${binding.symbol}`;
+      const makeFunDef: SI_STRUCT.MakeFun = {
+        type: SI_STRUCT.Production.MakeFun,
+        structDef: structDef,
       };
-      return defStep;
+      const predFunName = `${binding.symbol}?`;
+      const predFunDef: SI_STRUCT.PredFun = {
+        type: SI_STRUCT.Production.PredFun,
+        structDef: structDef,
+      };
+      // reserve all possible struct-property names
+      const selectFunNames: string[] = [];
+      properties.forEach((property) => {
+        selectFunNames.push(`${binding.symbol}-${property.symbol}`);
+      });
+      const selectFunDef: SI_STRUCT.SelectFun = {
+        type: SI_STRUCT.Production.SelectFun,
+        structDef: structDef,
+      };
+      const addList: [string, SI_STRUCT.StructFun][] = [
+        [makeFunName, makeFunDef],
+        [predFunName, predFunDef],
+      ];
+      selectFunNames.forEach((name) => {
+        addList.push([name, selectFunDef]);
+      });
+      // add all structFuns to environment
+      addList.forEach((entry) => {
+        if (newEnv instanceof Error) {
+          return newEnv;
+        } else {
+          newEnv = addToEnv(newEnv, entry[0], entry[1]);
+        }
+      });
+      if (newEnv instanceof Error) {
+        return newEnv;
+      } else {
+        const defStep: SI_STRUCT.DefinitionStep = {
+          type: SI_STRUCT.Production.DefinitionStep,
+          env: newEnv,
+          evalSteps: [],
+          originalDefOrExpr: def,
+          result: def,
+        };
+        return defStep;
+      }
     }
   }
 }
@@ -369,14 +394,12 @@ export function step(
     const allArgsAreValues = r.args.every((arg) => {
       return SI_STRUCT.isValue(arg);
     });
-
     if (allArgsAreValues) {
       const args: SI_STRUCT.Value[] = r.args as SI_STRUCT.Value[];
-      console.log("step: CallRedex has no names");
       //check if r.name is primitive or in env
-      const funDef = lookupFun(env, r.name.symbol);
+      const funDef = lookupEnv(env, r.name.symbol);
+      //check if name is in Primitive List
       if (Object.values<string>(SI_STRUCT.PrimNames).includes(r.name.symbol)) {
-        //primitive
         const primResult = prim(r.name, args);
         if (SI_STRUCT.isValue(primResult)) {
           return {
@@ -387,9 +410,10 @@ export function step(
         } else {
           return Error("step: prim is not applicable");
         }
+        //if name => function
       } else if (SI_STRUCT.isFunDef(funDef)) {
-        //fun
         console.log("step: env: " + JSON.stringify(funDef) + " args: " + args);
+        //check if funDef is a defined function or a struct-predefined function
         //replace names in body with args
         const newExpr = substFun(r, env);
         if (newExpr instanceof Error) {
@@ -842,6 +866,7 @@ function structRule() {}
 
 //substExpr
 
+//substitute all names in an expression with the values of a given environment
 function substExpr(
   expr: BSL_AST.expr,
   env: SI_STRUCT.Environment
@@ -909,6 +934,7 @@ function substExpr(
 
 // ####### Environment Functions #######
 
+//adds a Value to an Environment
 function addToEnv(
   env: SI_STRUCT.Environment,
   name: string,

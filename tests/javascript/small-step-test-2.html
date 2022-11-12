@@ -54,9 +54,22 @@
       (define (f x y) (+ x y))
       (f 3 2)
     </stepper>
-    <h3>Struct Example #1</h3>
+    <h3>Struct Example #1 (MAKE)</h3>
     <stepper>
       (define-struct pos (x y))
+      (make-pos 3 4)
+    </stepper>
+    <h3>Struct Example #2 (SELECT)</h3>
+    <stepper>
+      (define-struct pos (x y))
+      (define p (make-pos 3 4))
+      (pos-x p)
+    </stepper>
+    <h3>Struct Example #3 (PRED)</h3>
+    <stepper>
+      (define-struct pos (x y))
+      (define p (make-pos 3 4))
+      (pos? p)
     </stepper>
    <!-- <h2>Error Tests</h2>
     <h3>Call without defined function</h3>

@@ -34,8 +34,8 @@ export interface StructDef{
 };
 export interface StructValue{
     type: Production.StructValue;
-    binding: Name;
-    properties: Literal [];
+    structDef: Name;
+    properties: Literal[];
 };
 
 export type expr = Call | Cond | Name | Literal;
