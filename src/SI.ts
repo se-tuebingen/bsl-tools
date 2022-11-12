@@ -425,6 +425,16 @@ export function step(
             result: newExpr,
           };
         }
+        //if name => structFunction
+      } else if (SI_STRUCT.isStructFun(funDef)) {
+        //decide which struct Rule to use
+        if (SI_STRUCT.isMakeFun(funDef)) {
+          return Error("step: make is not implemented yet");
+        } else if (SI_STRUCT.isPredFun(funDef)) {
+          return Error("step: pred is not implemented yet");
+        } else {
+          return Error("step: select is not implemented yet");
+        }
       } else {
         return Error("step: name is neither primitive nor a defined function");
       }
@@ -865,7 +875,6 @@ function substFun(
 function structRule() {}
 
 //substExpr
-
 //substitute all names in an expression with the values of a given environment
 function substExpr(
   expr: BSL_AST.expr,
