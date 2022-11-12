@@ -7,6 +7,7 @@ export enum Production {
   CondOption = 'Cond-Option',
   Symbol = 'Symbol',
   Literal = 'Literal Value',
+  StructValue = 'Struct Value',
   Number = 'Number'
 }
 
@@ -31,6 +32,12 @@ export interface StructDef{
     binding: Name;
     properties: Name[];
 };
+export interface StructValue{
+    type: Production.StructValue;
+    binding: Name;
+    properties: Literal [];
+};
+
 export type expr = Call | Cond | Name | Literal;
 
 export interface Call{
@@ -53,7 +60,7 @@ export interface Name{
 };
 export interface Literal {
     type: Production.Literal,
-    value: boolean | string | number | `'()`;
+    value: boolean | string | number | `'()` | StructValue;
 }
 
 // runtime type checking
@@ -87,4 +94,7 @@ export function isLiteral(obj: any): obj is Literal {
 }
 export function isNumber(obj: any): obj is number {
   return obj.type === Production.Number;
+}
+export function isStructValue(obj: any): obj is StructValue {
+  return obj.type === Production.StructValue;
 }
