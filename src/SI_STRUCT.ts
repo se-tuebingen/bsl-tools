@@ -230,7 +230,7 @@ export interface StructPredFalse {
 export interface StructSelect {
   type: Production.StructSelect;
   redex: CallRedex;
-  result: Value;
+  result: BSL_AST.expr | Value;
 }
 
 export type OneRule = Prim | CondRule | Const | Fun | StructRule; /*| ProgRule*/

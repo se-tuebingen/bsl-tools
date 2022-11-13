@@ -433,12 +433,12 @@ export function step(
           if (structVal instanceof Error) {
             return structVal;
           } else {
-            const makeStr: SI_STRUCT.StructMake = {
+            const makeRule: SI_STRUCT.StructMake = {
               type: SI_STRUCT.Production.StructMake,
               redex: r,
               result: structVal,
             };
-            return makeStr;
+            return makeRule;
           }
         } else if (SI_STRUCT.isPredFun(funDef)) {
           const predVal = predStruct(r.name, funDef, args);
@@ -446,23 +446,33 @@ export function step(
             return predVal;
           } else {
             if (predVal) {
-              const predStr: SI_STRUCT.StructPredTrue = {
+              const predRule: SI_STRUCT.StructPredTrue = {
                 type: SI_STRUCT.Production.StructPredTrue,
                 redex: r,
                 result: predVal,
               };
-              return predStr;
+              return predRule;
             } else {
-              const predStr: SI_STRUCT.StructPredFalse = {
+              const predRule: SI_STRUCT.StructPredFalse = {
                 type: SI_STRUCT.Production.StructPredFalse,
                 redex: r,
                 result: predVal,
               };
-              return predStr;
+              return predRule;
             }
           }
         } else {
-          return Error("step: select is not implemented yet");
+          const selectVal = selectStruct(r.name, funDef, args);
+          if (selectVal instanceof Error) {
+            return selectVal;
+          } else {
+            const selectRule: SI_STRUCT.StructSelect = {
+              type: SI_STRUCT.Production.StructSelect,
+              redex: r,
+              result: selectVal,
+            };
+            return selectRule;
+          }
         }
       } else {
         return Error("step: name is neither primitive nor a defined function");
@@ -938,9 +948,11 @@ function predStruct(
       return Error("predStruct: argument is not a struct value");
     } else {
       const structVal = args[0];
-      const structName = structVal.structDef.symbol.slice(5);
-      const predName = name.symbol.slice(0, name.symbol.length - 1);
-      if (structName == predName) {
+      //extract struct in make-struct
+      const structName = structVal.structDef.symbol.split("-")[1];
+      //extract struct in struct?
+      const predName = name.symbol.split("?")[0];
+      if (structName === predName) {
         if (params.length == structVal.properties.length) {
           return true;
         } else {
@@ -948,6 +960,51 @@ function predStruct(
         }
       } else {
         return false;
+      }
+    }
+  }
+}
+
+function selectStruct(
+  name: BSL_AST.Name,
+  funDef: SI_STRUCT.SelectFun,
+  args: SI_STRUCT.Value[]
+): BSL_AST.expr | SI_STRUCT.Value | Error {
+  //check if the number of arguments is 1
+  if (args.length != 1) {
+    return Error("selectStruct: number of arguments doesn't match");
+  } else {
+    //check if the argument is a struct value
+    if (!BSL_AST.isStructValue(args[0])) {
+      return Error("selectStruct: argument is not a struct value");
+    } else {
+      const structVal: BSL_AST.StructValue = args[0];
+      //extract struct in make-struct
+      const structName = structVal.structDef.symbol.split("-")[1];
+      //extract struct in struct-property
+      const selectName = name.symbol.split("-")[0];
+      const property: string = name.symbol.split("-")[1];
+      //check if the struct name is the same
+      if (structName !== selectName) {
+        return Error("selectStruct: struct name doesn't match");
+      } else {
+        const params: string[] = funDef.structDef.properties.map(
+          (param) => param.symbol
+        );
+        //check if the property is in the struct
+        if (params.includes(property)) {
+          const index = params.indexOf(property);
+          const res: BSL_AST.expr = structVal.properties[index];
+          //check if the property is a literal
+          //reduce to value
+          if (BSL_AST.isLiteral(res)) {
+            return res.value;
+          } else {
+            return structVal.properties[index];
+          }
+        } else {
+          return Error("selectStruct: property doesn't exist");
+        }
       }
     }
   }
