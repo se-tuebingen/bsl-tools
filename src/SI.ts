@@ -286,56 +286,45 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
   if (BSL_AST.isCall(expr)) {
     const name = expr.name;
     const args = expr.args;
-    const valueLst: SI_STRUCT.Value[] = [];
-    let recExpr: BSL_AST.expr = {} as BSL_AST.expr;
-    const exprLst: BSL_AST.expr[] = [];
-    // local function split into value and expr
-    // => Either(Value[], (Value[],expr, expr[]))
-    // find position with map
-    let posFound = false;
-    args.map((arg) => {
-      //if the argument is a value, add it to the value list
-      if (!posFound && BSL_AST.isLiteral(arg)) {
-        valueLst.push(arg.value);
-        //else if the argument is neither a value nor a name, set the position
-      } else if (!posFound) {
-        posFound = true;
-        recExpr = arg;
-        // else the argument is an expression, add it to the expression list
-      } else {
-        exprLst.push(arg);
-      }
-    });
-    // if there is no context, all arguments are values and the result is a value
-    if (posFound == false) {
+    console.warn("### splitting call with args: ", expr.args);
+
+    if(args.every(x => BSL_AST.isLiteral(x))) {
+      console.warn("### al arguments are values");
+      // all arguments are values, no need to recurse: found redex
       const redex: SI_STRUCT.CallRedex = {
         type: SI_STRUCT.Production.CallRedex,
         name: name,
-        args: valueLst,
+        args: args.map(a => (a as BSL_AST.Literal).value),
       };
       return {
         type: SI_STRUCT.Production.Split,
         redex: redex,
         context: hole,
       };
-      // else there is a context and the result is an expression
+    }
+    // some arguments still need evaluation, recurse further
+    console.warn("#### recursing");
+    const firstRedexIndex = args.findIndex(x => !BSL_AST.isLiteral(x));
+    const valueLst = args.slice(0,firstRedexIndex) as BSL_AST.Literal[];
+    const recExpr = args[firstRedexIndex];
+    const exprLst = args.slice(firstRedexIndex + 1);
+    console.warn(firstRedexIndex, valueLst, recExpr, exprLst);
+
+    const splitResult = split(recExpr);
+    if (SI_STRUCT.isSplit(splitResult)) {
+      return {
+        type: SI_STRUCT.Production.Split,
+        redex: splitResult.redex,
+        context: {
+          type: SI_STRUCT.Production.AppContext,
+          op: name,
+          values: valueLst.map(x => x.value),
+          ctx: splitResult.context,
+          args: exprLst,
+        },
+      };
     } else {
-      const splitResult = split(recExpr);
-      if (SI_STRUCT.isSplit(splitResult)) {
-        return {
-          type: SI_STRUCT.Production.Split,
-          redex: splitResult.redex,
-          context: {
-            type: SI_STRUCT.Production.AppContext,
-            op: name,
-            values: valueLst,
-            ctx: splitResult.context,
-            args: exprLst,
-          },
-        };
-      } else {
-        return splitResult;
-      }
+      return splitResult;
     }
   } else if (BSL_AST.isCond(expr)) {
     const clause = expr.options[0];
@@ -391,6 +380,7 @@ export function step(
   // if it has, lookup in environment and construct Rule (Const, Fun, or Struct)
   if (SI_STRUCT.isCallRedex(r)) {
     //check if all args do not contain names
+    // TODO: refactor to simple function application
     const allArgsAreValues = r.args.every((arg) => {
       return SI_STRUCT.isValue(arg);
     });
