@@ -38,11 +38,11 @@ function processHolesRecursive(n: node): node {
   // runtime type checking
   const p = n.production;
   if(!p || typeof(p) !== 'string') {
-    throw `${JSON.stringify(n, undefined, 2).replaceAll('\n', '<br>')} has wrong structure, production needs to be a string`;
+    throw `${renderErronousJSON(n)}<br> has wrong structure, production needs to be a string`;
   }
   const c = n.code;
   if(!c || typeof(c) !== 'string') {
-    throw `${JSON.stringify(n, undefined, 2).replaceAll('\n', '<br>')} has wrong structure, code needs to be a string`;
+    throw `${renderErronousJSON(n)}<br>  has wrong structure, code needs to be a string`;
   }
   if (!n.holes) n.holes = [];
 
@@ -61,7 +61,7 @@ function processHolesRecursive(n: node): node {
       code = `${code}${codeParts[i]}`;
       const content = n.holes[holes.length] as any;
       if(!content) {
-        throw `${JSON.stringify(n, undefined, 2).replaceAll('\n', '<br>')} has wrong structure: less holes than marked with || in the code`;
+        throw `${renderErronousJSON(n)}<br> has wrong structure: less holes than marked with || in the code`;
       }
       holes.push({start: start, end: code.length, content: processHolesRecursive(content)});
     }
@@ -73,4 +73,14 @@ function processHolesRecursive(n: node): node {
     holes: holes
   };
 
+}
+
+function renderErronousJSON(n: node): string {
+  const code = JSON.stringify(n, undefined, 2);
+  return `
+    <textarea rows="${code.split('\n').length}"
+              cols="${code.split('\n').map(l => l.length).reduce((x,y) => x > y ? x : y)}"
+              readOnly="true"
+              resizable="false">${code}</textarea>
+  `;
 }
