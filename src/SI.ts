@@ -380,10 +380,7 @@ export function step(
   // if it has, lookup in environment and construct Rule (Const, Fun, or Struct)
   if (SI_STRUCT.isCallRedex(r)) {
     //check if all args do not contain names
-    // TODO: refactor to simple function application
-    const allArgsAreValues = r.args.every((arg) => {
-      return SI_STRUCT.isValue(arg);
-    });
+    const allArgsAreValues = r.args.every(SI_STRUCT.isValue);
     if (allArgsAreValues) {
       const args: SI_STRUCT.Value[] = r.args as SI_STRUCT.Value[];
       //check if r.name is primitive or in env
@@ -647,94 +644,44 @@ export function prim(
   name: BSL_AST.Name,
   args: SI_STRUCT.Value[]
 ): SI_STRUCT.Value | Error {
-  // + - *
-  if (name.symbol === "+") {
-    let n = 0;
-    args.forEach((el) => {
-      if (typeof el == "number") {
-        n += el;
-      } else {
-        return Error("error: argument is not a number: " + el);
-      }
-    });
-    return n;
-  } else if (name.symbol === "*") {
-    let n = 1;
-    args.forEach((el) => {
-      if (typeof el == "number") {
-        n *= el;
-      } else {
-        return Error("error: argument is not a number: " + el);
-      }
-    });
-    return n;
-  } else if (name.symbol === "-") {
-    let n = args[0];
-    for (let i = 1; i < args.length; i++) {
-      let el = args[i];
-      if (typeof el == "number" && typeof n == "number") {
-        n -= el;
-      } else {
-        return Error("error: argument is not a number: " + args[i]);
-      }
-    }
-    return n;
-  } else if (name.symbol === "/") {
-    let n = args[0];
-    for (let i = 1; i < args.length; i++) {
-      let el = args[i];
-      if (typeof n == "number" && typeof el == "number" && el != 0) {
-        n /= el;
-      } else if (el == 0) {
-        return Error("error: division by zero");
-      } else {
-        return Error("error: argument is not a number: " + el);
-      }
-    }
-    return n;
+  // + - * /
+  if(["+", "*", "-", "/"].includes(name.symbol) &&
+     !args.every(a => typeof a === "number")) {
+    const firstOffender = args.find(a => typeof a != "number");
+    return Error(`error: argument is not a number ${firstOffender}`);
+  }
+  switch(name.symbol) {
+    case "+":
+      return args.reduce((x,y) => (x as number) + (y as number));
+    case "*":
+      return args.reduce((x,y) => (x as number) * (y as number));
+    case "-":
+      return args.reduce((x,y) => (x as number) - (y as number));
+    case "/":
+      if(!args.slice(1).every(a => a != 0)) return Error("error: division by zero");
+      return args.reduce((x,y) => (x as number) / (y as number));
+    default:
   }
   // and, or, not
-  else if (name.symbol === "and") {
-    if (args.every((el) => typeof el == "boolean")) {
-      if (args.length >= 2) {
-        if (args.every((el) => el)) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return Error(`prim: ${name.symbol} needs at least two arguments`);
-      }
-    } else {
-      return Error("prim: 'and' needs boolean arguments");
-    }
-  } else if (name.symbol === "or") {
-    if (args.every((el) => typeof el == "boolean")) {
-      if (args.length >= 2) {
-        if (args.some((el) => el)) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return Error("prim: 'or' needs at least two arguments");
-      }
-    } else {
-      return Error("prim: 'or' needs boolean arguments");
-    }
-  } else if (name.symbol === "not") {
-    if (typeof args[0] == "boolean") {
-      if (args.length == 1) {
-        return !args[0];
-      } else {
-        return Error("prim: 'not' needs exactly one argument");
-      }
-    } else {
-      return Error("prim: 'not' needs boolean argument");
-    }
+  if(["and", "or", "not"].includes(name.symbol) &&
+     !args.every(a => typeof a === "boolean")) {
+    const firstOffender = args.find(a => typeof a != "boolean");
+    return Error(`error: argument is not a boolean ${firstOffender}`);
+  }
+  switch(name.symbol) {
+    case "and":
+      if(args.length < 2) return Error("prim: and needs at least two arguments");
+      return args.every(x => x);
+    case "or":
+      if(args.length < 2) return Error("prim: or needs at least two arguments");
+      return args.some(x => x);
+    case "not":
+      if(args.length != 1) return Error("prim: not needs exactly one argument");
+      return !args[0];
+    default:
   }
   // less than and greater than, to test HTML escaping
-  else if (["<", ">", "<=", ">="].includes(name.symbol)) {
+  if (["<", ">", "<=", ">="].includes(name.symbol)) {
     if (args.length !== 2) {
       return Error(`prim: ${name.symbol} needs exactly two arguments`);
     }
