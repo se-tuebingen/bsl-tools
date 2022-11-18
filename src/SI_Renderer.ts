@@ -58,13 +58,7 @@ export function setUpStepperGui(program:BSL_AST.program, el: HTMLElement): void 
     // calculate Steps
     const expr =  program[0] as BSL_AST.expr;
     console.log("expression", expr);
-    const emptyStepper: SI_STRUCT.Stepper = {
-        type: SI_STRUCT.Production.Stepper,
-        root: el,
-        originProgram: program,
-        stepperTree: [],
-    };
-    const stepper = calculateProgram(program, emptyStepper);
+    const stepper = calculateProgram(program);
     if (stepper instanceof Error) {
       throw stepper;
     }
@@ -147,14 +141,14 @@ function setCharPxWidth(el: HTMLElement): void {
 
 // main function
 function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): string{
-    const stepperTree = stepper.stepperTree;
+    const progSteps = stepper.progSteps;
 
     const str =
     `<div class="stepper">
 
        <div class="box environment">
          <div class="boxlabel">${dictionary[lang]['environment']}</div>
-         ${stepperTree.map(renderDefinition).join('')}
+         ${progSteps.map(renderDefinition).join('')}
        </div>
 
        <div class="box expression-steps"
@@ -170,10 +164,10 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
          </div>
        </div>
 
-       ${stepperTree.map((el, i) => renderEvalSteps(el, i, lang)).join('')}
+       ${progSteps.map((el, i) => renderEvalSteps(el, i, lang)).join('')}
 
        <div class="box expression-steps"
-            data-progstep="${stepperTree.length}"
+            data-progstep="${progSteps.length}"
             data-visible="false">
          <div class="boxlabel">${dictionary[lang]['current evaluation']}</div>
          <div class="step"
@@ -188,7 +182,7 @@ function renderStepper(stepper: SI_STRUCT.Stepper, lang: implementedLanguage): s
 
        <div class="box program">
          <div class="boxlabel">${dictionary[lang]['remaining program']}</div>
-         ${stepperTree.map(renderOriginalExpression).join('')}
+         ${progSteps.map(renderOriginalExpression).join('')}
        </div>
 
     </div>`;

@@ -3,35 +3,23 @@ import * as SI_STRUCT from "./SI_STRUCT";
 
 // calculateAllSteps (for the whole program)
 export function calculateProgram(
-  program: BSL_AST.program,
-  stepper: SI_STRUCT.Stepper
+  program: BSL_AST.program
 ): SI_STRUCT.Stepper | Error {
-  const copyProgram = JSON.parse(JSON.stringify(program));
   let env: SI_STRUCT.Environment = {};
-  while (copyProgram.length > 0) {
-    //program.forEach
-    let stepperTree: SI_STRUCT.ProgStep[] = stepper.stepperTree;
-    let defOrExpr = copyProgram.shift();
-    //NEW APPROACH
-    let progStep = calculateProgStep(defOrExpr, env);
-    if (progStep instanceof Error) {
-      return progStep;
-    } else {
-      env = progStep.env;
-      stepperTree.push(progStep);
-    }
-    console.log("progStep", progStep);
-    console.log("env", env);
-    stepper.stepperTree = stepperTree;
-  }
-  const newStepper: SI_STRUCT.Stepper = {
+  let progSteps: SI_STRUCT.ProgStep[] = [];
+  program.forEach(defOrExpr => {
+    const newStep = calculateProgStep(defOrExpr, env);
+    if(newStep instanceof Error) return newStep;
+    env = newStep.env;
+    progSteps.push(newStep);
+    console.log("progStep: ", newStep);
+    console.log("env:", env);
+  });
+  return {
     type: SI_STRUCT.Production.Stepper,
-    root: stepper.root,
-    originProgram: stepper.originProgram,
-    stepperTree: stepper.stepperTree,
+    originProgram: program,
+    progSteps: progSteps,
   };
-  //newStepper.stepperTree.map((step, i) => (step.currentStep = i));
-  return newStepper;
 }
 
 // calculate ProgStep

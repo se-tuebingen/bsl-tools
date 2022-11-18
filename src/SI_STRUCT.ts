@@ -49,9 +49,8 @@ export enum PrimNames {
 
 export interface Stepper {
   type: Production.Stepper;
-  root: HTMLElement;
   originProgram: BSL_AST.program;
-  stepperTree: ProgStep[];
+  progSteps: ProgStep[];
 }
 // ProgStep represents a line of code in a BSL program
 //  export interface ProgStep {
@@ -141,7 +140,7 @@ export type Value =
   | number
   | string
   | boolean
-  | `'()` 
+  | `'()`
   | BSL_AST.StructValue/*| FunValue/*| Closure */;
 
 export type EnvValue = Value | FunDef | StructDef | StructFun;
@@ -160,7 +159,7 @@ export interface StructDef {
 }
 export type StructFun = MakeFun | PredFun | SelectFun;
 
-export interface MakeFun {  
+export interface MakeFun {
   type: Production.MakeFun;
   structDef: StructDef;
 }
