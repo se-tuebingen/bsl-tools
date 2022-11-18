@@ -639,7 +639,6 @@ export function plug(
 }
 
 // ####### ONE RULE FUNCTIONS #######
-//TODO: refactor prim with map instead of for loop
 export function prim(
   name: BSL_AST.Name,
   args: SI_STRUCT.Value[]
