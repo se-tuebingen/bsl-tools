@@ -725,73 +725,62 @@ function substConst(
 ): BSL_AST.expr | SI_STRUCT.Value | Error {
   if (SI_STRUCT.isCallRedex(r)) {
     // get the identifier argument
-    const idLst: SI_STRUCT.Id[] = r.args.filter((el) =>
-      SI_STRUCT.isId(el)
-    ) as SI_STRUCT.Id[];
-    const id: SI_STRUCT.Id = idLst[0];
+    const id = r.args.find(SI_STRUCT.isId);
+    if(!id) return Error("id: could not find an identifier in argument list");
+    
     const value = lookupConst(env, id.symbol);
-    if (value instanceof Error) {
-      return value;
-    } else {
-      const newArgs: BSL_AST.expr[] = r.args.map((el) => {
-        if (SI_STRUCT.isId(el) && el.symbol === id.symbol) {
-          let newLit: BSL_AST.Literal = {
-            type: BSL_AST.Production.Literal,
-            value: value,
-          };
-          return newLit;
-        } else if (SI_STRUCT.isId(el)) {
-          let newName: BSL_AST.Name = {
-            type: BSL_AST.Production.Symbol,
-            symbol: el.symbol,
-          };
-          return newName;
-        } else {
-          let newLit: BSL_AST.Literal = {
-            type: BSL_AST.Production.Literal,
-            value: el,
-          };
-          return newLit;
-        }
-      });
-      return {
-        type: BSL_AST.Production.FunctionCall,
-        name: r.name,
-        args: newArgs,
-      };
-    }
-  } else if (SI_STRUCT.isCondRedex(r)) {
-    const name = r.options[0].condition;
-    if (BSL_AST.isName(name)) {
-      const value = lookupConst(env, name.symbol);
-      if (value instanceof Error) {
-        return value;
-      } else {
+    if (value instanceof Error) return value;
+
+    const newArgs: BSL_AST.expr[] = r.args.map((el) => {
+      if (SI_STRUCT.isId(el) && el.symbol === id.symbol) {
         let newLit: BSL_AST.Literal = {
           type: BSL_AST.Production.Literal,
           value: value,
         };
-        let newOpt: BSL_AST.Clause = {
-          type: BSL_AST.Production.CondOption,
-          condition: newLit,
-          result: r.options[0].result,
+        return newLit;
+      } else if (SI_STRUCT.isId(el)) {
+        let newName: BSL_AST.Name = {
+          type: BSL_AST.Production.Symbol,
+          symbol: el.symbol,
         };
-        let newCond: BSL_AST.Cond = {
-          type: BSL_AST.Production.CondExpression,
-          options: [newOpt],
+        return newName;
+      } else {
+        let newLit: BSL_AST.Literal = {
+          type: BSL_AST.Production.Literal,
+          value: el,
         };
-        return newCond;
+        return newLit;
       }
-    } else {
+    });
+    return {
+      type: BSL_AST.Production.FunctionCall,
+      name: r.name,
+      args: newArgs,
+    };
+  } else if (SI_STRUCT.isCondRedex(r)) {
+    const name = r.options[0].condition;
+    if (!BSL_AST.isName(name))
       return Error("substConst: condition is not a name");
-    }
+
+    const value = lookupConst(env, name.symbol);
+    if (value instanceof Error) return value;
+
+    const newLit: BSL_AST.Literal = {
+      type: BSL_AST.Production.Literal,
+      value: value,
+    };
+    const newOpt: BSL_AST.Clause = {
+      type: BSL_AST.Production.CondOption,
+      condition: newLit,
+      result: r.options[0].result,
+    };
+    const newCond: BSL_AST.Cond = {
+      type: BSL_AST.Production.CondExpression,
+      options: [newOpt],
+    };
+    return newCond;
   } else if (SI_STRUCT.isNameRedex(r)) {
-    const value = lookupConst(env, r.symbol);
-    if (value instanceof Error) {
-      return value;
-    } else {
-      return value;
-    }
+    return lookupConst(env, r.symbol);
   } else {
     return Error("substConst: redex is not a call or cond or name");
   }
