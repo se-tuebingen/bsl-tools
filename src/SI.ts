@@ -803,35 +803,25 @@ function substFun(
   env: SI_STRUCT.Environment
 ): BSL_AST.expr | Error {
   const funDef = lookupFun(env, r.name.symbol);
-  if (funDef instanceof Error) {
-    return funDef;
-  } else {
-    const params = funDef.params;
-    const body = funDef.body;
-    // 1. check if the number of arguments is equal to parameters (done)
-    // 2. check if the arguments are all literals and/or replace global constants (already done in step)
-    // 3. create a new environment with the parameters and the arguments (done)
-    if (r.args.length == params.length) {
-      let newEnv: SI_STRUCT.Environment = {};
-      params.map((param, i) => {
-        let tempEnv = addToEnv(
-          newEnv,
-          param.symbol,
-          r.args[i] as SI_STRUCT.Value
-        );
-        if (tempEnv instanceof Error) {
-          return tempEnv;
-        } else {
-          newEnv = tempEnv;
-        }
-      });
-      // 4. subst the body with the new environment
-      const newExpr = substExpr(body, newEnv);
-      return newExpr;
-    } else {
-      return Error("substFun: number of arguments doesn't match");
-    }
-  }
+  if (funDef instanceof Error) return funDef;
+
+  const params = funDef.params;
+  if (r.args.length != params.length)
+    return Error("substFun: number of arguments doesn't match");
+
+  let newEnv: SI_STRUCT.Environment = {};
+  params.forEach((param, i) => {
+    let tempEnv = addToEnv(
+      newEnv,
+      param.symbol,
+      r.args[i] as SI_STRUCT.Value
+    );
+    if (tempEnv instanceof Error) return tempEnv;
+    newEnv = tempEnv;
+  });
+  const body = funDef.body;
+  const newExpr = substExpr(body, newEnv);
+  return newExpr;
 }
 
 //structRules
