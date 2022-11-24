@@ -29,96 +29,127 @@
   </style>
 </head>
 
-  <body>
-    <h2>Small-Step-Interpreter-Stepper for Racket</h2>
-   <h3>First example</h3>
+<body>
+  <h2>Small-Step-Interpreter-Stepper for Racket</h2>
+  <div style="margin:100px;">
+    <h3>(Kong with) Prim</h3>
+    <h4>Example #1</h4>
     <stepper>
       (* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
     </stepper>
-    <h3>Second example</h3>
-    <stepper>
-      (+ 2 (+ (+ 9 8) 3)(- 5 9) 2)
-    </stepper>
-    <h3>Cond example #1</h3>
-    <stepper>
-      (cond [#true (+ 1 2)])
-    </stepper>
-    <h3>Cond example #2</h3>
-    <stepper>
-      (cond [#false "isThree"] [#true 3])
-    </stepper>
-    <h3>Cond example #3</h3>
-    <stepper>
-      (cond [(and #true #false) "isThree"]
-      [#false 3]
-      [(or #true #false) (* 2 3 4)])
-    </stepper>
-    <h3>Cond example #4</h3>
-    <stepper>
-      (cond [(and #true #false) "maybe"]
-      [#false 3]
-      [(or #false #false) (* 2 3 4)])
-    </stepper>
-    <h3>Cond example #5</h3>
-    <stepper>
-      (cond
-        [(cond
-        [(and #false #true) #false]
-        [#false 3]
-        [(or #true #false) #true])
-        "isThree"]
-      [#false 3]
-      [(or #true #false) (* 2 3 4)])
-    </stepper>
-    <h3>PROG example</h3>
-    <stepper>
-      (define x (+ 40 2))
-      (define y "hallo")
+    <h4>Example #2</h3>
+      <stepper>
+        (+ 2 (+ (+ 9 8) 3)(- 5 9) 2)
       </stepper>
-    <h3>CONST example</h3>
-    <stepper>
-      (define x (+ 200 30))
-      (define y (+ 2 3))
-      (+ x y 2)
-    </stepper>
-    <h3>CONST example #2</h3>
-    <stepper>
-      (define x (+ 4 5))
-      (define y (+ 2 3))
-      (+ x y)
-      (+ (* 2 x) (- y 4))
-    </stepper>
-    <h3>CONST example #3</h3>
-    <stepper>
-      (define x (+ 4 5))
-      x
-    </stepper>
-    <h3>CONST example #4</h3>
-    <stepper>
-      (define x (cond [#true #false]))
-      x
-    </stepper>
-    <h3>multiple expression example #1</h3>
-    <stepper>
-      (+ 2 4)
-      (+ 3 2)
-      (+ 4 5)
-    </stepper>
-    <h3>FUN Example #1</h3>
-    <stepper>
-      (define (f x) (+ x 2))
-      (f 3)
-    </stepper>
-    <h1>TO BE DELETED PROG EXAMPLE</h1>
-    <stepper lang="de">
-      "hallo"
-      2
-      '()
-    </stepper>
-          <!--(define x (cond [#true 3]))-->
-<!--
+      <h3>Prim-Function-Errors</h3>
+        <h4>Example #1</h4>
+        <stepper>
+          (/ 2 0)
+        </stepper>
+        <h4>Example #2</h4>
+        <stepper>
+          (+ 2 #false)
+        </stepper>
+        <h4>Example #3</h4>
+        <stepper>
+          (and #true 0)
+        </stepper>
+        <h4>Example #4</h4>
+        <stepper>
+          (not #true #false)
+        </stepper>
+        <h4>Example #5</h4>
+        <stepper>
+          (&gt;= #true #false)
+        </stepper>
+        </stepper>
+        <h3>(Kong with) Cond</h3>
+        <h4>Cond-True #1</h4>
+        <stepper>
+          (cond [#true (+ 1 2)])
+        </stepper>
+        <h4>Cond-True #2</h4>
+        <stepper>
+          (cond [(and #true #false) "isThree"]
+          [#false 3]
+          [(or #true #false) (* 2 3 4)])
+        </stepper>
+        <h4>Cond-True #3</h4>
+        <stepper>
+          (cond
+          [(cond
+          [(and #false #true) #false]
+          [#false 3]
+          [(or #true #false) #true])
+          "isThree"]
+          [#false 3]
+          [(or #true #false) (* 2 3 4)])
+        </stepper>
+        <h4>Cond-False</h4>
+        <stepper>
+          (cond [#false "isThree"] [#true 3])
+        </stepper>
+        <h4>Cond-Error</h4>
+        <stepper>
+          (cond [(and #true #false) "maybe"]
+          [#false 3]
+          [(or #false #false) (* 2 3 4)])
+        </stepper>
+        <h4>Cond-Error #2</h4>
+        <stepper>
+          (cond [2 "maybe"])
+        </stepper>
+        <h3>PROG example</h3>
+        <stepper>
+          (define x (+ 40 2))
+          (define y "hallo")
+        </stepper>
+        <h3>CONST example</h3>
+        <stepper>
+          (define x (+ 200 30))
+          (define y (+ 2 3))
+          (+ x y 2)
+        </stepper>
+        <h3>CONST example #2</h3>
+        <stepper>
+          (define x (+ 4 5))
+          (define y (+ 2 3))
+          (+ x y)
+          (+ (* 2 x) (- y 4))
+        </stepper>
+        <h3>CONST example #3</h3>
+        <stepper>
+          (define x (+ 4 5))
+          x
+        </stepper>
+        <h3>CONST example #4</h3>
+        <stepper>
+          (define x (cond [#true #false]))
+          x
+        </stepper>
+        <h3>multiple expression example #1</h3>
+        <stepper>
+          (+ 2 4)
+          (+ 3 2)
+          (+ 4 5)
+        </stepper>
+        <h3>FUN Example #1</h3>
+        <stepper>
+          (define (f x) (+ x 2))
+          (f 3)
+        </stepper>
+        <h1>TO BE DELETED PROG EXAMPLE</h1>
+        <stepper lang="de">
+          "hallo"
+          2
+          '()
+        </stepper>
+  </div>
+
+  <!--(define x (cond [#true 3]))-->
+  <!--
 -->
-   <!-- <h2>Error Tests</h2>
+  <!-- <h2>Error Tests</h2>
     <h3>Call without defined function</h3>
     <stepper>
       (call 1 2 3)
