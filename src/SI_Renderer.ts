@@ -611,7 +611,7 @@ function renderRuleInformation(rule: availableRules, kong: boolean):string {
 // ### rules ###
 // as taken from overview-reduction-and-equivalence.pdf, i.e. the script
 // to be displayed as reference
-type availableRules = 'Kong' | 'Fun' | 'Prim' | 'Const' | 'CondTrue' | 'CondFalse' | 'CondError' | 'StructMake' | 'StructSelect' | 'StructPredTrue' | 'StructPredFalse' | 'ProgRule';
+type availableRules = 'Kong' | 'Fun' | 'Prim' | 'PrimError' | 'Const' | 'CondTrue' | 'CondFalse' | 'CondError' | 'StructMake' | 'StructSelect' | 'StructPredTrue' | 'StructPredFalse' | 'ProgRule';
 const rules = {
   'Kong': {
     'name': `<cap>Kong</cap>`,
@@ -633,6 +633,14 @@ const rules = {
   },
   'Prim': {
     'name': `<cap>Prim</cap>`,
+    'text': `
+      <em>(name v<small>1</small> … v<small>n</small>) → v</em> falls
+      <em>name</em> eine primitive Funktion <em>f</em> ist und
+      <em>f(v<small>1</small> … v<small>n</small>) = v</em>
+    `
+  },
+  'PrimError': {
+    'name': `<cap>Prim</cap>-Error`,
     'text': `
       <em>(name v<small>1</small> … v<small>n</small>) → v</em> falls
       <em>name</em> eine primitive Funktion <em>f</em> ist und

@@ -7,9 +7,9 @@ export function calculateProgram(
 ): SI_STRUCT.Stepper | Error {
   let env: SI_STRUCT.Environment = {};
   let progSteps: SI_STRUCT.ProgStep[] = [];
-  program.forEach(defOrExpr => {
+  program.forEach((defOrExpr) => {
     const newStep = calculateProgStep(defOrExpr, env);
-    if(newStep instanceof Error) return newStep;
+    if (newStep instanceof Error) return newStep;
     env = newStep.env;
     progSteps.push(newStep);
     console.log("progStep: ", newStep);
@@ -276,13 +276,13 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
     const args = expr.args;
     console.warn("### splitting call with args: ", expr.args);
 
-    if(args.every(x => BSL_AST.isLiteral(x))) {
+    if (args.every((x) => BSL_AST.isLiteral(x))) {
       console.warn("### al arguments are values");
       // all arguments are values, no need to recurse: found redex
       const redex: SI_STRUCT.CallRedex = {
         type: SI_STRUCT.Production.CallRedex,
         name: name,
-        args: args.map(a => (a as BSL_AST.Literal).value),
+        args: args.map((a) => (a as BSL_AST.Literal).value),
       };
       return {
         type: SI_STRUCT.Production.Split,
@@ -292,8 +292,8 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
     }
     // some arguments still need evaluation, recurse further
     console.warn("#### recursing");
-    const firstRedexIndex = args.findIndex(x => !BSL_AST.isLiteral(x));
-    const valueLst = args.slice(0,firstRedexIndex) as BSL_AST.Literal[];
+    const firstRedexIndex = args.findIndex((x) => !BSL_AST.isLiteral(x));
+    const valueLst = args.slice(0, firstRedexIndex) as BSL_AST.Literal[];
     const recExpr = args[firstRedexIndex];
     const exprLst = args.slice(firstRedexIndex + 1);
     console.warn(firstRedexIndex, valueLst, recExpr, exprLst);
@@ -306,7 +306,7 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
         context: {
           type: SI_STRUCT.Production.AppContext,
           op: name,
-          values: valueLst.map(x => x.value),
+          values: valueLst.map((x) => x.value),
           ctx: splitResult.context,
           args: exprLst,
         },
@@ -373,33 +373,35 @@ export function step(
       const args: SI_STRUCT.Value[] = r.args as SI_STRUCT.Value[];
       //check if r.name is primitive or in env
       const funDef = lookupEnv(env, r.name.symbol);
-      //check if name is in Primitive List
+      //check if name is in primitive functions list
       if (Object.values<string>(SI_STRUCT.PrimNames).includes(r.name.symbol)) {
         const primResult = prim(r.name, args);
-        if (SI_STRUCT.isValue(primResult)) {
+        if (primResult instanceof Error) {
           return {
-            type: SI_STRUCT.Production.Prim,
+            type: SI_STRUCT.Production.PrimError,
             redex: r,
             result: primResult,
           };
-        } else {
-          return Error("step: prim is not applicable");
         }
+        return {
+          type: SI_STRUCT.Production.Prim,
+          redex: r,
+          result: primResult,
+        };
         //if name => function
       } else if (SI_STRUCT.isFunDef(funDef)) {
         console.log("step: env: " + JSON.stringify(funDef) + " args: " + args);
         //check if funDef is a defined function or a struct-predefined function
-        //replace names in body with args
+        //substitute names in body with args
         const newExpr = substFun(r, env);
         if (newExpr instanceof Error) {
           return newExpr;
-        } else {
-          return {
-            type: SI_STRUCT.Production.Fun,
-            redex: r,
-            result: newExpr,
-          };
         }
+        return {
+          type: SI_STRUCT.Production.Fun,
+          redex: r,
+          result: newExpr,
+        };
         //if name => structFunction
       } else if (SI_STRUCT.isStructFun(funDef)) {
         //decide which struct Rule to use
@@ -472,13 +474,13 @@ export function step(
     //check if condition is a name
     if (BSL_AST.isLiteral(r.options[0].condition)) {
       const condResult = cond(r);
-      if (condResult == undefined) {
+      if (condResult === undefined) {
         const newOptions = r.options.slice(1);
         if (newOptions.length < 1) {
           return {
             type: SI_STRUCT.Production.CondError,
             redex: r,
-            result: Error("cond: all question results were false"),
+            result: Error("'cond': all question results were false"),
           };
         }
         const newExpr: BSL_AST.Cond = {
@@ -497,7 +499,11 @@ export function step(
           result: condResult,
         };
       } else {
-        return Error("step: cond is not applicable");
+        return {
+          type: SI_STRUCT.Production.CondError,
+          redex: r,
+          result: condResult,
+        };
       }
     } else {
       const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(
@@ -632,51 +638,63 @@ export function prim(
   args: SI_STRUCT.Value[]
 ): SI_STRUCT.Value | Error {
   // + - * /
-  if(["+", "*", "-", "/"].includes(name.symbol) &&
-     !args.every(a => typeof a === "number")) {
-    const firstOffender = args.find(a => typeof a != "number");
-    return Error(`error: argument is not a number ${firstOffender}`);
+  if (
+    ["+", "*", "-", "/"].includes(name.symbol) &&
+    !args.every((a) => typeof a === "number")
+  ) {
+    const firstOffender = args.find((a) => typeof a != "number");
+    return Error(
+      `argument '${firstOffender}' is not a number in function '${name.symbol}'`
+    );
   }
-  switch(name.symbol) {
+  switch (name.symbol) {
     case "+":
-      return args.reduce((x,y) => (x as number) + (y as number));
+      return args.reduce((x, y) => (x as number) + (y as number));
     case "*":
-      return args.reduce((x,y) => (x as number) * (y as number));
+      return args.reduce((x, y) => (x as number) * (y as number));
     case "-":
-      return args.reduce((x,y) => (x as number) - (y as number));
+      return args.reduce((x, y) => (x as number) - (y as number));
     case "/":
-      if(!args.slice(1).every(a => a != 0)) return Error("error: division by zero");
-      return args.reduce((x,y) => (x as number) / (y as number));
+      if (!args.slice(1).every((a) => a != 0))
+        return Error(`division by zero in function '${name.symbol}'`);
+      return args.reduce((x, y) => (x as number) / (y as number));
     default:
   }
   // and, or, not
-  if(["and", "or", "not"].includes(name.symbol) &&
-     !args.every(a => typeof a === "boolean")) {
-    const firstOffender = args.find(a => typeof a != "boolean");
-    return Error(`error: argument is not a boolean ${firstOffender}`);
+  if (
+    ["and", "or", "not"].includes(name.symbol) &&
+    !args.every((a) => typeof a === "boolean")
+  ) {
+    const firstOffender = args.find((a) => typeof a != "boolean");
+    return Error(
+      `argument '${firstOffender}' is not a boolean in function '${name.symbol}'`
+    );
   }
-  switch(name.symbol) {
+  switch (name.symbol) {
     case "and":
-      if(args.length < 2) return Error("prim: and needs at least two arguments");
-      return args.every(x => x);
+      if (args.length < 2)
+        return Error(`function '${name.symbol}' needs at least two arguments`);
+      return args.every((x) => x);
     case "or":
-      if(args.length < 2) return Error("prim: or needs at least two arguments");
-      return args.some(x => x);
+      if (args.length < 2)
+        return Error(`function '${name.symbol}' needs at least two arguments`);
+      return args.some((x) => x);
     case "not":
-      if(args.length != 1) return Error("prim: not needs exactly one argument");
+      if (args.length !== 1)
+        return Error(`function '${name.symbol}' needs exactly one argument`);
       return !args[0];
     default:
   }
   // less than and greater than, to test HTML escaping
   if (["<", ">", "<=", ">="].includes(name.symbol)) {
     if (args.length !== 2) {
-      return Error(`prim: ${name.symbol} needs exactly two arguments`);
+      return Error(`function '${name.symbol}' needs exactly two arguments`);
     }
     const left = args[0];
     const right = args[1];
     if (typeof left !== "number" || typeof right !== "number") {
       return Error(
-        `prim: ${name.symbol} needs two numbers, but received ${left} and ${right}`
+        `function '${name.symbol}' needs two numbers, but received '${left}' and '${right}'`
       );
     }
     switch (name.symbol) {
@@ -691,10 +709,11 @@ export function prim(
       default:
         return true; // never reached but needed for compiler
     }
-  }
-  // else throw error
-  else {
-    return Error("prim: this function is not implemented");
+  } else {
+    // will never be reached but needed for compiler
+    return Error(
+      `function '${name.symbol}' is no implemented primitive function`
+    );
   }
 }
 
@@ -715,7 +734,7 @@ function cond(
   ) {
     return undefined;
   } else {
-    return Error("error: condition is not a boolean");
+    return Error("'cond': condition is not a boolean");
   }
 }
 
@@ -726,8 +745,8 @@ function substConst(
   if (SI_STRUCT.isCallRedex(r)) {
     // get the identifier argument
     const id = r.args.find(SI_STRUCT.isId);
-    if(!id) return Error("id: could not find an identifier in argument list");
-    
+    if (!id) return Error("id: could not find an identifier in argument list");
+
     const value = lookupConst(env, id.symbol);
     if (value instanceof Error) return value;
 
@@ -800,11 +819,7 @@ function substFun(
 
   let newEnv: SI_STRUCT.Environment = {};
   params.forEach((param, i) => {
-    let tempEnv = addToEnv(
-      newEnv,
-      param.symbol,
-      r.args[i] as SI_STRUCT.Value
-    );
+    let tempEnv = addToEnv(newEnv, param.symbol, r.args[i] as SI_STRUCT.Value);
     if (tempEnv instanceof Error) return tempEnv;
     newEnv = tempEnv;
   });

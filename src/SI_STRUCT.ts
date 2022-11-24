@@ -15,6 +15,7 @@ export enum Production {
   CondContext = "CondContext",
   Hole = "Hole",
   Prim = "Prim",
+  PrimError = "PrimError",
   CondTrue = "CondTrue",
   CondFalse = "CondFalse",
   CondError = "CondError",
@@ -172,11 +173,17 @@ export interface SelectFun {
   structDef: StructDef;
 }
 
-//######## OneRule(s) ########a
+//######## OneRule(s) ########
+export type PrimRule = Prim | PrimError;
 export interface Prim {
   type: Production.Prim;
   redex: CallRedex;
   result: Value;
+}
+export interface PrimError {
+  type: Production.PrimError;
+  redex: CallRedex;
+  result: Error;
 }
 export type CondRule = CondTrue | CondFalse | CondError;
 export interface CondTrue {
@@ -232,7 +239,7 @@ export interface StructSelect {
   result: BSL_AST.expr | Value;
 }
 
-export type OneRule = Prim | CondRule | Const | Fun | StructRule; /*| ProgRule*/
+export type OneRule = PrimRule | CondRule | Const | Fun | StructRule; /*| ProgRule*/
 
 // ####### ProgStepRule(s) ########
 export interface Kong {
@@ -296,6 +303,7 @@ export function isSplit(obj: any): obj is Split {
 export function isOneRule(obj: any): obj is OneRule {
   return (
     obj.type === Production.Prim ||
+    obj.type === Production.PrimError ||
     obj.type === Production.CondTrue ||
     obj.type === Production.CondFalse ||
     obj.type === Production.CondError ||
@@ -308,7 +316,7 @@ export function isOneRule(obj: any): obj is OneRule {
   );
 }
 export function isPrim(obj: any): obj is Prim {
-  return obj.type === Production.Prim;
+  return obj.type === Production.Prim || obj.type === Production.PrimError;
 }
 export function isCondRule(obj: any): obj is CondRule {
   return obj.type === Production.CondTrue || obj.type === Production.CondFalse;
