@@ -383,7 +383,7 @@ export function step(
       } else if (SI_STRUCT.isStructFun(funDef)) {
         //decide which struct Rule to use
         if (SI_STRUCT.isMakeFun(funDef)) {
-          const structVal = makeStruct(r.name, funDef, args);
+          const structVal = makeStruct(r.name, funDef, args, env);
           if (structVal instanceof Error)
             return {
               type: SI_STRUCT.Production.StructMakeError,
@@ -817,9 +817,15 @@ function substFun(
 function makeStruct(
   name: BSL_AST.Name,
   funDef: SI_STRUCT.MakeFun,
-  args: SI_STRUCT.Value[]
+  args: SI_STRUCT.Value[],
+  env: SI_STRUCT.Environment
 ): BSL_AST.StructValue | Error {
   const params = funDef.structDef.properties;
+  // slice name to get struct name
+  const structName = name.symbol.slice(5);
+  const inEnv = lookupStruct(env, structName);
+  if (inEnv instanceof Error) return inEnv;
+  // check arity
   if (params.length == args.length) {
     const structVal: BSL_AST.StructValue = {
       type: BSL_AST.Production.StructValue,
@@ -847,10 +853,10 @@ function predStruct(
 ): boolean | Error {
   const params = funDef.structDef.properties;
   if (args.length != 1) {
-    return Error("predStruct: number of arguments doesn't match");
+    return Error(`'${name.symbol}' takes exactly one argument`);
   } else {
     if (!BSL_AST.isStructValue(args[0])) {
-      return Error("predStruct: argument is not a struct value");
+      return false;
     } else {
       const structVal = args[0];
       //extract struct in make-struct
