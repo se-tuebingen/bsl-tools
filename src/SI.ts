@@ -7,7 +7,7 @@ export function calculateProgram(
 ): SI_STRUCT.Stepper | Error {
   let env: SI_STRUCT.Environment = {};
   let progSteps: SI_STRUCT.ProgStep[] = [];
-  program.forEach((defOrExpr) => {
+  program.map((defOrExpr) => {
     const newStep = calculateProgStep(defOrExpr, env);
     if (newStep instanceof Error) return newStep;
     env = newStep.env;
@@ -21,16 +21,15 @@ export function calculateProgram(
     progSteps: progSteps,
   };
 }
-
 // calculate ProgStep
-// line is a line of program code -> ProgStep | Error
+// One ProgStep represents a line of program code -> ProgStep | Error
 export function calculateProgStep(
   defOrExpr: BSL_AST.expr | BSL_AST.definition,
   env: SI_STRUCT.Environment
 ): SI_STRUCT.ProgStep | Error {
   if (BSL_AST.isExpr(defOrExpr)) {
     const evalStep = calculateEvalSteps(defOrExpr, env);
-    console.log("exprStep:", evalStep);
+    console.log("evalStep:", evalStep);
     if (evalStep instanceof Error) return evalStep;
     if (evalStep.length === 0) {
       return {
@@ -42,9 +41,8 @@ export function calculateProgStep(
       };
     } else {
       const result = evalStep[evalStep.length - 1].result;
-      if (BSL_AST.isExpr(result)) {
-        return new Error("Result is not a value");
-      } else {
+      if (BSL_AST.isExpr(result)) return new Error("Result is not a value");
+      else
         return {
           type: SI_STRUCT.Production.ExprStep,
           env: evalStep[evalStep.length - 1].env,
@@ -52,7 +50,6 @@ export function calculateProgStep(
           originalDefOrExpr: defOrExpr,
           result: result,
         };
-      }
     }
   } else {
     console.log("definition", defOrExpr);
@@ -153,7 +150,7 @@ export function calculateDefSteps(
     };
     // reserve all possible struct-property names
     const selectFunNames: string[] = [];
-    properties.forEach((property) => {
+    properties.map((property) => {
       selectFunNames.push(`${binding.symbol}-${property.symbol}`);
     });
     const selectFunDef: SI_STRUCT.SelectFun = {
@@ -824,7 +821,8 @@ function makeStruct(
   // slice name to get struct name
   const structName = name.symbol.slice(5);
   const inEnv = lookupStruct(env, structName);
-  if (inEnv instanceof Error) return inEnv;
+  if (inEnv instanceof Error)
+    return Error(`'${structName}' not found in environment`);
   // check arity
   if (params.length == args.length) {
     const structVal: BSL_AST.StructValue = {
