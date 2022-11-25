@@ -367,7 +367,12 @@ export function step(
         //check if funDef is a defined function or a struct-predefined function
         //substitute names in body with args
         const newExpr = substFun(r, env);
-        if (newExpr instanceof Error) return newExpr;
+        if (newExpr instanceof Error)
+          return {
+            type: SI_STRUCT.Production.FunError,
+            redex: r,
+            result: newExpr,
+          };
         else
           return {
             type: SI_STRUCT.Production.Fun,
@@ -379,7 +384,12 @@ export function step(
         //decide which struct Rule to use
         if (SI_STRUCT.isMakeFun(funDef)) {
           const structVal = makeStruct(r.name, funDef, args);
-          if (structVal instanceof Error) return structVal;
+          if (structVal instanceof Error)
+            return {
+              type: SI_STRUCT.Production.StructMakeError,
+              redex: r,
+              result: structVal,
+            };
           const makeRule: SI_STRUCT.StructMake = {
             type: SI_STRUCT.Production.StructMake,
             redex: r,
@@ -388,7 +398,12 @@ export function step(
           return makeRule;
         } else if (SI_STRUCT.isPredFun(funDef)) {
           const predVal = predStruct(r.name, funDef, args);
-          if (predVal instanceof Error) return predVal;
+          if (predVal instanceof Error)
+            return {
+              type: SI_STRUCT.Production.StructPredError,
+              redex: r,
+              result: predVal,
+            };
           // if check which StructPredRule to use
           if (predVal) {
             const predRule: SI_STRUCT.StructPredTrue = {
@@ -407,7 +422,12 @@ export function step(
           }
         } else {
           const selectVal = selectStruct(r.name, funDef, args);
-          if (selectVal instanceof Error) return selectVal;
+          if (selectVal instanceof Error)
+            return {
+              type: SI_STRUCT.Production.StructSelectError,
+              redex: r,
+              result: selectVal,
+            };
           const selectRule: SI_STRUCT.StructSelect = {
             type: SI_STRUCT.Production.StructSelect,
             redex: r,
@@ -415,16 +435,24 @@ export function step(
           };
           return selectRule;
         }
-      } else {
-        return Error("step: name is neither primitive nor a defined function");
-      }
+      } else
+        return {
+          type: SI_STRUCT.Production.FunError,
+          redex: r,
+          result: Error(`function '${r.name.symbol}' is not in env`),
+        };
     } else {
       console.log("step: env:" + JSON.stringify(env));
       const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(
         r,
         env
       );
-      if (substRed instanceof Error) return substRed;
+      if (substRed instanceof Error)
+        return {
+          type: SI_STRUCT.Production.ConstError,
+          redex: r,
+          result: substRed,
+        };
       return {
         type: SI_STRUCT.Production.Const,
         redex: r,
@@ -471,7 +499,12 @@ export function step(
         r,
         env
       );
-      if (substRed instanceof Error) return substRed;
+      if (substRed instanceof Error)
+        return {
+          type: SI_STRUCT.Production.ConstError,
+          redex: r,
+          result: substRed,
+        };
       return {
         type: SI_STRUCT.Production.Const,
         redex: r,
@@ -480,7 +513,12 @@ export function step(
     }
   } else if (SI_STRUCT.isNameRedex(r)) {
     const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(r, env);
-    if (substRed instanceof Error) return substRed;
+    if (substRed instanceof Error)
+      return {
+        type: SI_STRUCT.Production.ConstError,
+        redex: r,
+        result: substRed,
+      };
     return {
       type: SI_STRUCT.Production.Const,
       redex: r,
@@ -695,10 +733,8 @@ function substConst(
     // get the identifier argument
     const id = r.args.find(SI_STRUCT.isId);
     if (!id) return Error("id: could not find an identifier in argument list");
-
     const value = lookupConst(env, id.symbol);
     if (value instanceof Error) return value;
-
     const newArgs: BSL_AST.expr[] = r.args.map((el) => {
       if (SI_STRUCT.isId(el) && el.symbol === id.symbol) {
         let newLit: BSL_AST.Literal = {
@@ -761,11 +797,11 @@ function substFun(
 ): BSL_AST.expr | Error {
   const funDef = lookupFun(env, r.name.symbol);
   if (funDef instanceof Error) return funDef;
-
   const params = funDef.params;
   if (r.args.length != params.length)
-    return Error("substFun: number of arguments doesn't match");
-
+    return Error(
+      `Arity mismatch in '${r.name.symbol}': number of arguments are not equal to number of parameters`
+    );
   let newEnv: SI_STRUCT.Environment = {};
   params.forEach((param, i) => {
     let tempEnv = addToEnv(newEnv, param.symbol, r.args[i] as SI_STRUCT.Value);
@@ -798,7 +834,9 @@ function makeStruct(
     };
     return structVal;
   } else {
-    return Error("makeStruct: number of arguments doesn't match");
+    return Error(
+      `Arity mismatch in '${name.symbol}: number of arguments does not match number of properties`
+    );
   }
 }
 
@@ -913,7 +951,8 @@ function substExpr(
     let options = expr.options.map((clause) => {
       let newCondition = substExpr(clause.condition, env);
       let newResult = substExpr(clause.result, env);
-      if (newCondition instanceof Error || newResult instanceof Error) return Error("substExpr: error in cond");
+      if (newCondition instanceof Error || newResult instanceof Error)
+        return Error("substExpr: error in cond");
       let newClause: BSL_AST.Clause = {
         type: BSL_AST.Production.CondOption,
         condition: newCondition,
@@ -921,7 +960,8 @@ function substExpr(
       };
       return newClause;
     });
-    if (options.some((clause) => clause instanceof Error)) return Error("substExpr: error in cond");
+    if (options.some((clause) => clause instanceof Error))
+      return Error("substExpr: error in cond");
     let newCond: BSL_AST.Cond = {
       type: BSL_AST.Production.CondExpression,
       options: options as BSL_AST.Clause[],
@@ -957,7 +997,7 @@ function lookupEnv(
     console.warn("lookupEnv: " + name + " found in " + JSON.stringify(env));
     return env[name];
   } else {
-    return Error("lookupEnv: name is not bound in environment");
+    return Error(`'${name}' is not bound in environment`);
   }
 }
 

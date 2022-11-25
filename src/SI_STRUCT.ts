@@ -19,13 +19,19 @@ export enum Production {
   CondTrue = "CondTrue",
   CondFalse = "CondFalse",
   CondError = "CondError",
-  ProgRule = "ProgRule",
+  Prog = "Prog",
+  ProgError = "ProgError",
   Const = "Const",
+  ConstError = "ConstError",
   Fun = "Fun",
+  FunError = "FunError",
   StructMake = "StructMake",
+  StructMakeError = "StructMakeError",
   StructPredTrue = "StructPredTrue",
   StructPredFalse = "StructPredFalse",
+  StructPredError = "StructPredError",
   StructSelect = "StructSelect",
+  StructSelectError = "StructSelectError",
   Kong = "Kong",
   FunDef = "FunEnv",
   StructDef = "StructDef",
@@ -34,6 +40,10 @@ export enum Production {
   SelectFun = "SelectFun",
   Id = "Identifier",
 }
+/* For refactoring
+export enum Rule {
+}
+*/
 export enum PrimNames {
   Add = "+",
   Sub = "-",
@@ -53,11 +63,6 @@ export interface Stepper {
   originProgram: BSL_AST.program;
   progSteps: ProgStep[];
 }
-// ProgStep represents a line of code in a BSL program
-//  export interface ProgStep {
-//      type: Production.ProgStep;
-//      stepList: Step[];
-//  }
 
 // Step[]
 // Step is type = ExprStep | DefinitionStep
@@ -142,7 +147,7 @@ export type Value =
   | string
   | boolean
   | `'()`
-  | BSL_AST.StructValue/*| FunValue/*| Closure */;
+  | BSL_AST.StructValue /*| FunValue/*| Closure */;
 
 export type EnvValue = Value | FunDef | StructDef | StructFun;
 export interface Id {
@@ -201,27 +206,54 @@ export interface CondError {
   redex: CondRedex;
   result: Error;
 }
-export interface ProgRule {
-  type: Production.ProgRule;
+export type ProgRule = Prog | ProgError;
+export interface Prog {
+  type: Production.Prog;
   definition: BSL_AST.definition;
 }
-
+export interface ProgError {
+  type: Production.ProgError;
+  definition: Error;
+}
+export type ConstRule = Const | ConstError;
 export interface Const {
   type: Production.Const;
   redex: Redex;
   result: BSL_AST.expr | Value;
 }
-
+export interface ConstError {
+  type: Production.ConstError;
+  redex: Redex;
+  result: Error;
+}
+export type FunRule = Fun | FunError;
 export interface Fun {
   type: Production.Fun;
   redex: CallRedex;
   result: BSL_AST.expr;
 }
-type StructRule = StructMake | StructPredTrue | StructPredFalse | StructSelect;
+export interface FunError {
+  type: Production.FunError;
+  redex: CallRedex;
+  result: Error;
+}
+type StructRule =
+  | StructMake
+  | StructMakeError
+  | StructPredTrue
+  | StructPredFalse
+  | StructPredError
+  | StructSelect
+  | StructSelectError;
 export interface StructMake {
   type: Production.StructMake;
   redex: CallRedex;
   result: Value;
+}
+export interface StructMakeError {
+  type: Production.StructMakeError;
+  redex: CallRedex;
+  result: Error;
 }
 export interface StructPredTrue {
   type: Production.StructPredTrue;
@@ -233,13 +265,23 @@ export interface StructPredFalse {
   redex: CallRedex;
   result: false;
 }
+export interface StructPredError {
+  type: Production.StructPredError;
+  redex: CallRedex;
+  result: Error;
+}
 export interface StructSelect {
   type: Production.StructSelect;
   redex: CallRedex;
   result: BSL_AST.expr | Value;
 }
+export interface StructSelectError {
+  type: Production.StructSelectError;
+  redex: CallRedex;
+  result: Error;
+}
 
-export type OneRule = PrimRule | CondRule | Const | Fun | StructRule; /*| ProgRule*/
+export type OneRule = PrimRule | CondRule | ConstRule | FunRule | StructRule;
 
 // ####### ProgStepRule(s) ########
 export interface Kong {
@@ -308,11 +350,16 @@ export function isOneRule(obj: any): obj is OneRule {
     obj.type === Production.CondFalse ||
     obj.type === Production.CondError ||
     obj.type === Production.Const ||
+    obj.type === Production.ConstError ||
     obj.type === Production.Fun ||
+    obj.type === Production.FunError ||
     obj.type === Production.StructMake ||
+    obj.type === Production.StructMakeError ||
     obj.type === Production.StructPredTrue ||
     obj.type === Production.StructPredFalse ||
-    obj.type === Production.StructSelect
+    obj.type === Production.StructPredError ||
+    obj.type === Production.StructSelect ||
+    obj.type === Production.StructSelectError
   );
 }
 export function isPrim(obj: any): obj is Prim {
