@@ -29,54 +29,174 @@
   </style>
 </head>
 
-  <body>
-    <h2>Small-Step-Interpreter-Stepper for Racket</h2>
-    <h3>FUN Example #1</h3>
+<body>
+  <h2>Small-Step-Interpreter-Stepper for Racket</h2>
+  <div style="margin:100px;">
+    <h3>Prog</h3>
+    <h4>Simple Prog application for a constant</h4>
+    <stepper>
+      (define x (+ 40 2))
+      (define y "hallo")
+    </stepper>
+    <h4>Prog application for a function</h4>
+    <stepper>
+      (define (f x) (+ x 1))
+    </stepper>
+    <h4>Prog application for a struct</h4>
+    <h3>Prog-Errors</h3>
+    <h4>Example #1</h4>
+    <stepper>
+      (define x (+ 40 2))
+      (define y "hallo")
+      (define x 2)
+    </stepper>
+    <h4>Example #2</h4>
+    <stepper>
+      (define f 1)
+      (define (f x) (+ x 2))
+    </stepper>
+    <h4>Example #3</h4>
+    <stepper>
+      (define (make-pos x y) (+ x y))
+      (define-struct pos (x y))
+    </stepper>
+    <h4>Example #4</h4>
+    <stepper>
+      (define-struct pos (x y))
+      (define (make-pos x y) (+ x y))
+    </stepper>
+    <stepper>
+      (define-struct point (x y))
+    </stepper>
+    <h3>Const</h3>
+    <h4>Example #1</h4>
+    <stepper>
+      (define x (+ 200 30))
+      (define y (+ 2 3))
+      (+ x y 2)
+    </stepper>
+    <h4>Example #2</h4>
+    <stepper>
+      (define x (+ 4 5))
+      (define y (+ 2 3))
+      (+ x y)
+      (+ (* 2 x) (- y 4))
+    </stepper>
+    <h4>Example #3</h4>
+    <stepper>
+      (define x (+ 4 5))
+      x
+    </stepper>
+    <h4>Example #5</h4>
+    <stepper>
+      (define x (cond [#true #false]))
+      x
+    </stepper>
+    <h3>ConstError</h3>
+    <h4>Undefined constant</h4>
+    <stepper>
+      (define x (+ 2 4))
+      (+ x y)
+    </stepper>
+    <h3>FUN</h3>
+    <h4>Example #1</h4>
     <stepper>
       (define (f x) (+ x 2))
       (f 3)
     </stepper>
-    <h3>FUN Example #2</h3>
+    <h4>Example #2</h4>
     <stepper>
       (define y 20)
       (define (f x) (+ x 2))
       (f y)
     </stepper>
-    <h3>FUN Example #3</h3>
+    <h4>Example #3</h4>
     <stepper>
       (define y 40)
       (define (f x) (+ x y))
       (f 3)
     </stepper>
-    <h3>FUN Example #4</h3>
+    <h4>Example #4</h4>
     <stepper>
       (define y 40)
       (define (f x y) (+ x y))
       (f 3 2)
     </stepper>
-    <h3>Struct Example #1 (MAKE)</h3>
+    <h3>FunError</h3>
+    <h4>Arity mismatch</h4>
+    <stepper>
+      (define (f x) (+ x 2))
+      (f 3 4)
+    </stepper>
+    <h4>Undefined function</h4>
+    <stepper>
+      (f 3)
+    </stepper>
+    <h3>Struct-make</h3>
     <stepper>
       (define-struct pos (x y))
       (make-pos 3 4)
     </stepper>
-    <h3>Struct Example #2 (SELECT)</h3>
+    <h3>Struct-make-error</h3>
+    <h4>Arity mismatch</h4>
+    <stepper>
+      (define-struct pos (x y))
+      (make-pos 3)
+    </stepper>
+    <h4>Undefined struct</h4>
+    <stepper>
+      (make-pos 3 4)
+    </stepper>
+    <h3>Struct-select</h3>
     <stepper>
       (define-struct pos (x y))
       (define p (make-pos 3 4))
       (pos-x p)
     </stepper>
-    <h3>Struct Example #3 (PRED)</h3>
+    <h3>Struct-select-error</h3>
+    <h4>Arity mismatch</h4>
+    <stepper>
+      (define-struct pos (x y))
+      (define p (make-pos 3 4))
+      (pos-x p 3)
+    </stepper>
+    <h4>Undefined struct</h4>
+    <stepper>
+      (define p (make-pos 3 4))
+      (pos-x p)
+    </stepper>
+    <h3>Struct-pred</h3>
+    <h4>Struct-pred-true</h4>
     <stepper>
       (define-struct pos (x y))
       (define p (make-pos 3 4))
       (pos? p)
     </stepper>
-   <!-- <h2>Error Tests</h2>
+    <h4>Struct-pred-false</h4>
+    <stepper>
+      (define-struct pos (x y))
+      (define p 3)
+      (pos? p)
+    </stepper>
+    <h3>Struct-pred-error</h3>
+    <h4>Arity mismatch</h4>
+    <stepper>
+      (define-struct pos (x y))
+      (define p (make-pos 3 4))
+      (pos? p 3)
+    </stepper>
+    <h4>Undefined struct</h4>
+    <stepper>
+      (define p (make-pos 3 4))
+      (pos? p)
+    </stepper>
+  </div>
+  <!-- <h2>Error Tests</h2>
     <h3>Call without defined function</h3>
     <stepper>
       (call 1 2 3)
     </stepper>
-
-  </body>
+  -->
+</body>
 
 </html>
