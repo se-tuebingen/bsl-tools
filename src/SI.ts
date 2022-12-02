@@ -348,13 +348,13 @@ export function step(
         const primResult = prim(r.name, args);
         if (primResult instanceof Error)
           return {
-            type: SI_STRUCT.Production.PrimError,
+            type: SI_STRUCT.Rule.PrimError,
             redex: r,
             result: primResult,
           };
         else
           return {
-            type: SI_STRUCT.Production.Prim,
+            type: SI_STRUCT.Rule.Prim,
             redex: r,
             result: primResult,
           };
@@ -366,13 +366,13 @@ export function step(
         const newExpr = substFun(r, env);
         if (newExpr instanceof Error)
           return {
-            type: SI_STRUCT.Production.FunError,
+            type: SI_STRUCT.Rule.FunError,
             redex: r,
             result: newExpr,
           };
         else
           return {
-            type: SI_STRUCT.Production.Fun,
+            type: SI_STRUCT.Rule.Fun,
             redex: r,
             result: newExpr,
           };
@@ -383,12 +383,12 @@ export function step(
           const structVal = makeStruct(r.name, funDef, args, env);
           if (structVal instanceof Error)
             return {
-              type: SI_STRUCT.Production.StructMakeError,
+              type: SI_STRUCT.Rule.StructMakeError,
               redex: r,
               result: structVal,
             };
           const makeRule: SI_STRUCT.StructMake = {
-            type: SI_STRUCT.Production.StructMake,
+            type: SI_STRUCT.Rule.StructMake,
             redex: r,
             result: structVal,
           };
@@ -397,21 +397,21 @@ export function step(
           const predVal = predStruct(r.name, funDef, args);
           if (predVal instanceof Error)
             return {
-              type: SI_STRUCT.Production.StructPredError,
+              type: SI_STRUCT.Rule.StructPredError,
               redex: r,
               result: predVal,
             };
           // if check which StructPredRule to use
           if (predVal) {
             const predRule: SI_STRUCT.StructPredTrue = {
-              type: SI_STRUCT.Production.StructPredTrue,
+              type: SI_STRUCT.Rule.StructPredTrue,
               redex: r,
               result: predVal,
             };
             return predRule;
           } else {
             const predRule: SI_STRUCT.StructPredFalse = {
-              type: SI_STRUCT.Production.StructPredFalse,
+              type: SI_STRUCT.Rule.StructPredFalse,
               redex: r,
               result: predVal,
             };
@@ -421,12 +421,12 @@ export function step(
           const selectVal = selectStruct(r.name, funDef, args);
           if (selectVal instanceof Error)
             return {
-              type: SI_STRUCT.Production.StructSelectError,
+              type: SI_STRUCT.Rule.StructSelectError,
               redex: r,
               result: selectVal,
             };
           const selectRule: SI_STRUCT.StructSelect = {
-            type: SI_STRUCT.Production.StructSelect,
+            type: SI_STRUCT.Rule.StructSelect,
             redex: r,
             result: selectVal,
           };
@@ -434,7 +434,7 @@ export function step(
         }
       } else
         return {
-          type: SI_STRUCT.Production.FunError,
+          type: SI_STRUCT.Rule.FunError,
           redex: r,
           result: Error(`function '${r.name.symbol}' is not in env`),
         };
@@ -446,12 +446,12 @@ export function step(
       );
       if (substRed instanceof Error)
         return {
-          type: SI_STRUCT.Production.ConstError,
+          type: SI_STRUCT.Rule.ConstError,
           redex: r,
           result: substRed,
         };
       return {
-        type: SI_STRUCT.Production.Const,
+        type: SI_STRUCT.Rule.Const,
         redex: r,
         result: substRed,
       };
@@ -464,7 +464,7 @@ export function step(
         const newOptions = r.options.slice(1);
         if (newOptions.length < 1) {
           return {
-            type: SI_STRUCT.Production.CondError,
+            type: SI_STRUCT.Rule.CondError,
             redex: r,
             result: Error("'cond': all question results were false"),
           };
@@ -474,19 +474,19 @@ export function step(
           options: newOptions,
         };
         return {
-          type: SI_STRUCT.Production.CondFalse,
+          type: SI_STRUCT.Rule.CondFalse,
           redex: r,
           result: newExpr,
         };
       } else if (BSL_AST.isExpr(condResult) || SI_STRUCT.isValue(condResult)) {
         return {
-          type: SI_STRUCT.Production.CondTrue,
+          type: SI_STRUCT.Rule.CondTrue,
           redex: r,
           result: condResult,
         };
       } else {
         return {
-          type: SI_STRUCT.Production.CondError,
+          type: SI_STRUCT.Rule.CondError,
           redex: r,
           result: condResult,
         };
@@ -498,12 +498,12 @@ export function step(
       );
       if (substRed instanceof Error)
         return {
-          type: SI_STRUCT.Production.ConstError,
+          type: SI_STRUCT.Rule.ConstError,
           redex: r,
           result: substRed,
         };
       return {
-        type: SI_STRUCT.Production.Const,
+        type: SI_STRUCT.Rule.Const,
         redex: r,
         result: substRed,
       };
@@ -512,12 +512,12 @@ export function step(
     const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(r, env);
     if (substRed instanceof Error)
       return {
-        type: SI_STRUCT.Production.ConstError,
+        type: SI_STRUCT.Rule.ConstError,
         redex: r,
         result: substRed,
       };
     return {
-      type: SI_STRUCT.Production.Const,
+      type: SI_STRUCT.Rule.Const,
       redex: r,
       result: substRed,
     };
@@ -575,7 +575,7 @@ export function plug(
           type: SI_STRUCT.Production.EvalStep,
           env: env,
           rule: {
-            type: SI_STRUCT.Production.Kong,
+            type: SI_STRUCT.Rule.Kong,
             context: c,
             redexRule: oneRule,
           },
@@ -601,7 +601,7 @@ export function plug(
           type: SI_STRUCT.Production.EvalStep,
           env: env,
           rule: {
-            type: SI_STRUCT.Production.Kong,
+            type: SI_STRUCT.Rule.Kong,
             context: c,
             redexRule: oneRule,
           },
