@@ -104,7 +104,7 @@ const dictionary = {
     "next step": "Nächster Schritt",
     "previous step": "Vorheriger Schritt",
     environment: "Umgebung",
-    "remaining program": "Übriges Programm",
+    "remaining program": "Verbleibendes Programm",
     "start evaluation": "Auswertung Starten",
     "evaluation finished": "Auswertung Beendet",
     "go back": "Schritt zurück",

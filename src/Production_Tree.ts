@@ -73,11 +73,11 @@ const implementedLanguages = ['en', 'de'];
 const dictionary = {
   'en': {
     'select production': 'Select production',
-    'mark selected text as hole': 'Mark selected text as hole',
+    'mark selected text as hole': 'Mark selected text as subexpression',
   },
   'de': {
     'select production': 'Produktion auswählen',
-    'mark selected text as hole': 'Auswahl als Loch markieren',
+    'mark selected text as hole': 'Auswahl als Teilausdruck markieren',
   },
 };
 
