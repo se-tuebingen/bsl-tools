@@ -706,7 +706,7 @@ const rules = {
   FunError: {
     name: `<cap>FunError</cap>`,
     text: `
-      <em>(name v<small>1</small> … v<small>n</small>) → Error
+      <em>(name v<small>1</small> … v<small>n</small>) → Error</em>
       falls
       <em>(</em> <strong>define</strong> <em>(name name<small>1</small> … name<small>n</small>) e)</em> nicht in Umgebung.
     `,
@@ -736,7 +736,7 @@ const rules = {
   ConstError: {
     name: `<cap>Const</cap>-Error`,
     text: `
-      <em>name → Error</em> falls <em>(<strong>define</strong> name v)</em> 
+      <em>name → Error</em> falls <em>(<strong>define</strong> name v)</em>
       nicht in Umgebung.
     `,
   },
@@ -831,3 +831,24 @@ const rules = {
     `,
   },
 };
+// execute the const rule = ...-definition in a js console (e.g. Dev Tools)
+// and then run the following snippet to
+// verify it contains no invalid HTML with open tags
+// Object.keys(rules).forEach(name => {
+//   const rule = rules[name];
+//   const text = `${rule.name}${rule.text}`;
+//   const tags = text
+//     .split('<')
+//     .slice(1)
+//     .map(s => s.split('>')[0])
+//     .filter(s => s != 'br');
+//   let tagStack = [];
+//   tags.forEach(t => {
+//     if(!t.startsWith('/')) return tagStack.push(t);
+//     const tag = t.slice(1);
+//     if(tagStack.pop() != tag) throw Error(
+//       `Rule ${name} contains invalid HTML: ${t} has no corresponding open tag`);
+//   });
+//   if (tagStack.length > 0)
+//     throw Error(`Rule ${name} contains invalid HTML: ${tagStack.join(',')} are opened but not closed`);
+// });
