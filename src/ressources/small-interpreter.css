@@ -8,17 +8,13 @@
   --hole-yellow: #fdf68d; /* pale yellow */
   --hole-green: lightgreen;
   --hole-red: lightpink;
-  /* --highlight-border-connectors: lime;
-  --wrong-background: red;
-  --correct-background: lime;
-  --hole-selection-background: white; */
+  --font-family-monospace: 'Fira Sans', monospace;
+  --font-family-rule-description: Palatino, Georgia, "Times New Roman", serif;
 }
 /* ####### general layout ####### */
 div.stepper {
   text-align: center;
-  font-size: 1.2em;
   box-sizing: border-box;
-  font-family: sans-serif;
 }
 /* ##### boxes ###### */
 .stepper .box {
@@ -54,7 +50,7 @@ div.stepper {
 .stepper .step[data-currentStep="true"] {
   padding-top: 1.5em;
   margin-top: 1.5em;
-  padding-bottom: 1em;
+  padding-bottom: 1.5em;
   margin-bottom: 1.5em;
 
 }
@@ -66,7 +62,6 @@ div.stepper {
   display: inline-block;
   right: 2em;
   padding: 0.5em;
-  font-size: small;
   border: 1px solid var(--button-border);
   background-color: white;
   border-radius: 0.25em;
@@ -79,16 +74,16 @@ div.stepper {
 }
 /* second child because of box label */
 .stepper .step:nth-child(2) .prev-button {
-  top: -5em;
+  top: -3.5em;
 }
 .stepper .step:nth-child(2) .prev-button::after {
   content: ' (PROG)';
 }
 .stepper .next-button {
-  bottom: -1em;
+  bottom: -1.25em;
 }
 .stepper .step:last-child .next-button {
-  bottom: -4em;
+  bottom: -3.25em;
 }
 .stepper .step:last-child .next-button::after {
   content: ' (PROG)';
@@ -106,7 +101,7 @@ div.stepper {
 
 /* ######### code and rules ####### */
 .stepper .code {
-  font-family: 'Fira Sans', monospace;
+  font-family: var(--font-family-monospace, monospace);
   color: var(--text-grey);
 }
 .stepper .plug-result {
@@ -151,7 +146,7 @@ div.stepper {
   margin-left: var(--one-rule-margin-left, 4em);
 }
 .stepper .rule-description {
-  font-family: 'Fira Mono', monospace;
+  font-family: var(--font-family-monospace, monospace);
 }
 
 /* arrow body */
@@ -198,7 +193,7 @@ div.stepper {
   padding: 0.5em;
 }
 .stepper .rule-info-rule-text {
-  font-family: Palatino,Georgia,"Times New Roman",serif;
+  font-family: var(--font-family-rule-description, serif);
 }
 .stepper .rule-info-rule-text small {
   vertical-align: sub;
@@ -216,10 +211,6 @@ div.stepper {
   margin-left: 6em;
   margin-bottom: 1em;
 }
-/* .stepper .rule-info strong {
-  font-family: sans-serif;
-  font-style: normal;
-} */
 
 /* ##### showing and hiding stuff #### */
 /* hide steps that are not yet reached */

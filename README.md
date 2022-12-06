@@ -107,6 +107,23 @@ The interface is as follows:
 </stepper>
 ```
 
+Font sizes and styles are deliberately left unset wherever possible in order to
+just conform to the styling of the rest of the document.
+
+For the code and explanation formats, however, setting the `font-family` attributes
+is a must. The current stylesheets has chosen some specific fonts, if you do not
+agree with them or want to choose your own font, you simply need to override the CSS
+variable:
+```css
+.stepper {
+  --font-family-monospace: monospace; /* to use the system default */
+  --font-family-rule-description: "My fancy font", serif; /* to use your own choice */
+}
+```
+Place this somewhere where it overrides the default stylesheet that is added to the
+document head, e.g. in a `style` tag above the first stepper. Other CSS variables
+that can be set can be found at the head of [`src/ressources/small-interpreter.css`](src/ressources/small-interpreter.css).
+
 ## How to use: Scribble
 
 To use the scribble module, you need to import it in your document:
