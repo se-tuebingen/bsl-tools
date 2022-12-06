@@ -6,7 +6,6 @@ export enum Production {
   DefinitionStep = "DefinitionStep",
   EvalStep = "EvalStep",
   Split = "Split",
-  PlugResult = "PlugResult",
   CallRedex = "CallRedex",
   CondRedex = "CondRedex",
   NameRedex = "NameRedex",
@@ -14,18 +13,56 @@ export enum Production {
   AppContext = "AppContext",
   CondContext = "CondContext",
   Hole = "Hole",
+  FunDef = "FunEnv",
+  StructDef = "StructDef",
+  MakeFun = "MakeFun",
+  PredFun = "PredFun",
+  SelectFun = "SelectFun",
+  Id = "Identifier",
+}
+
+export enum Decomposition {
+  Stepper = "Stepper",
+  ExprStep = "ExprStep",
+  DefinitionStep = "DefinitionStep",
+  EvalStep = "EvalStep",
+  Split = "Split",
+  CallRedex = "CallRedex",
+  CondRedex = "CondRedex",
+  NameRedex = "NameRedex",
+  CondOption = "CondOption",
+  AppContext = "AppContext",
+  CondContext = "CondContext",
+  Hole = "Hole",
+  Id = "Identifier",
+}
+export enum EnvironmentValue {
+  FunDef = "FunEnv",
+  StructDef = "StructDef",
+  MakeFun = "MakeFun",
+  PredFun = "PredFun",
+  SelectFun = "SelectFun",
+}
+export enum Rule {
+  Kong = "Kong",
   Prim = "Prim",
+  PrimError = "PrimError",
   CondTrue = "CondTrue",
   CondFalse = "CondFalse",
   CondError = "CondError",
-  ProgRule = "ProgRule",
+  Prog = "Prog",
+  ProgError = "ProgError",
   Const = "Const",
+  ConstError = "ConstError",
   Fun = "Fun",
-  Kong = "Kong",
-  FunDef = "FunDef",
-  StructDef = "StructDef",
-  StructValue = "StructValue",
-  Id = "Identifier",
+  FunError = "FunError",
+  StructMake = "StructMake",
+  StructMakeError = "StructMakeError",
+  StructPredTrue = "StructPredTrue",
+  StructPredFalse = "StructPredFalse",
+  StructPredError = "StructPredError",
+  StructSelect = "StructSelect",
+  StructSelectError = "StructSelectError",
 }
 export enum PrimNames {
   Add = "+",
@@ -40,23 +77,12 @@ export enum PrimNames {
   Lt = "<",
   Gt = ">",
 }
-
 export interface Stepper {
   type: Production.Stepper;
-  root: HTMLElement;
   originProgram: BSL_AST.program;
-  stepperTree: ProgStep[];
+  progSteps: ProgStep[];
 }
-// ProgStep represents a line of code in a BSL program
-//  export interface ProgStep {
-//      type: Production.ProgStep;
-//      stepList: Step[];
-//  }
-
-// Step[]
-// Step is type = ExprStep | DefinitionStep
 export type ProgStep = ExprStep | DefinitionStep;
-
 // DefinitionStep has ProgRule
 export interface DefinitionStep {
   type: Production.DefinitionStep;
@@ -72,28 +98,19 @@ export interface ExprStep {
   originalDefOrExpr: BSL_AST.expr;
   result: Value | Error;
 }
-
 export interface EvalStep {
   type: Production.EvalStep;
   env: Environment;
   rule: Kong | OneRule;
   result: BSL_AST.expr | Value | Error;
 }
-// LOCAL-Rule für ISL
-
 export type SplitResult = Split | Value;
-
 export interface Split {
   type: Production.Split;
   redex: Redex;
   context: Context;
 }
 
-/* export interface PlugResult {
-    type: Production.PlugResult;
-    rule: Kong | OneRule;
-    expr: BSL_AST.expr | Value;
-} */
 // Redex ist Summentyp: CallRedex | CondRedex, etc.
 // ####### REDEX #######
 export type Redex = CallRedex | CondRedex | NameRedex;
@@ -135,8 +152,10 @@ export type Value =
   | number
   | string
   | boolean
-  | `'()` /*| FunValue/*| Closure | StructValue*/;
-export type EnvValue = Value | FunDef /* | StructDef*/;
+  | `'()`
+  | BSL_AST.StructValue /*| FunValue/*| Closure */;
+
+export type EnvValue = Value | FunDef | StructDef | StructFun;
 export interface Id {
   type: Production.Id;
   symbol: string;
@@ -148,51 +167,131 @@ export interface FunDef {
 }
 export interface StructDef {
   type: Production.StructDef;
-  params: BSL_AST.Name[];
+  properties: BSL_AST.Name[];
 }
-//######## OneRule(s) ########a
+export type StructFun = MakeFun | PredFun | SelectFun;
+
+export interface MakeFun {
+  type: Production.MakeFun;
+  structDef: StructDef;
+}
+export interface PredFun {
+  type: Production.PredFun;
+  structDef: StructDef;
+}
+export interface SelectFun {
+  type: Production.SelectFun;
+  structDef: StructDef;
+}
+
+//######## OneRule(s) ########
+export type PrimRule = Prim | PrimError;
 export interface Prim {
-  type: Production.Prim;
+  type: Rule.Prim;
   redex: CallRedex;
   result: Value;
 }
+export interface PrimError {
+  type: Rule.PrimError;
+  redex: CallRedex;
+  result: Error;
+}
 export type CondRule = CondTrue | CondFalse | CondError;
 export interface CondTrue {
-  type: Production.CondTrue;
+  type: Rule.CondTrue;
   redex: CondRedex;
   result: BSL_AST.expr | Value;
 }
 export interface CondFalse {
-  type: Production.CondFalse;
+  type: Rule.CondFalse;
   redex: CondRedex;
   result: BSL_AST.Cond;
 }
 export interface CondError {
-  type: Production.CondError;
+  type: Rule.CondError;
   redex: CondRedex;
   result: Error;
 }
-export interface ProgRule {
-  type: Production.ProgRule;
+export type ProgRule = Prog | ProgError;
+export interface Prog {
+  type: Rule.Prog;
   definition: BSL_AST.definition;
 }
-
+export interface ProgError {
+  type: Rule.ProgError;
+  definition: Error;
+}
+export type ConstRule = Const | ConstError;
 export interface Const {
-  type: Production.Const;
+  type: Rule.Const;
   redex: Redex;
   result: BSL_AST.expr | Value;
 }
-
+export interface ConstError {
+  type: Rule.ConstError;
+  redex: Redex;
+  result: Error;
+}
+export type FunRule = Fun | FunError;
 export interface Fun {
-  type: Production.Fun;
+  type: Rule.Fun;
   redex: CallRedex;
   result: BSL_AST.expr;
 }
-export type OneRule = Prim | CondRule | Const | Fun; /*| ProgRule*/
+export interface FunError {
+  type: Rule.FunError;
+  redex: CallRedex;
+  result: Error;
+}
+type StructRule =
+  | StructMake
+  | StructMakeError
+  | StructPredTrue
+  | StructPredFalse
+  | StructPredError
+  | StructSelect
+  | StructSelectError;
+export interface StructMake {
+  type: Rule.StructMake;
+  redex: CallRedex;
+  result: Value;
+}
+export interface StructMakeError {
+  type: Rule.StructMakeError;
+  redex: CallRedex;
+  result: Error;
+}
+export interface StructPredTrue {
+  type: Rule.StructPredTrue;
+  redex: CallRedex;
+  result: true;
+}
+export interface StructPredFalse {
+  type: Rule.StructPredFalse;
+  redex: CallRedex;
+  result: false;
+}
+export interface StructPredError {
+  type: Rule.StructPredError;
+  redex: CallRedex;
+  result: Error;
+}
+export interface StructSelect {
+  type: Rule.StructSelect;
+  redex: CallRedex;
+  result: BSL_AST.expr | Value;
+}
+export interface StructSelectError {
+  type: Rule.StructSelectError;
+  redex: CallRedex;
+  result: Error;
+}
+
+export type OneRule = PrimRule | CondRule | ConstRule | FunRule | StructRule;
 
 // ####### ProgStepRule(s) ########
 export interface Kong {
-  type: Production.Kong;
+  type: Rule.Kong;
   context: Context;
   redexRule: OneRule;
 }
@@ -251,32 +350,34 @@ export function isSplit(obj: any): obj is Split {
 }
 export function isOneRule(obj: any): obj is OneRule {
   return (
-    obj.type === Production.Prim ||
-    obj.type === Production.CondTrue ||
-    obj.type === Production.CondFalse ||
-    obj.type === Production.CondError ||
-    obj.type === Production.Const ||
-    obj.type === Production.Fun
+    obj.type === Rule.Prim ||
+    obj.type === Rule.PrimError ||
+    obj.type === Rule.CondTrue ||
+    obj.type === Rule.CondFalse ||
+    obj.type === Rule.CondError ||
+    obj.type === Rule.Const ||
+    obj.type === Rule.ConstError ||
+    obj.type === Rule.Fun ||
+    obj.type === Rule.FunError ||
+    obj.type === Rule.StructMake ||
+    obj.type === Rule.StructMakeError ||
+    obj.type === Rule.StructPredTrue ||
+    obj.type === Rule.StructPredFalse ||
+    obj.type === Rule.StructPredError ||
+    obj.type === Rule.StructSelect ||
+    obj.type === Rule.StructSelectError
   );
 }
-export function isPrim(obj: any): obj is Prim {
-  return obj.type === Production.Prim;
-}
-export function isCondRule(obj: any): obj is CondRule {
-  return obj.type === Production.CondTrue || obj.type === Production.CondFalse;
-}
-export function isConst(obj: any): obj is Const {
-  return obj.type === Production.Const;
-}
 export function isKong(obj: any): obj is Kong {
-  return obj.type === Production.Kong;
+  return obj.type === Rule.Kong;
 }
 export function isValue(obj: any): obj is Value {
   return (
     typeof obj === "number" ||
     typeof obj === "string" ||
     typeof obj === "boolean" ||
-    obj === `'()`
+    obj === `'()` ||
+    BSL_AST.isStructValue(obj)
   ); //|| isClosure(obj);
 }
 export function isFunDef(obj: any): obj is FunDef {
@@ -287,4 +388,20 @@ export function isStructDef(obj: any): obj is StructDef {
 }
 export function isId(obj: any): obj is Id {
   return obj.type === Production.Id;
+}
+export function isStructFun(obj: any): obj is StructFun {
+  return (
+    obj.type === Production.MakeFun ||
+    obj.type === Production.PredFun ||
+    obj.type === Production.SelectFun
+  );
+}
+export function isMakeFun(obj: any): obj is MakeFun {
+  return obj.type === Production.MakeFun;
+}
+export function isPredFun(obj: any): obj is PredFun {
+  return obj.type === Production.PredFun;
+}
+export function isSelectFun(obj: any): obj is SelectFun {
+  return obj.type === Production.SelectFun;
 }
