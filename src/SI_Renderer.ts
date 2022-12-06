@@ -592,7 +592,7 @@ function printContext(
   if (SI_STRUCT.isAppContext(ctx)) {
     const leftEls = [
       BSL_Print.printName(ctx.op),
-      ...ctx.values.map((v) => `${v}`),
+      ...ctx.values.map((v) => BSL_AST.isStructValue(v) ? BSL_Print.printValue(v) : `${v}`),
     ];
     acc.left = `${acc.left}(${leftEls.join(" ")} `;
     acc.right =
@@ -612,11 +612,18 @@ function printContext(
   }
   return printContext(ctx.ctx, acc);
 }
+function printValueOrId(vOrId: (SI_STRUCT.Value | SI_STRUCT.Id)): string {
+  if(SI_STRUCT.isValue(vOrId)) {
+    return BSL_Print.printValue(vOrId);
+  } else {
+    return printIdentifier(vOrId);
+  }
+}
 // recursive definition of printing the redex
 function printRedex(redex: SI_STRUCT.Redex): string {
   if (SI_STRUCT.isCallRedex(redex)) {
     return `(${BSL_Print.printName(redex.name)} ${redex.args
-      .map((arg) => (SI_STRUCT.isValue(arg) ? `${arg}` : printIdentifier(arg)))
+      .map(printValueOrId)
       .join(" ")})`;
   } else if (SI_STRUCT.isCondRedex(redex)) {
     return `(cond ${redex.options.map(BSL_Print.printOption).join(" ")})`;
