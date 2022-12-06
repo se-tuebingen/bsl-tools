@@ -125,6 +125,9 @@ div.stepper {
 .stepper .hole-result {
   background-color: var(--hole-green);
 }
+.stepper .hole-result.rule-hole {
+  padding: 0;
+}
 .stepper .hole-error {
   background-color: var(--hole-red);
 }
