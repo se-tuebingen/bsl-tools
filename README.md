@@ -255,71 +255,7 @@ locally (served via `file://`).
 
 ### Publishing a version
 
-Everytime a tag starting with `v` is published, a github workflow similar to the one running when
+Everytime a [tag](https://git-scm.com/book/en/v2/Git-Basics-Tagging) starting with `v` is published, a github workflow similar to the one running when
 something is pushed on main will kick off, compile and test the code.
 If the tag has the form `vX.X.X` (3 numbers), the module will be released under
 this name, otherwise, the workflow will fail.
-
-# Meeting Notes
-## Meeting 19.05.22
-
-- Parser in JS/TS bauen
-- Scribble Plugin bauen für ("string" / sexpr -> Tree)
-
-
-## Nice to have
-- PNG Vollbild von Tree für PDF
-
-
-
-# Meeting 09.06.
-
-- Vergleich zu Vorlesung theorethische Informatik bei der Darstellung von Auswertungsbäumen
-- Small-Step-Interpreter nach Vorbild von der einen Bachelorarbeit
-- (done in front-end) BSL-Grammatik ``&lt; &gt;`` escapen
-- (mvp steht) Zwei Ansätze zu Darstellung des AST (Programmiernah / Skriptnah (Grammatiksyntaxnah))
-- (done) backup skript für node_modules im Fall der Fälle
-
-## todos tree
-
-- Darstellung Skriptnah
-- Idee: Game-Like stats in Quiz Mode
-
-## visualisation
-### Values
-Value is a representation for legitimate Output
-- Literals (boolean, string, number, empty list, StructValue)
-- ClosureValue? (Function-Definition in Environment or Struct-Definition in Environment)
-
-### PROG with CONST
-(define x 2)
-(+ x (+ x (- 2 2)))
-ENV = []
-
-=> PROG
-
-(+ x (+ x (- 2 2)))
-ENV = ["x": 2]
-
-=> KONG MIT PRIM
-
-(+ x (+ x 0))
-ENV = ["x": 2]
-
-=> (KONG MIT) CONST
-
-(+ x (+ 2 0))
-
-=> KONG MIT PRIM
-
-(+ x 2)
-
-=> CONST
-
-(+ 2 2)
-
-=> PRIM
-
-4
-
-### Second Example
