@@ -1,4 +1,4 @@
-name: Compile and Publish Test Pages
+name: Compile and Publish Test Pages and Releases
 on:
   push:
     branches:
@@ -35,3 +35,13 @@ jobs:
         with:
           branch: gh-pages
           folder: tests
+      - name: Publish compiled version as development version
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            dist/bsl_tools.js
+            dist/bsl_tools.rkt

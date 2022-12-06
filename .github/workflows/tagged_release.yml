@@ -1,0 +1,31 @@
+name: Publish Tagged Commit as Versioned Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  tagged_release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: Install nodejs 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+      - run: npm install
+      - name: Compile
+        run: make build
+      - name: Execute Tests
+        run: make test
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            dist/bsl_tools.js
+            dist/bsl_tools.rkt
