@@ -287,7 +287,8 @@ function renderEvalSteps(
           } <img class="icon" src="${angle_down}">
         </div>
 
-        <div class="split-result code">
+        <div class="plug-result code"
+             data-info-collapsed="true">
           ${
             SI_STRUCT.isDefinitionStep(progStep)
               ? BSL_Print.printDefinition(progStep.result)
@@ -297,6 +298,13 @@ function renderEvalSteps(
                     : BSL_Print.printValue(progStep.result)
                 }`
           }
+          <img class="icon info-toggle info-expand"
+                  src="${circle_info}"
+                  onclick="expandInfo(event)">
+          <img class="icon info-toggle info-collapse"
+                  src="${circle_xmark}"
+                  onclick="collapseInfo(event)">
+          ${renderRuleInformation('Prog', false)}
         </div>
       </div>
     </div>

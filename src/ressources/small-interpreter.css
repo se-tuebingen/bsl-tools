@@ -88,6 +88,13 @@ div.stepper {
 .stepper .step:last-child .next-button::after {
   content: ' (PROG)';
 }
+.stepper .step:last-child .info-toggle {
+  position: absolute;
+  right: 0;
+  bottom: -4em;
+  margin: 0;
+  background-color: white;
+}
 .stepper .icon {
   display: inline-block;
   height: 1em;
