@@ -31,6 +31,12 @@ build:
 	echo "Compiling TypeScript and Ressources to JavaScript"
 	node_modules/.bin/esbuild src/bsl_tools.ts --bundle --minify --sourcemap=inline --target=chrome58,firefox57,safari11,edge16 --outfile=dist/bsl_tools.js --watch --loader:.css=text --loader:.svg=dataurl
 
+headless_build:
+	echo "Building Parser TypeScript from Grammar"
+	node_modules/.bin/tspegjs -o src/BSL_Parser.ts src/grammar/bsl.pegjs
+	echo "Compiling TypeScript and Ressources to JavaScript"
+	node_modules/.bin/esbuild src/bsl_tools.ts --bundle --minify --sourcemap=inline --target=chrome58,firefox57,safari11,edge16 --outfile=dist/bsl_tools.js --loader:.css=text --loader:.svg=dataurl
+
 test:
 	cd tests/javascript && cp ../../dist/bsl_tools.js bsl_tools.js
 	cd tests/scribble && ./test.sh

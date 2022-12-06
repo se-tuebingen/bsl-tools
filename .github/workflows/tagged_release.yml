@@ -18,7 +18,7 @@ jobs:
           cache: 'npm'
       - run: npm install
       - name: Compile
-        run: make build
+        run: make headless_build
       - name: Execute Tests
         run: make test
 

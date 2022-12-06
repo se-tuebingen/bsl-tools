@@ -28,7 +28,7 @@ jobs:
       # - name: Install TypeScript
       #   run: npm install -g typescript
       - name: Compile
-        run: make build
+        run: make headless_build
       - name: Execute Tests
         run: make test
       - uses: JamesIves/github-pages-deploy-action@4.1.7
