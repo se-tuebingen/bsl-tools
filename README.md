@@ -7,6 +7,12 @@ Beginning Student Language is a programming language in DrRacket. This repositor
 
 The current test build can be seen at <https://se-tuebingen.github.io/bsl-tools/>. [![Compile and Publish Test Pages](https://github.com/se-tuebingen/bsl-tools/actions/workflows/publish.yml/badge.svg)](https://github.com/se-tuebingen/bsl-tools/actions/workflows/publish.yml)
 
+The module is distributed as a single JavaScript file and an optional
+additional Racket file for use with Scribble.
+You can download them from [Releases](https://github.com/se-tuebingen/bsl-tools/releases),
+the current test build shows the "Development Build" and corresponds to the state
+of the main branch, we also try to provide semantic versioned editions.
+
 ## How to use: HTML
 
 Currently, the collapsible AST tree view and the BSL-Stepper are implemented.
@@ -246,6 +252,13 @@ In order to be able to render the Scribble test pages, you need to have
 
 The HTML test pages load the JavaScript plugin from the `dist` folder if opened
 locally (served via `file://`).
+
+### Publishing a version
+
+Everytime a tag starting with `v` is published, a github workflow similar to the one running when
+something is pushed on main will kick off, compile and test the code.
+If the tag has the form `vX.X.X` (3 numbers), the module will be released under
+this name, otherwise, the workflow will fail.
 
 # Meeting Notes
 ## Meeting 19.05.22
