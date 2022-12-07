@@ -24,26 +24,24 @@ export function processSteppers() {
       console.log(BSL_Print.indent(BSL_Print.pprint(program), 30));
       setUpStepperGui(program, el as HTMLElement);
     } catch (e: any) {
-      let error;
-      if (e) {
-        console.error(e);
-        error = `${e}`;
-      } else {
-        console.log("Unknown error");
-        error = "Unknown Error";
-      }
-      el.innerHTML = `
-        <h3>Error turning Program into Stepper</h3>
-        <div>${el.innerHTML}</div>
-        <div>${error}</div>
-      `;
-      (el as HTMLElement).style.cssText = `
-        padding: 2em;
-        color: darkred;
-        display: block;
-      `;
+      renderError(e, el as HTMLElement);
     }
   });
+}
+
+function renderError(err: any, el: HTMLElement) {
+  console.error(err);
+  const error = err ? `${err}` : 'Unknown Error';
+  el.innerHTML = `
+    <h3>Error turning Program into Stepper</h3>
+    <div>${el.innerHTML}</div>
+    <div>${error}</div>
+  `;
+  (el as HTMLElement).style.cssText = `
+    padding: 2em;
+    color: darkred;
+    display: block;
+  `;
 }
 
 // ### set up a single stepper ###
@@ -51,37 +49,65 @@ export function setUpStepperGui(
   program: BSL_AST.program,
   el: HTMLElement
 ): void {
-  // add css if necessary
+  addStylesheet();
+  const stepper = calculateProgram(program);
+  if (stepper instanceof Error) throw stepper;
+  const lang = getLanguage(el);
+  const measures = getPixelMeasurements(el); // for static maxwidth indentation & clipping
+  el.innerHTML = renderStepper(stepper, lang, measures);
+}
+
+function addStylesheet() {
   if (!document.getElementById("bsl-tools-stepper-style")) {
     const styleNode = document.createElement("style");
     styleNode.innerHTML = stepper_css;
     styleNode.id = "bsl-tools-stepper-style";
     document.getElementsByTagName("head")[0].appendChild(styleNode);
   }
-  // calculate Steps
-  const expr = program[0] as BSL_AST.expr;
-  console.log("expression", expr);
-  const stepper = calculateProgram(program);
-  if (stepper instanceof Error) {
-    throw stepper;
-  }
-  console.log("stepper", stepper);
-  // set language
-  let lang = el.getAttribute("lang");
+}
+
+function getLanguage(el: HTMLElement): implementedLanguage {
+  const lang = el.getAttribute("lang");
   if (!lang) {
-    lang = "en";
+    return "en";
   } else if (!implementedLanguages.includes(lang)) {
     console.error(`
         Language ${lang} is not implemented for this module,
         you can choose from ${implementedLanguages.join(",")}.
         Defaulting to 'en'.
       `);
-    lang = "en";
+    return "en";
   }
-  // get width of single character and available pixel width for static maxwidth indentation
-  const measures = getPixelMeasurements(el);
-  // render and attach
-  el.innerHTML = renderStepper(stepper, lang as implementedLanguage, measures);
+  return lang as implementedLanguage;
+}
+
+// helper for getting width of em in px
+interface PixelMeasurements {
+  charWidth: number,
+  maxChars: number
+}
+function getPixelMeasurements(el: HTMLElement): PixelMeasurements {
+  const measureText = 'Loading...';
+  el.innerHTML = `
+    <div class="bsl-tools-stepper" style="width: 100%;">
+      <div class="box">
+        <div class="step code"
+             data-currentStep="true">
+          <p style="display: inline-block;">${measureText}</p>
+        </div>
+      </div>
+    </div>
+  `;
+  const p = el.getElementsByTagName("p")[0];
+  const stepper = el.getElementsByClassName("bsl-tools-stepper")[0];
+  if (!p || !stepper) {
+    console.error("failed to inject measuring HTML into", el);
+    return {charWidth: 12, maxChars: 80}; // arbitrary value
+  }
+  const charPxWidth = p.clientWidth / measureText.length;
+  const factor = 0.9;
+  const maxWidthInChars = Math.round((factor * stepper.clientWidth) / charPxWidth);
+  return {charWidth: charPxWidth, maxChars: maxWidthInChars};
 }
 
 // ###### internationalization for this module #####
@@ -112,38 +138,6 @@ const dictionary = {
 };
 
 // ####### RENDER FUNCTIONS #######
-// helper for getting width of em in px
-interface PixelMeasurements {
-  charWidth: number,
-  maxChars: number
-}
-function getPixelMeasurements(el: HTMLElement): PixelMeasurements {
-  el.innerHTML = `
-    <div class="bsl-tools-stepper" style="width: 100%;">
-      <div class="box">
-        <div class="step code"
-             data-currentStep="true">
-          <p style="display: inline-block;">Loading...</p>
-        </div>
-      </div>
-    </div>
-  `;
-  const p = el.getElementsByTagName("p")[0];
-  const stepper = el.getElementsByClassName("bsl-tools-stepper")[0];
-  if (!p || !stepper) {
-    console.error("failed to inject measuring HTML into", el);
-    return {charWidth: 12, maxChars: 80}; // arbitrary value
-  }
-  const charPxWidth = p.clientWidth / "Loading...".length;
-  console.log(`Found that 1em is ${charPxWidth} wide`);
-  const factor = 0.9;
-  const maxWidthInChars = Math.round((factor * stepper.clientWidth) / charPxWidth);
-  console.log(`
-    That means to fill ${factor} of the available width,
-    we may print at most ${maxWidthInChars} characters.
-  `);
-  return {charWidth: charPxWidth, maxChars: maxWidthInChars};
-}
 
 // main function
 function renderStepper(
