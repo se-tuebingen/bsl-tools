@@ -38,8 +38,8 @@ export function productionTree(
   }
   // render HTML
   target.innerHTML = `
-  <div class="tree-container">
-    <ul class="tree ast">
+  <div class="bsl-tools-tree-container">
+    <ul class="bsl-tools-tree">
       ${quiz
         ? renderQuizNode(root, lang as implementedLanguage, grammar as grammar)
         : renderNode(root, grammar as grammar)}
@@ -165,9 +165,9 @@ function renderCode(n: node):string {
 (window as any).toggleChild = (e: Event,i:number) => {
   const hole = e.target as HTMLElement;
   const li = getParentTagRecursive(hole, 'li');
-  const tree = getParentClassRecursive(hole, 'tree');
+  const tree = getParentClassRecursive(hole, 'bsl-tools-tree');
   if(!li || !tree) {
-    console.error('toggleChild called from .hole not in .tree');
+    console.error('toggleChild called from .hole not in .bsl-tools-tree');
     return;
   };
 
@@ -278,7 +278,7 @@ function renderProductionQuiz(n: node, lang: implementedLanguage, grammar: gramm
         l.setAttribute('data-collapsed', 'false'));
 
       // adjust connectors
-      const quiz = getParentClassRecursive(span, 'tree');
+      const quiz = getParentClassRecursive(span, 'bsl-tools-tree');
       if (quiz) adjustConnectors(quiz);
     }
   } else {
@@ -378,7 +378,7 @@ function renderHoleQuiz(n: node, lang: implementedLanguage):string {
         c.setAttribute('data-collapsed', 'false'));
 
       // adjust connectors for width change
-      const quiz = getParentClassRecursive(span, 'tree');
+      const quiz = getParentClassRecursive(span, 'bsl-tools-tree');
       if (quiz) adjustConnectors(quiz);
     }
   }

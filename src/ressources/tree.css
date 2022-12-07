@@ -1,5 +1,5 @@
 /* ######## color variables ###### */
-.tree {
+.bsl-tools-tree {
   --branch-color: #666;
   --node-background: #ebf0f4; /* racket azure */
   --text-grey: #444; /* like in scribble */
@@ -15,15 +15,15 @@ https://www.cssscript.com/clean-tree-diagram/
 (Edited and extended)
 */
 /* ###### parent ###### */
-.tree-container {
+.bsl-tools-tree-container {
   text-align: center;
   overflow-y: scroll;
 }
 
 /* ###### node layout ######## */
-.tree,
-.tree ul,
-.tree li {
+.bsl-tools-tree,
+.bsl-tools-tree ul,
+.bsl-tools-tree li {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -31,31 +31,31 @@ https://www.cssscript.com/clean-tree-diagram/
     white-space: nowrap;
 }
 
-.tree {
+.bsl-tools-tree {
     margin: 0 0 1em;
     text-align: center;
     margin-left: auto;
     margin-right: auto;
 }
 
-.tree,
-.tree ul {
+.bsl-tools-tree,
+.bsl-tools-tree ul {
     display: table;
 }
 
-.tree ul {
+.bsl-tools-tree ul {
     width: 100%;
 }
 
-.tree li {
+.bsl-tools-tree li {
     display: table-cell;
     padding: 0;
     padding-top: 1.5em;
     vertical-align: top;
 }
 
-.tree code,
-.tree span {
+.bsl-tools-tree code,
+.bsl-tools-tree span {
     border: solid .1em var(--branch-color);
     border-radius: .2em;
     display: inline-block;
@@ -69,17 +69,17 @@ https://www.cssscript.com/clean-tree-diagram/
 
 /* ########### custom AST node  styles ######## */
 /* node */
-.tree span {
+.bsl-tools-tree span {
   font-family: 'Fira-Mono', monospace;
   background-color: var(--node-background);
   transition: 1s background-color ease-out;
 }
-.tree .terminal-symbol {
+.bsl-tools-tree .terminal-symbol {
   border-width: .2em;
   border-style: double;
 }
 /* node label */
-.tree .name {
+.bsl-tools-tree .name {
   color: var(--text-grey);
   font-style: italic;
   font-size: 0.85em;
@@ -92,10 +92,10 @@ https://www.cssscript.com/clean-tree-diagram/
   background-color: rgba(255,255,255,0.7);
 }
 /* tooltip */
-.tree .name .tooltip {
+.bsl-tools-tree .name .tooltip {
   display: none;
 }
-.tree .name:hover .tooltip {
+.bsl-tools-tree .name:hover .tooltip {
   display: block;
   position: absolute;
   left: 100%;
@@ -109,7 +109,7 @@ https://www.cssscript.com/clean-tree-diagram/
 
 /* ###### connectors ########### */
 /* part above box */
-.tree span:before {
+.bsl-tools-tree span:before {
     outline: solid 1px var(--branch-color);
     content: "";
     width: var(--connector-width, 0px); /* to be set dynamically */
@@ -118,46 +118,46 @@ https://www.cssscript.com/clean-tree-diagram/
     top: -1.5em;
     transform: var(--connector-transform); /* to be set dynamically */
 }
-.tree span.terminal-symbol:before {
+.bsl-tools-tree span.terminal-symbol:before {
   top: calc(-1.5em - .2em);
 }
 
 /* ####### highlight way back up from a node ###### */
-/* .tree li:hover > span {
+/* .bsl-tools-tree li:hover > span {
   border-color: var(--highlight-border-connectors);
 }
-.tree li:hover::before {
+.bsl-tools-tree li:hover::before {
   border-color: var(--highlight-border-connectors);
   z-index: 1000;
 }
-.tree li:hover > span::before {
+.bsl-tools-tree li:hover > span::before {
   outline-color: var(--highlight-border-connectors);
 } */
 
 /* ######## hide connectors over root ######## */
-.tree>li:before,
-.tree>li:after,
-.tree>li>code:before,
-.tree>li>span:before {
+.bsl-tools-tree>li:before,
+.bsl-tools-tree>li:after,
+.bsl-tools-tree>li>code:before,
+.bsl-tools-tree>li>span:before {
     outline: none !important;
     border: none !important;
 }
-.tree>li {
+.bsl-tools-tree>li {
     margin-top: 0;
 }
 
 /* ####### collapse nodes ######## */
 /* click on span to hide/show */
-.tree .hole:hover {
+.bsl-tools-tree .hole:hover {
   cursor: pointer;
 }
 
-.tree [data-collapsed="true"] {
+.bsl-tools-tree [data-collapsed="true"] {
   display: none;
 }
 
 /* ######### holes ########## */
-.tree .char {
+.bsl-tools-tree .char {
   display: inline;
   margin: 0;
   border: none;
@@ -166,11 +166,11 @@ https://www.cssscript.com/clean-tree-diagram/
   background-color: transparent;
   transition: background-color 1s ease-out;
 }
-.tree .char::before {
+.bsl-tools-tree .char::before {
   display: none;
 }
 
-.tree .hole {
+.bsl-tools-tree .hole {
   display: inline-block;
   background-color: var(--hole-yellow);
   border: 1px solid var(--text-grey);
@@ -183,25 +183,25 @@ https://www.cssscript.com/clean-tree-diagram/
 /* ########### quiz ########## */
 
 /* quiz stages */
-.tree span[data-quiz-state="production"] .name,
-.tree span[data-quiz-state="production"] .code,
-.tree span[data-quiz-state="production"] .hole-marking {
+.bsl-tools-tree span[data-quiz-state="production"] .name,
+.bsl-tools-tree span[data-quiz-state="production"] .code,
+.bsl-tools-tree span[data-quiz-state="production"] .hole-marking {
   display: none;
 }
 
-.tree span[data-quiz-state="hole-marking"] .code,
-.tree span[data-quiz-state="hole-marking"] .production {
+.bsl-tools-tree span[data-quiz-state="hole-marking"] .code,
+.bsl-tools-tree span[data-quiz-state="hole-marking"] .production {
   display: none;
 }
 
-.tree span[data-quiz-state="done"] .production,
-.tree span[data-quiz-state="done"] .hole-marking {
+.bsl-tools-tree span[data-quiz-state="done"] .production,
+.bsl-tools-tree span[data-quiz-state="done"] .hole-marking {
   display: none;
 }
 
 /* highlighting text by putting a div behind a textarea */
-.tree textarea,
-.tree .marker-container {
+.bsl-tools-tree textarea,
+.bsl-tools-tree .marker-container {
   font-family: inherit;
   resize: none;
   font-size: calc(1em);
@@ -211,16 +211,16 @@ https://www.cssscript.com/clean-tree-diagram/
   box-sizing: border-box;
 }
 
-.tree .textarea-container {
+.bsl-tools-tree .textarea-container {
   position: relative;
   display: inline-block;
 }
-.tree textarea {
+.bsl-tools-tree textarea {
   position: relative;
   background-color: transparent;
   z-index: 2;
 }
-.tree .marker-container {
+.bsl-tools-tree .marker-container {
   text-align: left;
   background-color: var(--hole-selection-background);
   position: absolute;
@@ -228,18 +228,18 @@ https://www.cssscript.com/clean-tree-diagram/
   left: 0;
   z-index: 1;
 }
-.tree .marker {
+.bsl-tools-tree .marker {
   color: transparent;
   background-color: transparent;
   transition: 1s background-color ease-out;
 }
 
 /* feedback for wrong answer */
-.tree .wrong {
+.bsl-tools-tree .wrong {
   background-color: var(--wrong-background);
   transition: none;
 }
-.tree .correct {
+.bsl-tools-tree .correct {
   background-color: var(--correct-background);
   transition: none;
 }
