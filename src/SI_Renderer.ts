@@ -6,7 +6,7 @@ import * as BSL_Print from "./BSL_Print";
 import * as SI_STRUCT from "./SI_STRUCT";
 import { calculateProgram } from "./SI";
 // styles & icon ressources
-import { default as small_interpreter_css } from "./ressources/small-interpreter.css";
+import { default as stepper_css } from "./ressources/stepper.css";
 import { default as angle_up } from "./ressources/icons/angle-up-solid.svg";
 import { default as angle_down } from "./ressources/icons/angle-down-solid.svg";
 import { default as plus_icon } from "./ressources/icons/plus-solid.svg";
@@ -54,7 +54,7 @@ export function setUpStepperGui(
   // add css if necessary
   if (!document.getElementById("bsl-tools-stepper-style")) {
     const styleNode = document.createElement("style");
-    styleNode.innerHTML = small_interpreter_css;
+    styleNode.innerHTML = stepper_css;
     styleNode.id = "bsl-tools-stepper-style";
     document.getElementsByTagName("head")[0].appendChild(styleNode);
   }
