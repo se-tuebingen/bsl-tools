@@ -119,7 +119,7 @@ const dictionary = {
     "current evaluation": "Current Evaluation",
     "next step": "Next Step",
     "previous step": "Previous Step",
-    environment: "Environment",
+    "environment": "Environment",
     "remaining program": "Remaining Program",
     "start evaluation": "Start Evaluation",
     "evaluation finished": "Evaluation Finished",
@@ -129,7 +129,7 @@ const dictionary = {
     "current evaluation": "Aktuelle Auswertung",
     "next step": "Nächster Schritt",
     "previous step": "Vorheriger Schritt",
-    environment: "Umgebung",
+    "environment": "Umgebung",
     "remaining program": "Verbleibendes Programm",
     "start evaluation": "Auswertung Starten",
     "evaluation finished": "Auswertung Beendet",
@@ -147,21 +147,22 @@ function renderStepper(
 ): string {
   const progSteps = stepper.progSteps;
 
-  const str = `<div class="bsl-tools-stepper">
+  return `
+    <div class="bsl-tools-stepper">
 
        <div class="box environment">
          <div class="boxlabel">${dictionary[lang]["environment"]}</div>
          ${progSteps.map((s,i) => renderDefinition(s, i, measures)).join("")}
        </div>
 
-       <div class="box expression-steps"
+       <div class="box eval-steps"
             data-progstep="-1"
             data-visible="true">
          <div class="boxlabel">${dictionary[lang]["current evaluation"]}</div>
          <div class="step"
               data-currentStep="true">
            <div class="next-button"
-                onclick="gotoExpression(event, 1)">
+                onclick="showExpression(event, 1)">
              ${
                dictionary[lang]["start evaluation"]
              } <img class="icon" src="${angle_down}">
@@ -171,7 +172,7 @@ function renderStepper(
 
        ${progSteps.map((el, i) => renderEvalSteps(el, i, lang, measures)).join("")}
 
-       <div class="box expression-steps"
+       <div class="box eval-steps"
             data-progstep="${progSteps.length}"
             data-visible="false">
          <div class="boxlabel">${dictionary[lang]["current evaluation"]}</div>
@@ -179,7 +180,7 @@ function renderStepper(
               data-currentStep="true">
             <div class="code">${dictionary[lang]["evaluation finished"]}</div>
             <div class="prev-button"
-                 onclick="gotoExpression(event, -1)">
+                 onclick="showExpression(event, -1)">
               ${
                 dictionary[lang]["go back"]
               } <img class="icon" src="${angle_up}">
@@ -193,16 +194,15 @@ function renderStepper(
        </div>
 
     </div>`;
-  return str;
 }
-(window as any).gotoExpression = (e: Event, a: number) => {
-  navigateExpression(e, a);
+(window as any).showExpression = (e: Event, a: number) => {
+  showEvalStep(e, a);
 };
 // render what remains of an expression after evaluation
 function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number, measures: PixelMeasurements): string {
   // filtering at this position in order to keep correct implicit progStep index
-  if (SI_STRUCT.isDefinitionStep(progStep)) {
-    return `
+  if (!SI_STRUCT.isDefinitionStep(progStep)) return "";
+  return `
       <div class="step code"
            data-progstep="${idx}"
            data-visible="false">
@@ -213,9 +213,6 @@ function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number, measures: P
         )}
       </div>
     `;
-  } else {
-    return "";
-  }
 }
 
 // render the part of the original Program that is being represented by a progstep
@@ -245,86 +242,89 @@ function renderEvalSteps(
   lang: implementedLanguage,
   measures: PixelMeasurements
 ): string {
-  function renderDefinitionContext(def: BSL_AST.definition): Context {
-    if (BSL_AST.isConstDef(def)) {
-      return { left: `(define ${def.name.symbol} `, right: ")" };
-    } else {
-      // does not matter, no eval steps here anyway
-      return { left: "", right: "" };
-    }
-  }
-  const ctx = SI_STRUCT.isDefinitionStep(progStep)
-    ? renderDefinitionContext(progStep.originalDefOrExpr)
+  const ctx =
+    SI_STRUCT.isDefinitionStep(progStep) && BSL_AST.isConstDef(progStep.originalDefOrExpr)
+    ? { left: `(define ${progStep.originalDefOrExpr.name.symbol} `, right: ")" }
     : { left: "", right: "" };
   return `
-    <div class="box expression-steps"
+    <div class="box eval-steps"
          data-progstep="${idx}"
          data-visible="false">
       <div class="boxlabel">${dictionary[lang]["current evaluation"]}</div>
       ${
-        // all evaluation steps
         progStep.evalSteps
           .map((el, i) => renderStep(i, el, lang, { ...ctx }, measures))
           .join("")
-        // result
       }
-      <div class="step"
-           data-step="${progStep.evalSteps.length}"
-           data-currentStep="${
-             progStep.evalSteps.length === 0 ? "true" : "false"
-           }"
-           data-collapsed="false">
-        <div class="prev-button"
-             onclick="prevStep(event)">
-          ${
-            dictionary[lang]["previous step"]
-          } <img class="icon" src="${angle_up}">
-        </div>
-        <div class="next-button"
-             onclick="nextStep(event)">
-          ${
-            dictionary[lang]["next step"]
-          } <img class="icon" src="${angle_down}">
-        </div>
+      ${renderLastStep(progStep, lang, measures)}
 
-        <div class="plug-result code"
-             data-info-collapsed="true">
-          ${
-            BSL_Print.sanitize(
-              SI_STRUCT.isDefinitionStep(progStep)
-              ? BSL_Print.printDefinition(progStep.result)
-              : `${
-                  progStep.result instanceof Error
-                    ? progStep.result
-                    : BSL_Print.printValue(progStep.result)
-                }`)
-          }
-          <img class="icon info-toggle info-expand"
-                  src="${circle_info}"
-                  onclick="expandInfo(event)">
-          <img class="icon info-toggle info-collapse"
-                  src="${circle_xmark}"
-                  onclick="collapseInfo(event)">
-          ${renderRuleInformation('Prog', false)}
-        </div>
-      </div>
     </div>
   `;
 }
-// navigate between expressions
-function navigateExpression(e: Event, amount: number): void {
+
+function renderLastStep(
+  progStep: SI_STRUCT.ProgStep,
+  lang: implementedLanguage,
+  measures: PixelMeasurements
+): string {
+  return `
+  <div class="step"
+       data-step="${progStep.evalSteps.length}"
+       data-currentStep="${
+         progStep.evalSteps.length === 0 ? "true" : "false"
+       }"
+       data-collapsed="false">
+    <div class="prev-button"
+         onclick="prevStep(event)">
+      ${
+        dictionary[lang]["previous step"]
+      } <img class="icon" src="${angle_up}">
+    </div>
+    <div class="next-button"
+         onclick="nextStep(event)">
+      ${
+        dictionary[lang]["next step"]
+      } <img class="icon" src="${angle_down}">
+    </div>
+
+    <div class="plug-result code"
+         data-info-collapsed="true">
+      ${
+        BSL_Print.indent(BSL_Print.sanitize(
+          SI_STRUCT.isDefinitionStep(progStep)
+          ? BSL_Print.printDefinition(progStep.result)
+          : `${
+              progStep.result instanceof Error
+                ? progStep.result
+                : BSL_Print.printValue(progStep.result)
+            }`), measures.maxChars)
+      }
+      <img class="icon info-toggle info-expand"
+              src="${circle_info}"
+              onclick="expandInfo(event)">
+      <img class="icon info-toggle info-collapse"
+              src="${circle_xmark}"
+              onclick="collapseInfo(event)">
+      ${renderRuleInformation('Prog', false)}
+    </div>
+  </div>
+  `;
+}
+
+// navigate between evaluation steps
+function showEvalStep(e: Event, amount: number): void {
   const el = e.target as HTMLElement;
   // el will be a button
   const oldButtonPosition = el.getBoundingClientRect().y;
-  const expressionDiv = getParentClassRecursive(el, "expression-steps");
+  const expressionDiv = getParentClassRecursive(el, "eval-steps");
   if (!expressionDiv) {
-    console.error("found no parent with class .expression-steps", el);
+    console.error("found no parent with class .eval-steps", el);
     return;
   }
   const idxString = expressionDiv.getAttribute("data-progstep");
   if (!idxString) {
     console.error(
-      "div with class .expression-steps has no data-progstep attribute",
+      "div with class .eval-steps has no data-progstep attribute",
       expressionDiv
     );
     return;
@@ -358,7 +358,7 @@ function navigateExpression(e: Event, amount: number): void {
     }
   });
   // show correct stepper
-  navigateDOM([expressionDiv], "../.expression-steps").map((e) => {
+  navigateDOM([expressionDiv], "../.eval-steps").map((e) => {
     const idxString = e.getAttribute("data-progstep");
     if (idxString) {
       if (parseInt(idxString) === targetIdx) {
@@ -537,7 +537,7 @@ function renderStep(
     window.scrollBy(0, newButtonPosition - oldButtonPosition);
   } else if (currentStep && !currentStep.nextElementSibling) {
     // continue with next expression
-    navigateExpression(e, 1);
+    showEvalStep(e, 1);
   }
 };
 (window as any).prevStep = (e: Event) => {
@@ -552,7 +552,7 @@ function renderStep(
   } else {
     const position = currentStep.getAttribute("data-step");
     if (position === "0") {
-      navigateExpression(e, -1);
+      showEvalStep(e, -1);
       return;
     } else if (currentStep.previousElementSibling) {
       currentStep.setAttribute("data-currentStep", "false");
