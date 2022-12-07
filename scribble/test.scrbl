@@ -172,6 +172,13 @@ Errors in JSON will not be caught by Scribble!
 @section{Stepper Tests}
 
 @subsection{English}
+
+Here is some example text - this way, we can compare how the font sizes match
+or do not match. A longer paragraph should give a better impression of how text
+looks like.
+
+I even threw in an extra paragraph, that's how generous I am!
+
 @stepper[
 #'((* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
 (cond [(>= 5 5) "isThree"]
@@ -191,7 +198,14 @@ Errors in JSON will not be caught by Scribble!
 ]
 
 @subsection{German}
-@stepper[ #:lang "de" 
+
+Mit ein bisschen Text über dem Stepper können wir die Schriftgrößen vergleichen
+und ein bisschen so tun, als wüssten wir jetzt wie es in einem richtigen Dokument
+aussähe.
+
+Hier ist noch ein extra-Absatz!
+
+@stepper[ #:lang "de"
 #'((* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
 (cond [(>= 5 5) "isThree"]
 [#false 3]
