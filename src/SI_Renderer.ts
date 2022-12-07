@@ -454,8 +454,9 @@ function renderStep(
       ? KONG_WIDTH
       : hole_position;
   // find out if we have place to repeat the holes
+  const ruleNameOnlyText = rules[ruleName]["name"].replaceAll('<cap>', '').replaceAll('</cap>','');
   const space_left = // 3 for the arrow, 2 for the icon ---v
-    measures.maxChars - left_offset_arrow - rules[ruleName]["name"].length - 5;
+    measures.maxChars - left_offset_arrow - ruleNameOnlyText.length - 5;
   const renderHolesInRule = redex.length + result.redex.length <= space_left;
 
   return `
@@ -465,9 +466,7 @@ function renderStep(
          data-collapsed="false">
       <div class="prev-button"
            onclick="prevStep(event)">
-        ${
-          dictionary[lang]["previous step"]
-        } <img class="icon" src="${angle_up}">
+        ${dictionary[lang]["previous step"]} <img class="icon" src="${angle_up}">
       </div>
       <div class="next-button"
            onclick="nextStep(event)">
@@ -495,18 +494,18 @@ function renderStep(
           }
 
           <span class="rule left-arrowed one-rule"
-                style="--one-rule-margin-left: ${
-                  left_offset_arrow * measures.charWidth
-                }px">
+                style="--one-rule-margin-left: ${left_offset_arrow * measures.charWidth}px">
              <span class="rule-name">${rules[ruleName]["name"]}</span>${
-    renderHolesInRule
-      ? `:
-               <span class="rule-description">
-                 <span class="hole rule-hole">${redex}</span> →
-                 <span class="hole hole-result rule-hole">${BSL_Print.sanitize(result.redex)}</span>
-               </span>`
-      : ""
-  }
+                renderHolesInRule
+                  ? `:
+                   <span class="rule-description">
+                     <span class="hole rule-hole">${redex}</span> →
+                     <span class="hole hole-result rule-hole">${
+                       BSL_Print.sanitize(result.redex)
+                     }</span>
+                   </span>`
+                  : ""
+              }
            </span>
 
            <img src="${circle_info}"
@@ -529,58 +528,50 @@ function renderStep(
   const button = e.target as HTMLElement;
   const oldButtonPosition = button.getBoundingClientRect().y;
   const currentStep = getParentClassRecursive(button, "step");
-  if (currentStep && currentStep.nextElementSibling) {
-    currentStep.setAttribute("data-currentStep", "false");
-    currentStep.setAttribute("data-collapsed", "true");
-    currentStep.nextElementSibling.setAttribute("data-currentStep", "true");
-    currentStep.nextElementSibling.setAttribute("data-collapsed", "false");
-    // move "next" button under mouse
-    const newButton =
-      currentStep.nextElementSibling.querySelector(".next-button");
-    if (!newButton) return;
-    const newButtonPosition = newButton.getBoundingClientRect().y;
-    window.scrollBy(0, newButtonPosition - oldButtonPosition);
-  } else if (currentStep && !currentStep.nextElementSibling) {
+  if(!currentStep) return;
+  const newCurrentStep = currentStep.nextElementSibling;
+  if(!newCurrentStep) {
     // continue with next expression
     takeProgSteps(e, 1);
+    return;
   }
+  currentStep.setAttribute("data-currentStep", "false");
+  currentStep.setAttribute("data-collapsed", "true");
+  newCurrentStep.setAttribute("data-currentStep", "true");
+  newCurrentStep.setAttribute("data-collapsed", "false");
+  // move "next" button under mouse
+  const newButton = newCurrentStep.querySelector(".next-button");
+  if (!newButton) return;
+  const newButtonPosition = newButton.getBoundingClientRect().y;
+  window.scrollBy(0, newButtonPosition - oldButtonPosition);
 };
 (window as any).prevStep = (e: Event) => {
   const button = e.target as HTMLElement;
   const oldButtonPosition = button.getBoundingClientRect().y;
   const currentStep = getParentClassRecursive(button, "step");
   if (!currentStep) {
-    console.error(
-      "prevStep not called from within an element of the .step class"
-    );
+    console.error("prevStep not called from within an element of the .step class");
     return;
-  } else {
-    const position = currentStep.getAttribute("data-step");
-    if (position === "0") {
-      takeProgSteps(e, -1);
-      return;
-    } else if (currentStep.previousElementSibling) {
-      currentStep.setAttribute("data-currentStep", "false");
-      currentStep.setAttribute("data-collapsed", "true");
-      currentStep.previousElementSibling.setAttribute(
-        "data-currentStep",
-        "true"
-      );
-      currentStep.previousElementSibling.setAttribute(
-        "data-collapsed",
-        "false"
-      );
-      // move "prev" button to be under mouse
-      const newButton =
-        currentStep.previousElementSibling.querySelector(".prev-button");
-      if (!newButton) return;
-      const newButtonPosition = newButton.getBoundingClientRect().y;
-      window.scrollBy(0, newButtonPosition - oldButtonPosition);
-    } else {
-      console.error("prevStep called on a step with no previous html element");
-      return;
-    }
   }
+  const position = currentStep.getAttribute("data-step");
+  if (position === "0") {
+    takeProgSteps(e, -1);
+    return;
+  }
+  const newCurrentStep = currentStep.previousElementSibling;
+  if(!newCurrentStep) {
+    console.error("prevStep called on a step with no previous html element");
+    return;
+  }
+  currentStep.setAttribute("data-currentStep", "false");
+  currentStep.setAttribute("data-collapsed", "true");
+  newCurrentStep.setAttribute("data-currentStep","true");
+  newCurrentStep.setAttribute("data-collapsed","false");
+  // move "prev" button to be under mouse
+  const newButton = newCurrentStep.querySelector(".prev-button");
+  if (!newButton) return;
+  const newButtonPosition = newButton.getBoundingClientRect().y;
+  window.scrollBy(0, newButtonPosition - oldButtonPosition);
 };
 (window as any).collapse = (e: Event) => {
   const button = e.target as HTMLElement;
