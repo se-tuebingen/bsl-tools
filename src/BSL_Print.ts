@@ -48,7 +48,7 @@ export function printValue(val: boolean | string | number | BSL_AST.StructValue)
     return val ? "#true" : "#false";
   }
   if (BSL_AST.isStructValue(val)) {
-  return `&lt;${printName(val.structDef)} ${val.properties.map(printE).join(" ")}&gt;`;
+  return `<${printName(val.structDef)} ${val.properties.map(printE).join(" ")}>`;
 }
   else {
     return `${val}`;

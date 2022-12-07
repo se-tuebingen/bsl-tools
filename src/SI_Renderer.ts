@@ -290,13 +290,14 @@ function renderEvalSteps(
         <div class="plug-result code"
              data-info-collapsed="true">
           ${
-            SI_STRUCT.isDefinitionStep(progStep)
+            BSL_Print.sanitize(
+              SI_STRUCT.isDefinitionStep(progStep)
               ? BSL_Print.printDefinition(progStep.result)
               : `${
                   progStep.result instanceof Error
                     ? progStep.result
                     : BSL_Print.printValue(progStep.result)
-                }`
+                }`)
           }
           <img class="icon info-toggle info-expand"
                   src="${circle_info}"
@@ -398,24 +399,32 @@ function renderStep(
     : step.rule;
   // result and rule name
   const redex: string = BSL_Print.sanitize(printRedex(redexRule.redex));
-  function renderResult(res: BSL_AST.expr | SI_STRUCT.Value | Error): string {
+  function renderResult(res: BSL_AST.expr | SI_STRUCT.Value | Error): {html: string, redex: string} {
     if (SI_STRUCT.isValue(res)) {
-      return `${
-        context.left
-      }<span class="hole hole-result">${BSL_Print.printValue(res)}</span>${
-        context.right
-      }`;
-    } else if (res instanceof Error) {
-      return `<span class="hole hole-result hole-error">"${res}"</span>`; // to prevent indentation issues
-    } else {
-      return `${
+      const redexResult = BSL_Print.printValue(res);
+      const resultHtml = `${
         context.left
       }<span class="hole hole-result">${BSL_Print.sanitize(
-        BSL_Print.printE(res)
+        redexResult
+      )}</span>${
+        context.right
+      }`;
+      return {html: resultHtml, redex: redexResult};
+    } else if (res instanceof Error) {
+      const redexResult = `${res}`;
+      const resultHtml = `<span class="hole hole-result hole-error">"${res}"</span>`; // to prevent indentation issues
+      return {redex: redexResult, html: resultHtml};
+    } else {
+      const redexResult = BSL_Print.printE(res);
+      const resultHtml = `${
+        context.left
+      }<span class="hole hole-result">${BSL_Print.sanitize(
+        redexResult
       )}</span>${context.right}`;
+      return {redex: redexResult, html: resultHtml};
     }
   }
-  const result: string = renderResult(redexRule.result);
+  const result = renderResult(redexRule.result);
   const ruleName = redexRule.type;
   // prepare indented code expressions
   const code_before = BSL_Print.indent(
@@ -423,7 +432,7 @@ function renderStep(
     maxWidthInChars,
     "html"
   );
-  const code_after = BSL_Print.indent(result, maxWidthInChars, "html");
+  const code_after = BSL_Print.indent(result.html, maxWidthInChars, "html");
 
   // find out where to position the rule arrow so that it points at the hole
   const code_before_hole = code_after
@@ -441,7 +450,7 @@ function renderStep(
   // find out if we have place to repeat the holes
   const space_left = // 3 for the arrow, 2 for the icon ---v
     maxWidthInChars - left_offset_arrow - rules[ruleName]["name"].length - 5;
-  const renderHolesInRule = redex.length + result.length <= space_left;
+  const renderHolesInRule = redex.length + result.redex.length <= space_left;
 
   return `
     <div class="step"
@@ -488,7 +497,7 @@ function renderStep(
       ? `:
                <span class="rule-description">
                  <span class="hole rule-hole">${redex}</span> →
-                 <span class="hole hole-result rule-hole">${result}</span>
+                 <span class="hole hole-result rule-hole">${BSL_Print.sanitize(result.redex)}</span>
                </span>`
       : ""
   }
