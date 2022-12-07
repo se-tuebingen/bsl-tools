@@ -162,7 +162,7 @@ function renderStepper(
          <div class="step"
               data-currentStep="true">
            <div class="next-button"
-                onclick="showExpression(event, 1)">
+                onclick="takeProgSteps(event, 1)">
              ${
                dictionary[lang]["start evaluation"]
              } <img class="icon" src="${angle_down}">
@@ -180,7 +180,7 @@ function renderStepper(
               data-currentStep="true">
             <div class="code">${dictionary[lang]["evaluation finished"]}</div>
             <div class="prev-button"
-                 onclick="showExpression(event, -1)">
+                 onclick="takeProgSteps(event, -1)">
               ${
                 dictionary[lang]["go back"]
               } <img class="icon" src="${angle_up}">
@@ -195,8 +195,8 @@ function renderStepper(
 
     </div>`;
 }
-(window as any).showExpression = (e: Event, a: number) => {
-  showEvalStep(e, a);
+(window as any).takeProgSteps = (e: Event, a: number) => {
+  takeProgSteps(e, a);
 };
 // render what remains of an expression after evaluation
 function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number, measures: PixelMeasurements): string {
@@ -311,21 +311,24 @@ function renderLastStep(
   `;
 }
 
-// navigate between evaluation steps
-function showEvalStep(e: Event, amount: number): void {
-  const el = e.target as HTMLElement;
+/*
+  update visibility of expressions in environment/remaining program and steppers
+  amount: number of ProgSteps to move forward/backwards
+*/
+function takeProgSteps(e: Event, amount: number): void {
+  const button = e.target as HTMLElement;
   // el will be a button
-  const oldButtonPosition = el.getBoundingClientRect().y;
-  const expressionDiv = getParentClassRecursive(el, "eval-steps");
-  if (!expressionDiv) {
-    console.error("found no parent with class .eval-steps", el);
+  const oldButtonPosition = button.getBoundingClientRect().y;
+  const currentStep = getParentClassRecursive(button, "eval-steps");
+  if (!currentStep) {
+    console.error("found no parent with class .eval-steps", button);
     return;
   }
-  const idxString = expressionDiv.getAttribute("data-progstep");
+  const idxString = currentStep.getAttribute("data-progstep");
   if (!idxString) {
     console.error(
       "div with class .eval-steps has no data-progstep attribute",
-      expressionDiv
+      currentStep
     );
     return;
   }
@@ -335,50 +338,52 @@ function showEvalStep(e: Event, amount: number): void {
     console.error(`cannot navigate to progStep ${targetIdx}: does not exist`);
     return;
   }
-  // set visibility in environment
-  navigateDOM([expressionDiv], "../.environment/div").map((def) => {
+  const root = currentStep.parentElement;
+  if(!root) return;
+  showEnvironment(root, targetIdx);
+  showRemainingProgram(root, targetIdx);
+  const newCurrentStep = showProgStep(root, targetIdx);
+  moveProgStepButton(newCurrentStep, oldButtonPosition, amount > 0);
+}
+
+function showEnvironment(root: HTMLElement, step: number) {
+  navigateDOM([root], ".environment/div").forEach((def) => {
     const idxString = def.getAttribute("data-progstep");
     if (idxString) {
-      if (parseInt(idxString) < targetIdx) {
-        def.setAttribute("data-visible", "true");
-      } else {
-        def.setAttribute("data-visible", "false");
-      }
+      def.setAttribute('data-visible', parseInt(idxString) < step ? 'true': 'false');
     }
   });
-  // set visibility in program
-  navigateDOM([expressionDiv], "../.program/div").map((prog) => {
+}
+
+function showRemainingProgram(root: HTMLElement, step: number) {
+  navigateDOM([root], ".program/div").forEach((prog) => {
     const idxString = prog.getAttribute("data-progstep");
     if (idxString) {
-      if (parseInt(idxString) <= targetIdx) {
-        prog.setAttribute("data-visible", "false");
-      } else {
-        prog.setAttribute("data-visible", "true");
-      }
+      prog.setAttribute('data-visible', parseInt(idxString) > step ? 'true': 'false');
     }
   });
-  // show correct stepper
-  navigateDOM([expressionDiv], "../.eval-steps").map((e) => {
-    const idxString = e.getAttribute("data-progstep");
-    if (idxString) {
-      if (parseInt(idxString) === targetIdx) {
-        e.setAttribute("data-visible", "true");
-        // move prev/next-button to stay under mouse
-        Array.from(e.children)
-          .filter((c) => c.getAttribute("data-currentstep") === "true")
-          .map((c) => {
-            const newButton = c.querySelector(
-              amount > 0 ? ".next-button" : ".prev-button"
-            );
-            if (!newButton) return;
-            const newButtonPosition = newButton.getBoundingClientRect().y;
-            window.scrollBy(0, newButtonPosition - oldButtonPosition);
-          });
-      } else {
-        e.setAttribute("data-visible", "false");
-      }
-    }
-  });
+}
+
+function showProgStep(root: HTMLElement, index: number): HTMLElement {
+  return navigateDOM([root], ".eval-steps").filter((progStep) => {
+    const idxString = progStep.getAttribute("data-progstep");
+    const current = idxString && parseInt(idxString) === index;
+    progStep.setAttribute('data-visible', current ? 'true' : 'false');
+    return current;
+  })[0];
+}
+
+function moveProgStepButton(progStep: HTMLElement, oldButtonPosition: number, forward: boolean) {
+  // move prev/next-button to stay under mouse
+  const currentStep = Array.from(progStep.children)
+    .filter((c) => c.getAttribute("data-currentstep") === "true")[0];
+  if(!currentStep) return;
+  const newButton = currentStep.querySelector(
+    forward ? ".next-button" : ".prev-button"
+  );
+  if (!newButton) return;
+  const newButtonPosition = newButton.getBoundingClientRect().y;
+  window.scrollBy(0, newButtonPosition - oldButtonPosition);
 }
 
 // one individual step
@@ -537,7 +542,7 @@ function renderStep(
     window.scrollBy(0, newButtonPosition - oldButtonPosition);
   } else if (currentStep && !currentStep.nextElementSibling) {
     // continue with next expression
-    showEvalStep(e, 1);
+    takeProgSteps(e, 1);
   }
 };
 (window as any).prevStep = (e: Event) => {
@@ -552,7 +557,7 @@ function renderStep(
   } else {
     const position = currentStep.getAttribute("data-step");
     if (position === "0") {
-      showEvalStep(e, -1);
+      takeProgSteps(e, -1);
       return;
     } else if (currentStep.previousElementSibling) {
       currentStep.setAttribute("data-currentStep", "false");
