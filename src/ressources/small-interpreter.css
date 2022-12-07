@@ -1,5 +1,5 @@
 /* ######### colors ####### */
-.stepper {
+.bsl-tools-stepper {
   /* --branch-color: #666; */
   --box-background: #ebf0f4; /* racket azure */
   --box-border: #0d3657;
@@ -12,12 +12,12 @@
   --font-family-rule-description: Palatino, Georgia, "Times New Roman", serif;
 }
 /* ####### general layout ####### */
-div.stepper {
+div.bsl-tools-stepper {
   text-align: center;
   box-sizing: border-box;
 }
 /* ##### boxes ###### */
-.stepper .box {
+.bsl-tools-stepper .box {
   text-align: left;
   background-color: var(--box-background);
   padding: 0.5em;
@@ -27,7 +27,7 @@ div.stepper {
   position: relative;
   margin-bottom: 1.5em;
 }
-.stepper .boxlabel {
+.bsl-tools-stepper .boxlabel {
   position: absolute;
   top: -1em;
   left: 0.5em;
@@ -39,7 +39,7 @@ div.stepper {
 
 }
 /* single step */
-.stepper .step {
+.bsl-tools-stepper .step {
   margin-bottom: 0.5em;
   position: relative;
   background-color: white;
@@ -47,17 +47,18 @@ div.stepper {
 }
 
 /* ####### buttons ###### */
-.stepper .step[data-currentStep="true"] {
+.bsl-tools-stepper .step[data-currentStep="true"] {
   padding-top: 1.5em;
   margin-top: 1.5em;
   padding-bottom: 1.5em;
   margin-bottom: 1.5em;
 
 }
-.stepper .prev-button, .stepper .next-button {
+.bsl-tools-stepper .prev-button, .bsl-tools-stepper .next-button {
   display: none;
 }
-.stepper [data-currentStep="true"] .prev-button, .stepper [data-currentStep="true"] .next-button {
+.bsl-tools-stepper [data-currentStep="true"] .prev-button,
+.bsl-tools-stepper [data-currentStep="true"] .next-button {
   position: absolute;
   display: inline-block;
   right: 2em;
@@ -66,56 +67,56 @@ div.stepper {
   background-color: white;
   border-radius: 0.25em;
 }
-.stepper .prev-button:hover, .stepper .next-button:hover {
+.bsl-tools-stepper .prev-button:hover, .bsl-tools-stepper .next-button:hover {
   cursor: pointer;
 }
-.stepper .prev-button {
+.bsl-tools-stepper .prev-button {
   top: -1em;
 }
 /* second child because of box label */
-.stepper .step:nth-child(2) .prev-button {
+.bsl-tools-stepper .step:nth-child(2) .prev-button {
   top: -3.5em;
 }
-.stepper .step:nth-child(2) .prev-button::after {
+.bsl-tools-stepper .step:nth-child(2) .prev-button::after {
   content: ' (PROG)';
 }
-.stepper .next-button {
+.bsl-tools-stepper .next-button {
   bottom: -1.25em;
 }
-.stepper .step:last-child .next-button {
+.bsl-tools-stepper .step:last-child .next-button {
   bottom: -3.25em;
 }
-.stepper .step:last-child .next-button::after {
+.bsl-tools-stepper .step:last-child .next-button::after {
   content: ' (PROG)';
 }
-.stepper .step:last-child .info-toggle {
+.bsl-tools-stepper .step:last-child .info-toggle {
   position: absolute;
   right: 0;
   bottom: -4em;
   margin: 0;
   background-color: white;
 }
-.stepper .icon {
+.bsl-tools-stepper .icon {
   display: inline-block;
   height: 1em;
 }
-.stepper .split-result .icon {
+.bsl-tools-stepper .split-result .icon {
   opacity: 70%;
 }
-.stepper [data-visible="false"] {
+.bsl-tools-stepper [data-visible="false"] {
   display: none;
 }
 
 /* ######### code and rules ####### */
-.stepper .code {
+.bsl-tools-stepper .code {
   font-family: var(--font-family-monospace, monospace);
   color: var(--text-grey);
 }
-.stepper .plug-result {
+.bsl-tools-stepper .plug-result {
   position: relative;
   z-index: 2;
 }
-.stepper .hole {
+.bsl-tools-stepper .hole {
   display: inline-block;
   background-color: var(--hole-yellow);
   /* border: 1px solid var(--text-grey); */
@@ -124,16 +125,16 @@ div.stepper {
   padding-right: 0.25em;
   position: relative;
 }
-.stepper .hole-result {
+.bsl-tools-stepper .hole-result {
   background-color: var(--hole-green);
 }
-.stepper .hole-result.rule-hole {
+.bsl-tools-stepper .hole-result.rule-hole {
   padding: 0;
 }
-.stepper .hole-error {
+.bsl-tools-stepper .hole-error {
   background-color: var(--hole-red);
 }
-.stepper .rule {
+.bsl-tools-stepper .rule {
   display: inline-block;
   position: relative;
   padding-left: .5em;
@@ -142,22 +143,22 @@ div.stepper {
   margin-top: 1em;
   margin-bottom: 1.5em;
 }
-.stepper .kong {
+.bsl-tools-stepper .kong {
   position: absolute;
   left: 0;
   top: 0;
   padding-left: 0;
   background-color: rgba(255,255,255,0.5);
 }
-.stepper .one-rule {
+.bsl-tools-stepper .one-rule {
   margin-left: var(--one-rule-margin-left, 4em);
 }
-.stepper .rule-description {
+.bsl-tools-stepper .rule-description {
   font-family: var(--font-family-monospace, monospace);
 }
 
 /* arrow body */
-.stepper .left-arrowed::before {
+.bsl-tools-stepper .left-arrowed::before {
   position: absolute;
   content: '';
   left: 0;
@@ -166,13 +167,13 @@ div.stepper {
   border-left: 2px solid var(--text-grey);
   z-index: -1;
 }
-.stepper .kong::before {
+.bsl-tools-stepper .kong::before {
   left: 0.35em;
   border-left: 2px dotted var(--text-grey);
 }
 
 /* arrow head */
-.stepper .left-arrowed::after {
+.bsl-tools-stepper .left-arrowed::after {
   position: absolute;
   content: '';
   left: calc(2px - 0.35em); /*-0.35em; /* ca. sqrt(2)/2 * 0.5em */
@@ -183,37 +184,37 @@ div.stepper {
   border-bottom: 2px solid var(--text-grey);
   transform: rotate(45deg);
 }
-.stepper .kong::after {
+.bsl-tools-stepper .kong::after {
   left: 2px;
 }
 /* rule info */
-.stepper .info-toggle {
+.bsl-tools-stepper .info-toggle {
   margin-top: 1em;
   margin-bottom: 1.5em;
   margin-left: 0.5em;
   float: right;
 }
-.stepper .info-toggle:hover {
+.bsl-tools-stepper .info-toggle:hover {
   cursor: pointer;
 }
-.stepper .rule-info {
+.bsl-tools-stepper .rule-info {
   padding: 0.5em;
 }
-.stepper .rule-info-rule-text {
+.bsl-tools-stepper .rule-info-rule-text {
   font-family: var(--font-family-rule-description, serif);
 }
-.stepper .rule-info-rule-text small {
+.bsl-tools-stepper .rule-info-rule-text small {
   vertical-align: sub;
 }
-.stepper cap {
+.bsl-tools-stepper cap {
   font-variant-caps: small-caps;
 }
-.stepper .rule-info-rule-name {
+.bsl-tools-stepper .rule-info-rule-name {
   position: absolute;
   left: -6em;
   top: 0;
 }
-.stepper .rule-info-text-container {
+.bsl-tools-stepper .rule-info-text-container {
   position: relative;
   margin-left: 6em;
   margin-bottom: 1em;
@@ -221,32 +222,32 @@ div.stepper {
 
 /* ##### showing and hiding stuff #### */
 /* hide steps that are not yet reached */
-.stepper .step[data-currentStep="true"] ~ .step {
+.bsl-tools-stepper .step[data-currentStep="true"] ~ .step {
   display: none;
 }
 /* collapsing and expanding steps */
-.stepper .step[data-collapsed="true"] .plug-result {
+.bsl-tools-stepper .step[data-collapsed="true"] .plug-result {
   display: none;
 }
-.stepper .expander, .stepper .collapser {
+.bsl-tools-stepper .expander, .bsl-tools-stepper .collapser {
   padding-left: 0.25em;
   padding-right: 0.25em;
   float: right;
 }
-.stepper .expander:hover, .stepper .collapser:hover {
+.bsl-tools-stepper .expander:hover, .bsl-tools-stepper .collapser:hover {
   cursor: pointer;
 }
-.stepper .step[data-collapsed="true"] .collapser {
+.bsl-tools-stepper .step[data-collapsed="true"] .collapser {
   display: none;
 }
-.stepper .step[data-collapsed="false"] .expander {
+.bsl-tools-stepper .step[data-collapsed="false"] .expander {
   display: none;
 }
 /* collapsing and expanding info about the rules */
-.stepper .plug-result[data-info-collapsed="true"] .rule-info,
-.stepper .plug-result[data-info-collapsed="true"] .info-collapse {
+.bsl-tools-stepper .plug-result[data-info-collapsed="true"] .rule-info,
+.bsl-tools-stepper .plug-result[data-info-collapsed="true"] .info-collapse {
   display: none;
 }
-.stepper .plug-result[data-info-collapsed="false"] .info-expand {
+.bsl-tools-stepper .plug-result[data-info-collapsed="false"] .info-expand {
   display: none;
 }

@@ -115,7 +115,7 @@ is a must. The current stylesheets has chosen some specific fonts, if you do not
 agree with them or want to choose your own font, you simply need to override the CSS
 variable:
 ```css
-.stepper {
+.bsl-tools-stepper {
   --font-family-monospace: monospace; /* to use the system default */
   --font-family-rule-description: "My fancy font", serif; /* to use your own choice */
 }

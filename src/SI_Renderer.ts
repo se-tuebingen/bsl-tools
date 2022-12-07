@@ -117,7 +117,7 @@ let charPxWidth = 12; // arbitrary default
 let maxWidthInChars = 80;
 function setCharPxWidth(el: HTMLElement): void {
   el.innerHTML = `
-    <div class="stepper" style="width: 100%;">
+    <div class="bsl-tools-stepper" style="width: 100%;">
       <div class="box">
         <div class="step code"
              data-currentStep="true">
@@ -127,7 +127,7 @@ function setCharPxWidth(el: HTMLElement): void {
     </div>
   `;
   const p = el.getElementsByTagName("p")[0];
-  const stepper = el.getElementsByClassName("stepper")[0];
+  const stepper = el.getElementsByClassName("bsl-tools-stepper")[0];
   if (!p || !stepper) {
     console.error("failed to inject measuring HTML into", el);
     return;
@@ -149,7 +149,7 @@ function renderStepper(
 ): string {
   const progSteps = stepper.progSteps;
 
-  const str = `<div class="stepper">
+  const str = `<div class="bsl-tools-stepper">
 
        <div class="box environment">
          <div class="boxlabel">${dictionary[lang]["environment"]}</div>
