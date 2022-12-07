@@ -78,10 +78,10 @@ export function setUpStepperGui(
       `);
     lang = "en";
   }
-  // get width of single character for dynamic maxwidth indentation
-  setCharPxWidth(el);
+  // get width of single character and available pixel width for static maxwidth indentation
+  const measures = getPixelMeasurements(el);
   // render and attach
-  el.innerHTML = renderStepper(stepper, lang as implementedLanguage);
+  el.innerHTML = renderStepper(stepper, lang as implementedLanguage, measures);
 }
 
 // ###### internationalization for this module #####
@@ -113,9 +113,11 @@ const dictionary = {
 
 // ####### RENDER FUNCTIONS #######
 // helper for getting width of em in px
-let charPxWidth = 12; // arbitrary default
-let maxWidthInChars = 80;
-function setCharPxWidth(el: HTMLElement): void {
+interface PixelMeasurements {
+  charWidth: number,
+  maxChars: number
+}
+function getPixelMeasurements(el: HTMLElement): PixelMeasurements {
   el.innerHTML = `
     <div class="bsl-tools-stepper" style="width: 100%;">
       <div class="box">
@@ -130,22 +132,24 @@ function setCharPxWidth(el: HTMLElement): void {
   const stepper = el.getElementsByClassName("bsl-tools-stepper")[0];
   if (!p || !stepper) {
     console.error("failed to inject measuring HTML into", el);
-    return;
+    return {charWidth: 12, maxChars: 80}; // arbitrary value
   }
-  charPxWidth = p.clientWidth / "Loading...".length;
+  const charPxWidth = p.clientWidth / "Loading...".length;
   console.log(`Found that 1em is ${charPxWidth} wide`);
   const factor = 0.9;
-  maxWidthInChars = Math.round((factor * stepper.clientWidth) / charPxWidth);
+  const maxWidthInChars = Math.round((factor * stepper.clientWidth) / charPxWidth);
   console.log(`
     That means to fill ${factor} of the available width,
     we may print at most ${maxWidthInChars} characters.
   `);
+  return {charWidth: charPxWidth, maxChars: maxWidthInChars};
 }
 
 // main function
 function renderStepper(
   stepper: SI_STRUCT.Stepper,
-  lang: implementedLanguage
+  lang: implementedLanguage,
+  measures: PixelMeasurements
 ): string {
   const progSteps = stepper.progSteps;
 
@@ -153,7 +157,7 @@ function renderStepper(
 
        <div class="box environment">
          <div class="boxlabel">${dictionary[lang]["environment"]}</div>
-         ${progSteps.map(renderDefinition).join("")}
+         ${progSteps.map((s,i) => renderDefinition(s, i, measures)).join("")}
        </div>
 
        <div class="box expression-steps"
@@ -171,7 +175,7 @@ function renderStepper(
          </div>
        </div>
 
-       ${progSteps.map((el, i) => renderEvalSteps(el, i, lang)).join("")}
+       ${progSteps.map((el, i) => renderEvalSteps(el, i, lang, measures)).join("")}
 
        <div class="box expression-steps"
             data-progstep="${progSteps.length}"
@@ -191,7 +195,7 @@ function renderStepper(
 
        <div class="box program">
          <div class="boxlabel">${dictionary[lang]["remaining program"]}</div>
-         ${progSteps.map(renderOriginalExpression).join("")}
+         ${progSteps.map((s,i) => renderOriginalExpression(s,i,measures)).join("")}
        </div>
 
     </div>`;
@@ -201,7 +205,7 @@ function renderStepper(
   navigateExpression(e, a);
 };
 // render what remains of an expression after evaluation
-function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number): string {
+function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number, measures: PixelMeasurements): string {
   // filtering at this position in order to keep correct implicit progStep index
   if (SI_STRUCT.isDefinitionStep(progStep)) {
     return `
@@ -210,7 +214,7 @@ function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number): string {
            data-visible="false">
         ${BSL_Print.indent(
           BSL_Print.sanitize(BSL_Print.printDefinition(progStep.result)),
-          maxWidthInChars,
+          measures.maxChars,
           "html"
         )}
       </div>
@@ -223,7 +227,8 @@ function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number): string {
 // render the part of the original Program that is being represented by a progstep
 function renderOriginalExpression(
   progStep: SI_STRUCT.ProgStep,
-  idx: number
+  idx: number,
+  measures: PixelMeasurements
 ): string {
   return `
     <div class="step code"
@@ -233,7 +238,7 @@ function renderOriginalExpression(
         BSL_Print.sanitize(
           BSL_Print.printDefOrExpr(progStep.originalDefOrExpr)
         ),
-        maxWidthInChars,
+        measures.maxChars,
         "html"
       )}
     </div>
@@ -243,7 +248,8 @@ function renderOriginalExpression(
 function renderEvalSteps(
   progStep: SI_STRUCT.ProgStep,
   idx: number,
-  lang: implementedLanguage
+  lang: implementedLanguage,
+  measures: PixelMeasurements
 ): string {
   function renderDefinitionContext(def: BSL_AST.definition): Context {
     if (BSL_AST.isConstDef(def)) {
@@ -264,7 +270,7 @@ function renderEvalSteps(
       ${
         // all evaluation steps
         progStep.evalSteps
-          .map((el, i) => renderStep(i, el, lang, { ...ctx }))
+          .map((el, i) => renderStep(i, el, lang, { ...ctx }, measures))
           .join("")
         // result
       }
@@ -386,7 +392,8 @@ function renderStep(
   currentStep: number,
   step: SI_STRUCT.EvalStep,
   lang: implementedLanguage,
-  ctx: Context = { left: "", right: "" }
+  ctx: Context = { left: "", right: "" },
+  measures: PixelMeasurements
 ): string {
   // console.log(`Rendering step ${currentStep}`);
   // acquire necessary information:
@@ -429,10 +436,10 @@ function renderStep(
   // prepare indented code expressions
   const code_before = BSL_Print.indent(
     `${context.left}<span class="hole">${redex}</span>${context.right}`,
-    maxWidthInChars,
+    measures.maxChars,
     "html"
   );
-  const code_after = BSL_Print.indent(result.html, maxWidthInChars, "html");
+  const code_after = BSL_Print.indent(result.html, measures.maxChars, "html");
 
   // find out where to position the rule arrow so that it points at the hole
   const code_before_hole = code_after
@@ -449,7 +456,7 @@ function renderStep(
       : hole_position;
   // find out if we have place to repeat the holes
   const space_left = // 3 for the arrow, 2 for the icon ---v
-    maxWidthInChars - left_offset_arrow - rules[ruleName]["name"].length - 5;
+    measures.maxChars - left_offset_arrow - rules[ruleName]["name"].length - 5;
   const renderHolesInRule = redex.length + result.redex.length <= space_left;
 
   return `
@@ -490,7 +497,7 @@ function renderStep(
 
           <span class="rule left-arrowed one-rule"
                 style="--one-rule-margin-left: ${
-                  left_offset_arrow * charPxWidth
+                  left_offset_arrow * measures.charWidth
                 }px">
              <span class="rule-name">${rules[ruleName]["name"]}</span>${
     renderHolesInRule
