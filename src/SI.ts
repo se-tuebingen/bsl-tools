@@ -12,8 +12,6 @@ export function calculateProgram(
     if (newStep instanceof Error) return newStep;
     env = newStep.env;
     progSteps.push(newStep);
-    console.log("progStep: ", newStep);
-    console.log("env:", env);
   });
   return {
     type: SI_STRUCT.Production.Stepper,
@@ -29,7 +27,6 @@ export function calculateProgStep(
 ): SI_STRUCT.ProgStep | Error {
   if (BSL_AST.isExpr(defOrExpr)) {
     const evalStep = calculateEvalSteps(defOrExpr, env);
-    console.log("evalStep:", evalStep);
     if (evalStep instanceof Error) return evalStep;
     if (evalStep.length === 0) {
       return {
@@ -52,10 +49,8 @@ export function calculateProgStep(
         };
     }
   } else {
-    console.log("definition", defOrExpr);
     const defStep = calculateDefSteps(defOrExpr, env);
     if (defStep instanceof Error) return defStep;
-    console.log("defStep", defStep);
     return defStep;
   }
 }
@@ -68,7 +63,6 @@ export function calculateDefSteps(
   if (BSL_AST.isConstDef(def)) {
     const name = def.name;
     const expr = def.value;
-    console.log("name", name + "expr", expr);
     if (BSL_AST.isLiteral(expr)) {
       const value = expr.value;
       const newEnv = addToEnv(env, name.symbol, value);
@@ -212,17 +206,13 @@ export function evaluateExpression(
   env: SI_STRUCT.Environment
 ): SI_STRUCT.EvalStep | SI_STRUCT.Value | Error {
   if (BSL_AST.isLiteral(expr)) {
-    console.log("evaluateExpression: Literal", expr);
     return expr.value;
   } else {
     const splitExpr = split(expr);
-    //console.log("splitExpr", splitExpr);
     if (SI_STRUCT.isSplit(splitExpr)) {
       const stepExpr = step(splitExpr.redex, env);
-      //console.log("stepExpr", stepExpr);
       if (SI_STRUCT.isOneRule(stepExpr)) {
         const exprStep = plug(stepExpr, splitExpr.context, env);
-        console.log("exprStep", exprStep);
         if (SI_STRUCT.isEvalStep(exprStep)) {
           return exprStep;
         } else {
@@ -244,10 +234,8 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
   if (BSL_AST.isCall(expr)) {
     const name = expr.name;
     const args = expr.args;
-    console.warn("### splitting call with args: ", expr.args);
 
     if (args.every((x) => BSL_AST.isLiteral(x))) {
-      console.warn("### al arguments are values");
       // all arguments are values, no need to recurse: found redex
       const redex: SI_STRUCT.CallRedex = {
         type: SI_STRUCT.Production.CallRedex,
@@ -261,12 +249,10 @@ export function split(expr: BSL_AST.expr): SI_STRUCT.SplitResult | Error {
       };
     }
     // some arguments still need evaluation, recurse further
-    console.warn("#### recursing");
     const firstRedexIndex = args.findIndex((x) => !BSL_AST.isLiteral(x));
     const valueLst = args.slice(0, firstRedexIndex) as BSL_AST.Literal[];
     const recExpr = args[firstRedexIndex];
     const exprLst = args.slice(firstRedexIndex + 1);
-    console.warn(firstRedexIndex, valueLst, recExpr, exprLst);
 
     const splitResult = split(recExpr);
     if (SI_STRUCT.isSplit(splitResult)) {
@@ -360,7 +346,6 @@ export function step(
           };
         //if name => function
       } else if (SI_STRUCT.isFunDef(funDef)) {
-        console.log("step: env: " + JSON.stringify(funDef) + " args: " + args);
         //check if funDef is a defined function or a struct-predefined function
         //substitute names in body with args
         const newExpr = substFun(r, env);
@@ -439,7 +424,6 @@ export function step(
           result: Error(`function '${r.name.symbol}' is not in env`),
         };
     } else {
-      console.log("step: env:" + JSON.stringify(env));
       const substRed: BSL_AST.expr | SI_STRUCT.Value | Error = substConst(
         r,
         env
@@ -533,7 +517,6 @@ export function plug(
   env: SI_STRUCT.Environment
 ): SI_STRUCT.EvalStep | Error {
   //check if context is a Hole
-  console.log("plug: oneRule: " + JSON.stringify(oneRule));
   if (SI_STRUCT.isHole(c)) {
     return {
       type: SI_STRUCT.Production.EvalStep,
@@ -570,7 +553,6 @@ export function plug(
           name: c.op,
           args: newArgs,
         };
-        console.log("plug: env: " + JSON.stringify(env));
         return {
           type: SI_STRUCT.Production.EvalStep,
           env: env,
@@ -985,10 +967,6 @@ function addToEnv(
   if (env[name] === undefined) {
     const newEnv = { ...env };
     newEnv[name] = value;
-    console.warn(
-      "addToEnv: " + name + ":" + value + " added to " + JSON.stringify(env)
-    );
-    console.warn("addToEnv: newEnv = " + JSON.stringify(newEnv));
     return newEnv;
   } else return Error("addToEnv: name already exists in environment");
 }
@@ -998,7 +976,6 @@ function lookupEnv(
   name: string
 ): SI_STRUCT.EnvValue | Error {
   if (name in env) {
-    console.warn("lookupEnv: " + name + " found in " + JSON.stringify(env));
     return env[name];
   } else {
     return Error(`'${name}' is not bound in environment`);

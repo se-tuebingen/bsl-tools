@@ -21,7 +21,6 @@ export function processSteppers() {
   Array.from(document.getElementsByTagName("stepper")).map((el) => {
     try {
       const program: BSL_AST.program = parse(BSL_Print.dirtify(el.innerHTML));
-      console.log(BSL_Print.indent(BSL_Print.pprint(program), 30));
       setUpStepperGui(program, el as HTMLElement);
     } catch (e: any) {
       renderError(e, el as HTMLElement);
@@ -404,7 +403,6 @@ function renderStep(
   ctx: Context = { left: "", right: "" },
   measures: PixelMeasurements
 ): string {
-  // console.log(`Rendering step ${currentStep}`);
   // acquire necessary information:
   // context and redex
   const context: Context = SI_STRUCT.isKong(step.rule)
