@@ -77,17 +77,11 @@ div.bsl-tools-stepper {
 .bsl-tools-stepper .step:nth-child(2) .prev-button {
   top: -3.5em;
 }
-.bsl-tools-stepper .step:nth-child(2) .prev-button::after {
-  content: ' (PROG)';
-}
 .bsl-tools-stepper .next-button {
   bottom: -1.25em;
 }
 .bsl-tools-stepper .step:last-child .next-button {
   bottom: -3.25em;
-}
-.bsl-tools-stepper .step:last-child .next-button::after {
-  content: ' (PROG)';
 }
 .bsl-tools-stepper .step:last-child .info-toggle {
   position: absolute;

@@ -163,9 +163,19 @@ function renderStepper(
               data-currentStep="true">
            <div class="next-button"
                 onclick="takeProgSteps(event, 1)">
-             ${
+             <cap>Prog</cap>: ${
                dictionary[lang]["start evaluation"]
              } <img class="icon" src="${angle_down}">
+           </div>
+           <div class="plug-result code"
+                data-info-collapsed="true">
+             <img class="icon info-toggle info-expand"
+                     src="${circle_info}"
+                     onclick="expandInfo(event)">
+             <img class="icon info-toggle info-collapse"
+                     src="${circle_xmark}"
+                     onclick="collapseInfo(event)">
+             ${renderRuleInformation('Prog', false)}
            </div>
          </div>
        </div>
@@ -282,7 +292,7 @@ function renderLastStep(
     </div>
     <div class="next-button"
          onclick="nextStep(event)">
-      ${
+      <cap>Prog</cap>: ${
         dictionary[lang]["next step"]
       } <img class="icon" src="${angle_down}">
     </div>
