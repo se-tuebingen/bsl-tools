@@ -50,6 +50,8 @@ export function setUpStepperGui(
 ): void {
   addStylesheet();
   const stepper = calculateProgram(program);
+  console.log(BSL_Print.indent(BSL_Print.pprint(program), 30));
+  console.log(stepper);
   if (stepper instanceof Error) throw stepper;
   const lang = getLanguage(el);
   const measures = getPixelMeasurements(el); // for static maxwidth indentation & clipping
@@ -199,7 +201,7 @@ function renderStepper(
 
        <div class="box program">
          <div class="boxlabel">${dictionary[lang]["remaining program"]}</div>
-         ${progSteps.map((s,i) => renderOriginalExpression(s,i,measures)).join("")}
+         ${stepper.originProgram.map((s,i) => renderOriginalExpression(s,i,measures)).join("")}
        </div>
 
     </div>`;
@@ -210,7 +212,7 @@ function renderStepper(
 // render what remains of an expression after evaluation
 function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number, measures: PixelMeasurements): string {
   // filtering at this position in order to keep correct implicit progStep index
-  if (!SI_STRUCT.isDefinitionStep(progStep)) return "";
+  if (!SI_STRUCT.isDefinitionStep(progStep) || progStep.result instanceof Error) return "";
   return `
       <div class="step code"
            data-progstep="${idx}"
@@ -226,7 +228,7 @@ function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number, measures: P
 
 // render the part of the original Program that is being represented by a progstep
 function renderOriginalExpression(
-  progStep: SI_STRUCT.ProgStep,
+  expression: BSL_AST.defOrExpr,
   idx: number,
   measures: PixelMeasurements
 ): string {
@@ -236,7 +238,7 @@ function renderOriginalExpression(
          data-visible="true">
       ${BSL_Print.indent(
         BSL_Print.sanitize(
-          BSL_Print.printDefOrExpr(progStep.originalDefOrExpr)
+          BSL_Print.printDefOrExpr(expression)
         ),
         measures.maxChars,
         "html"
@@ -300,12 +302,12 @@ function renderLastStep(
          data-info-collapsed="true">
       ${
         BSL_Print.indent(BSL_Print.sanitize(
-          SI_STRUCT.isDefinitionStep(progStep)
+          SI_STRUCT.isDefinitionStep(progStep) && !(progStep.result instanceof Error)
           ? BSL_Print.printDefinition(progStep.result)
           : `${
               progStep.result instanceof Error
                 ? progStep.result
-                : BSL_Print.printValue(progStep.result)
+                : BSL_Print.printValue(progStep.result as SI_STRUCT.Value)
             }`), measures.maxChars)
       }
       <img class="icon info-toggle info-expand"

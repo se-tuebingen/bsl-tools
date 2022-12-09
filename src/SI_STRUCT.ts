@@ -89,7 +89,7 @@ export interface DefinitionStep {
   env: Environment;
   evalSteps: EvalStep[];
   originalDefOrExpr: BSL_AST.definition;
-  result: BSL_AST.definition; //evaluated definition, which is given to env
+  result: BSL_AST.definition | Error; //evaluated definition, which is given to env
 }
 export interface ExprStep {
   type: Production.ExprStep;

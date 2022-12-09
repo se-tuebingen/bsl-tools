@@ -66,13 +66,13 @@ export function calculateDefSteps(
     if (BSL_AST.isLiteral(expr)) {
       const value = expr.value;
       const newEnv = addToEnv(env, name.symbol, value);
-      if (newEnv instanceof Error) return newEnv;
+      const err = newEnv instanceof Error;
       return {
         type: SI_STRUCT.Production.DefinitionStep,
-        env: newEnv,
+        env: err ? env : newEnv,
         evalSteps: [],
         originalDefOrExpr: def,
-        result: def,
+        result: err ? newEnv : def,
       };
     } else {
       let stepList = calculateEvalSteps(expr, env);
