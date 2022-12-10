@@ -271,8 +271,8 @@ function peg$parse(input: string, options?: IParseOptions) {
     };
   const peg$c25 = "define";
   const peg$c26 = peg$literalExpectation("define", false);
-  const peg$c27 = /^[^",'`()[\]{}|#\n\t\r0-9 ]/;
-  const peg$c28 = peg$classExpectation(["\"", ",", "'", "`", "(", ")", "[", "]", "{", "}", "|", "#", "\n", "\t", "\r", ["0", "9"], " "], true, false);
+  const peg$c27 = /^[^",'`()[\]{}|#\n\t\r ]/;
+  const peg$c28 = peg$classExpectation(["\"", ",", "'", "`", "(", ")", "[", "]", "{", "}", "|", "#", "\n", "\t", "\r", " "], true, false);
   const peg$c29 = function(symbol: any): any {
     return {
       "type": "Symbol",

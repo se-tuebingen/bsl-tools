@@ -65,7 +65,7 @@ Call
   }
 
 Name
-  = _ !"define" symbol: [^\"\,\'\`\(\)\[\]\{\}\|\#\n\t\r0-9 ]+ {
+  = _ !"define" symbol: [^\"\,\'\`\(\)\[\]\{\}\|\#\n\t\r ]+ {
   return {
     "type": "Symbol",
   	"symbol":symbol.join("")
