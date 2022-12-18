@@ -5,20 +5,25 @@ import * as SI_STRUCT from "./SI_STRUCT";
 export function calculateProgram(
   program: BSL_AST.program
 ): SI_STRUCT.Stepper | Error {
-  let env: SI_STRUCT.Environment = {};
-  let progSteps: SI_STRUCT.ProgStep[] = [];
+  let env: SI_STRUCT.Environment = {}; // empty environment
+  let progSteps: (SI_STRUCT.ProgStep | Error)[] = [];
   program.map((defOrExpr) => {
     const newStep = calculateProgStep(defOrExpr, env);
-    if (newStep instanceof Error) return newStep;
-    env = newStep.env;
-    progSteps.push(newStep);
+    console.log(newStep);
+    env = newStep instanceof Error ? env : newStep.env;
+    console.log(env);
+    return newStep;
   });
-  return {
-    type: SI_STRUCT.Production.Stepper,
-    originProgram: program,
-    progSteps: progSteps,
-  };
+  const err = progSteps.find((progStep) => progStep instanceof Error);
+  if (err instanceof Error) return err;
+  else
+    return {
+      type: SI_STRUCT.Production.Stepper,
+      originProgram: program,
+      progSteps: progSteps,
+    };
 }
+
 // calculate ProgStep
 // One ProgStep represents a line of program code -> ProgStep | Error
 export function calculateProgStep(
@@ -34,7 +39,7 @@ export function calculateProgStep(
         env: env,
         evalSteps: [],
         originalDefOrExpr: defOrExpr,
-        result: evaluateExpression(defOrExpr, env) as SI_STRUCT.Value,
+        result: evaluateExpression(defOrExpr, env) as SI_STRUCT.Value | Error,
       };
     } else {
       const result = evalStep[evalStep.length - 1].result;
@@ -50,7 +55,6 @@ export function calculateProgStep(
     }
   } else {
     const defStep = calculateDefSteps(defOrExpr, env);
-    if (defStep instanceof Error) return defStep;
     return defStep;
   }
 }
@@ -67,10 +71,17 @@ export function calculateDefSteps(
       const value = expr.value;
       const newEnv = addToEnv(env, name.symbol, value);
       const err = newEnv instanceof Error;
+      const progRule: SI_STRUCT.ProgError | SI_STRUCT.Prog = err
+        ? {
+            type: SI_STRUCT.Rule.ProgError,
+            result: newEnv,
+          }
+        : { type: SI_STRUCT.Rule.Prog, result: def };
       return {
         type: SI_STRUCT.Production.DefinitionStep,
         env: err ? env : newEnv,
         evalSteps: [],
+        rule: progRule,
         originalDefOrExpr: def,
         result: err ? newEnv : def,
       };
@@ -80,15 +91,22 @@ export function calculateDefSteps(
       const value = stepList[stepList.length - 1].result;
       if (SI_STRUCT.isValue(value)) {
         const newEnv = addToEnv(env, name.symbol, value);
-        if (newEnv instanceof Error) return newEnv;
+        const err = newEnv instanceof Error;
         const newDef: BSL_AST.ConstDef = {
           type: BSL_AST.Production.ConstantDefinition,
           name: name,
           value: { type: BSL_AST.Production.Literal, value: value },
         };
+        const progRule: SI_STRUCT.ProgError | SI_STRUCT.Prog = err
+          ? {
+              type: SI_STRUCT.Rule.ProgError,
+              result: newEnv,
+            }
+          : { type: SI_STRUCT.Rule.Prog, result: def };
         return {
           type: SI_STRUCT.Production.DefinitionStep,
-          env: newEnv,
+          env: err ? env : newEnv,
+          rule: progRule,
           evalSteps: stepList,
           originalDefOrExpr: def,
           result: newDef,
@@ -111,10 +129,17 @@ export function calculateDefSteps(
         body: def.body,
       };
       const newEnv = addToEnv(env, name.symbol, funDef);
-      if (newEnv instanceof Error) return newEnv;
+      const err = newEnv instanceof Error;
+      const progRule: SI_STRUCT.ProgError | SI_STRUCT.Prog = err
+        ? {
+            type: SI_STRUCT.Rule.ProgError,
+            result: newEnv,
+          }
+        : { type: SI_STRUCT.Rule.Prog, result: def };
       const defStep: SI_STRUCT.DefinitionStep = {
         type: SI_STRUCT.Production.DefinitionStep,
-        env: newEnv,
+        env: err ? env : newEnv,
+        rule: progRule,
         evalSteps: [],
         originalDefOrExpr: def,
         result: def,
@@ -122,6 +147,8 @@ export function calculateDefSteps(
       return defStep;
     }
   } else {
+    /*
+    // addStructToEnv ()
     const binding = def.binding;
     const properties = def.properties;
     // add StructDef to environment
@@ -132,16 +159,28 @@ export function calculateDefSteps(
     let newEnv = addToEnv(env, binding.symbol, structDef);
     //check if newEnv is an Error before defining structFuns
     if (newEnv instanceof Error) return newEnv;
+
+    // reserve all make, pred and structFun names
     const makeFunName = `make-${binding.symbol}`;
     const makeFunDef: SI_STRUCT.MakeFun = {
       type: SI_STRUCT.Production.MakeFun,
       structDef: structDef,
     };
+    newEnv = addToEnv(newEnv, makeFunName, makeFunDef);
+    //check if newEnv is an Error before moving on to predFun
+    if (newEnv instanceof Error) return newEnv;
+
     const predFunName = `${binding.symbol}?`;
     const predFunDef: SI_STRUCT.PredFun = {
       type: SI_STRUCT.Production.PredFun,
       structDef: structDef,
     };
+    newEnv = addToEnv(newEnv, predFunName, predFunDef);
+    //check if newEnv is an Error before moving on to predFun
+    if (newEnv instanceof Error) return newEnv;
+    else{
+      addStructFunsToEnv(newEnv, structDef): newEnv | Error
+    }
     // reserve all possible struct-property names
     const selectFunNames: string[] = [];
     properties.map((property) => {
@@ -151,10 +190,7 @@ export function calculateDefSteps(
       type: SI_STRUCT.Production.SelectFun,
       structDef: structDef,
     };
-    const addList: [string, SI_STRUCT.StructFun][] = [
-      [makeFunName, makeFunDef],
-      [predFunName, predFunDef],
-    ];
+    const addList: [string, SI_STRUCT.StructFun][] = [];
     selectFunNames.forEach((name) => {
       addList.push([name, selectFunDef]);
     });
@@ -163,15 +199,25 @@ export function calculateDefSteps(
       if (newEnv instanceof Error) return newEnv;
       newEnv = addToEnv(newEnv, entry[0], entry[1]);
     });
-    if (newEnv instanceof Error) return newEnv;
+    const errId = addList.findIndex((x) => x instanceof Error);
+    const err = errId != -1 ? true : false;
+    const progRule: SI_STRUCT.ProgError | SI_STRUCT.Prog = err
+      ? {
+          type: SI_STRUCT.Rule.ProgError,
+          result: addList[errId],
+        }
+      : { type: SI_STRUCT.Rule.Prog, result: def };
+
     const defStep: SI_STRUCT.DefinitionStep = {
       type: SI_STRUCT.Production.DefinitionStep,
-      env: newEnv,
+      env: err ? env : newEnv,
+      rule: progRule,
       evalSteps: [],
       originalDefOrExpr: def,
       result: def,
     };
-    return defStep;
+    return defStep;*/
+    return Error("not implemented");
   }
 }
 // expr, steppResult[] => exprStep[] | Error
@@ -768,6 +814,9 @@ function substConst(
     return Error("substConst: redex is not a call or cond or name");
   }
 }
+// prog
+// add a new Value to Environment and determine ProgRule
+// it would probably be a good idea to make several functions for each definition
 
 //fun
 function substFun(
@@ -964,11 +1013,14 @@ function addToEnv(
   name: string,
   value: SI_STRUCT.EnvValue
 ): SI_STRUCT.Environment | Error {
-  if (env[name] === undefined) {
+  if (name in env) return Error("addToEnv: name already exists in environment");
+  else {
+    console.log(name, " is not in: ", env);
+    console.log("adding to env: ", name, value);
     const newEnv = { ...env };
     newEnv[name] = value;
     return newEnv;
-  } else return Error("addToEnv: name already exists in environment");
+  }
 }
 
 function lookupEnv(
