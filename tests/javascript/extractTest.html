@@ -1,0 +1,40 @@
+<html>
+
+<head>
+    <title>BSL Small Step Interpreter Test</title>
+    <script>
+        let scriptNode = document.createElement('script');
+        if (window.location.href.startsWith('file://')) {
+            console.log('detected local dev testing, loading bsl_tools.js from dist');
+            scriptNode.src = '../../dist/bsl_tools.js';
+        } else {
+            scriptNode.src = 'bsl_tools.js';
+        }
+        document.getElementsByTagName('head')[0].appendChild(scriptNode);
+    </script>
+    <style>
+        h2,
+        h3 {
+            text-align: center;
+        }
+
+        h2,
+        h3 {
+            margin-top: 7vh;
+        }
+
+        h3 {
+            font-size: 16pt;
+        }
+    </style>
+</head>
+
+<body>
+    <stepper>
+        (define x 40)
+        (define y "hallo")
+        (define x 2)
+    </stepper>
+</body>
+
+</html>
