@@ -793,13 +793,13 @@ function peg$parse(input: string, options?: IParseOptions) {
     s0 = peg$currPos;
     s1 = peg$parse_();
     if (s1 as any !== peg$FAILED) {
-      s2 = peg$parseCond();
+      s2 = peg$parseValue();
       if (s2 as any === peg$FAILED) {
-        s2 = peg$parseCall();
+        s2 = peg$parseCond();
         if (s2 as any === peg$FAILED) {
-          s2 = peg$parseName();
+          s2 = peg$parseCall();
           if (s2 as any === peg$FAILED) {
-            s2 = peg$parseValue();
+            s2 = peg$parseName();
           }
         }
       }

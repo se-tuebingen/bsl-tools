@@ -21,6 +21,7 @@ export function processSteppers() {
   Array.from(document.getElementsByTagName("stepper")).map((el) => {
     try {
       const program: BSL_AST.program = parse(BSL_Print.dirtify(el.innerHTML));
+      console.log(program);
       setUpStepperGui(program, el as HTMLElement);
     } catch (e: any) {
       renderError(e, el as HTMLElement);

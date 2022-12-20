@@ -6,17 +6,20 @@ export function calculateProgram(
   program: BSL_AST.program
 ): SI_STRUCT.Stepper | Error {
   let env: SI_STRUCT.Environment = {};
-  let progSteps: SI_STRUCT.ProgStep[] = [];
-  program.map((defOrExpr) => {
+  const progSteps = program.map((defOrExpr) => {
     const newStep = calculateProgStep(defOrExpr, env);
     if (newStep instanceof Error) return newStep;
     env = newStep.env;
-    progSteps.push(newStep);
+    console.log("newStep", newStep);
+    return newStep;
   });
+  const isProgStepError = progSteps.some(s => s instanceof Error);
+  if (isProgStepError) return  progSteps.find(s => s instanceof Error) as Error;
+
   return {
     type: SI_STRUCT.Production.Stepper,
     originProgram: program,
-    progSteps: progSteps,
+    progSteps: progSteps as SI_STRUCT.ProgStep[],
   };
 }
 // calculate ProgStep
@@ -25,6 +28,7 @@ export function calculateProgStep(
   defOrExpr: BSL_AST.expr | BSL_AST.definition,
   env: SI_STRUCT.Environment
 ): SI_STRUCT.ProgStep | Error {
+  // If it is an expression, calculate the steps for the expression
   if (BSL_AST.isExpr(defOrExpr)) {
     const evalStep = calculateEvalSteps(defOrExpr, env);
     if (evalStep instanceof Error) return evalStep;
@@ -48,9 +52,10 @@ export function calculateProgStep(
           result: result,
         };
     }
-  } else {
+  } else { // If it is a definition, calculate the step for the definition
     const defStep = calculateDefSteps(defOrExpr, env);
-    if (defStep instanceof Error) return defStep;
+    // If the an error occurs, return the error
+    // if (defStep instanceof Error) return defStep;
     return defStep;
   }
 }
@@ -60,10 +65,13 @@ export function calculateDefSteps(
   def: BSL_AST.definition,
   env: SI_STRUCT.Environment
 ): SI_STRUCT.DefinitionStep | Error {
+  // If Constant Definition => Add Constant Definition to Environment
   if (BSL_AST.isConstDef(def)) {
     const name = def.name;
     const expr = def.value;
+    // If the expression is a literal, add the literal to the environment
     if (BSL_AST.isLiteral(expr)) {
+      console.log("isLiteral");
       const value = expr.value;
       const newEnv = addToEnv(env, name.symbol, value);
       const err = newEnv instanceof Error;
