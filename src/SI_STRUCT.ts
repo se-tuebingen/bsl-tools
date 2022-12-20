@@ -88,20 +88,9 @@ export interface DefinitionStep {
   type: Production.DefinitionStep;
   env: Environment;
   evalSteps: EvalStep[];
-  rule: ProgRule;
   originalDefOrExpr: BSL_AST.definition;
   result: BSL_AST.definition | Error; //evaluated definition, which is given to env
 }
-/* change data structure of ProgStep
-export interface DefinitionStep {
-  type: Production.DefinitionStep;
-  env: Environment;
-  evalSteps: EvalStep[];
-  rule: ProgRule;
-  originalDefOrExpr: BSL_AST.definition;
-  result: BSL_AST.definition | Error; //evaluated definition, which is given to env
-}
-*/
 export interface ExprStep {
   type: Production.ExprStep;
   env: Environment;
@@ -226,11 +215,11 @@ export interface CondError {
 export type ProgRule = Prog | ProgError;
 export interface Prog {
   type: Rule.Prog;
-  result: BSL_AST.definition;
+  definition: BSL_AST.definition;
 }
 export interface ProgError {
   type: Rule.ProgError;
-  result: Error;
+  definition: Error;
 }
 export type ConstRule = Const | ConstError;
 export interface Const {
@@ -381,15 +370,6 @@ export function isOneRule(obj: any): obj is OneRule {
 }
 export function isKong(obj: any): obj is Kong {
   return obj.type === Rule.Kong;
-}
-export function isProgRule(obj: any): obj is ProgRule {
-  return obj.type === Rule.Prog || obj.type === Rule.ProgError;
-}
-export function isProg(obj: any): obj is Prog {
-  return obj.type === Rule.Prog;
-}
-export function isProgError(obj: any): obj is ProgError {
-  return obj.type === Rule.ProgError;
 }
 export function isValue(obj: any): obj is Value {
   return (
