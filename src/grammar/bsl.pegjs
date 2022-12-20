@@ -36,7 +36,7 @@ ConstDef
   }
 
 Expression
-  = _ expr: (Cond / Call / Name / Value) { return expr }
+  = _ expr: (Value / Cond / Call / Name) { return expr }
 
 Cond
   = "(cond" options:(Option)+ _")" {
