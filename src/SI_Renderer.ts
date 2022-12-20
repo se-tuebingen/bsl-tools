@@ -30,7 +30,7 @@ export function processSteppers() {
 
 function renderError(err: any, el: HTMLElement) {
   console.error(err);
-  const error = err ? `${err}` : "Unknown Error";
+  const error = err ? `${err}` : 'Unknown Error';
   el.innerHTML = `
     <h3>Error turning Program into Stepper</h3>
     <div>${el.innerHTML}</div>
@@ -47,7 +47,7 @@ function renderError(err: any, el: HTMLElement) {
 export function setUpStepperGui(
   program: BSL_AST.program,
   el: HTMLElement
-): void | Error {
+): void {
   addStylesheet();
   const stepper = calculateProgram(program);
   console.log(BSL_Print.indent(BSL_Print.pprint(program), 30));
@@ -84,11 +84,11 @@ function getLanguage(el: HTMLElement): implementedLanguage {
 
 // helper for getting width of em in px
 interface PixelMeasurements {
-  charWidth: number;
-  maxChars: number;
+  charWidth: number,
+  maxChars: number
 }
 function getPixelMeasurements(el: HTMLElement): PixelMeasurements {
-  const measureText = "Loading...";
+  const measureText = 'Loading...';
   el.innerHTML = `
     <div class="bsl-tools-stepper" style="width: 100%;">
       <div class="box">
@@ -103,14 +103,12 @@ function getPixelMeasurements(el: HTMLElement): PixelMeasurements {
   const stepper = el.getElementsByClassName("bsl-tools-stepper")[0];
   if (!p || !stepper) {
     console.error("failed to inject measuring HTML into", el);
-    return { charWidth: 12, maxChars: 80 }; // arbitrary value
+    return {charWidth: 12, maxChars: 80}; // arbitrary value
   }
   const charPxWidth = p.clientWidth / measureText.length;
   const factor = 0.9;
-  const maxWidthInChars = Math.round(
-    (factor * stepper.clientWidth) / charPxWidth
-  );
-  return { charWidth: charPxWidth, maxChars: maxWidthInChars };
+  const maxWidthInChars = Math.round((factor * stepper.clientWidth) / charPxWidth);
+  return {charWidth: charPxWidth, maxChars: maxWidthInChars};
 }
 
 // ###### internationalization for this module #####
@@ -122,7 +120,7 @@ const dictionary = {
     "current evaluation": "Current Evaluation",
     "next step": "Next Step",
     "previous step": "Previous Step",
-    environment: "Environment",
+    "environment": "Environment",
     "remaining program": "Remaining Program",
     "start evaluation": "Start Evaluation",
     "evaluation finished": "Evaluation Finished",
@@ -132,7 +130,7 @@ const dictionary = {
     "current evaluation": "Aktuelle Auswertung",
     "next step": "Nächster Schritt",
     "previous step": "Vorheriger Schritt",
-    environment: "Umgebung",
+    "environment": "Umgebung",
     "remaining program": "Verbleibendes Programm",
     "start evaluation": "Auswertung Starten",
     "evaluation finished": "Auswertung Beendet",
@@ -155,7 +153,7 @@ function renderStepper(
 
        <div class="box environment">
          <div class="boxlabel">${dictionary[lang]["environment"]}</div>
-         ${progSteps.map((s, i) => renderDefinition(s, i, measures)).join("")}
+         ${progSteps.map((s,i) => renderDefinition(s, i, measures)).join("")}
        </div>
 
        <div class="box eval-steps"
@@ -178,14 +176,12 @@ function renderStepper(
              <img class="icon info-toggle info-collapse"
                      src="${circle_xmark}"
                      onclick="collapseInfo(event)">
-             ${renderRuleInformation("Prog", false)}
+             ${renderRuleInformation('Prog', false)}
            </div>
          </div>
        </div>
 
-       ${progSteps
-         .map((el, i) => renderEvalSteps(el, i, lang, measures))
-         .join("")}
+       ${progSteps.map((el, i) => renderEvalSteps(el, i, lang, measures)).join("")}
 
        <div class="box eval-steps"
             data-progstep="${progSteps.length}"
@@ -205,9 +201,7 @@ function renderStepper(
 
        <div class="box program">
          <div class="boxlabel">${dictionary[lang]["remaining program"]}</div>
-         ${stepper.originProgram
-           .map((s, i) => renderOriginalExpression(s, i, measures))
-           .join("")}
+         ${stepper.originProgram.map((s,i) => renderOriginalExpression(s,i,measures)).join("")}
        </div>
 
     </div>`;
@@ -216,14 +210,9 @@ function renderStepper(
   takeProgSteps(e, a);
 };
 // render what remains of an expression after evaluation
-function renderDefinition(
-  progStep: SI_STRUCT.ProgStep,
-  idx: number,
-  measures: PixelMeasurements
-): string {
+function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number, measures: PixelMeasurements): string {
   // filtering at this position in order to keep correct implicit progStep index
-  if (!SI_STRUCT.isDefinitionStep(progStep) || progStep.result instanceof Error)
-    return "";
+  if (!SI_STRUCT.isDefinitionStep(progStep) || progStep.result instanceof Error) return "";
   return `
       <div class="step code"
            data-progstep="${idx}"
@@ -248,7 +237,9 @@ function renderOriginalExpression(
          data-progstep="${idx}"
          data-visible="true">
       ${BSL_Print.indent(
-        BSL_Print.sanitize(BSL_Print.printDefOrExpr(expression)),
+        BSL_Print.sanitize(
+          BSL_Print.printDefOrExpr(expression)
+        ),
         measures.maxChars,
         "html"
       )}
@@ -263,21 +254,19 @@ function renderEvalSteps(
   measures: PixelMeasurements
 ): string {
   const ctx =
-    SI_STRUCT.isDefinitionStep(progStep) &&
-    BSL_AST.isConstDef(progStep.originalDefOrExpr)
-      ? {
-          left: `(define ${progStep.originalDefOrExpr.name.symbol} `,
-          right: ")",
-        }
-      : { left: "", right: "" };
+    SI_STRUCT.isDefinitionStep(progStep) && BSL_AST.isConstDef(progStep.originalDefOrExpr)
+    ? { left: `(define ${progStep.originalDefOrExpr.name.symbol} `, right: ")" }
+    : { left: "", right: "" };
   return `
     <div class="box eval-steps"
          data-progstep="${idx}"
          data-visible="false">
       <div class="boxlabel">${dictionary[lang]["current evaluation"]}</div>
-      ${progStep.evalSteps
-        .map((el, i) => renderStep(i, el, lang, { ...ctx }, measures))
-        .join("")}
+      ${
+        progStep.evalSteps
+          .map((el, i) => renderStep(i, el, lang, { ...ctx }, measures))
+          .join("")
+      }
       ${renderLastStep(progStep, lang, measures)}
 
     </div>
@@ -292,11 +281,15 @@ function renderLastStep(
   return `
   <div class="step"
        data-step="${progStep.evalSteps.length}"
-       data-currentStep="${progStep.evalSteps.length === 0 ? "true" : "false"}"
+       data-currentStep="${
+         progStep.evalSteps.length === 0 ? "true" : "false"
+       }"
        data-collapsed="false">
     <div class="prev-button"
          onclick="prevStep(event)">
-      ${dictionary[lang]["previous step"]} <img class="icon" src="${angle_up}">
+      ${
+        dictionary[lang]["previous step"]
+      } <img class="icon" src="${angle_up}">
     </div>
     <div class="next-button"
          onclick="nextStep(event)">
@@ -307,30 +300,23 @@ function renderLastStep(
 
     <div class="plug-result code"
          data-info-collapsed="true">
-      ${BSL_Print.indent(
-        BSL_Print.sanitize(
-          SI_STRUCT.isDefinitionStep(progStep) &&
-            !(progStep.result instanceof Error)
-            ? BSL_Print.printDefinition(progStep.result)
-            : `${
-                progStep.result instanceof Error
-                  ? progStep.result
-                  : BSL_Print.printValue(progStep.result as SI_STRUCT.Value)
-              }`
-        ),
-        measures.maxChars
-      )}
+      ${
+        BSL_Print.indent(BSL_Print.sanitize(
+          SI_STRUCT.isDefinitionStep(progStep) && !(progStep.result instanceof Error)
+          ? BSL_Print.printDefinition(progStep.result)
+          : `${
+              progStep.result instanceof Error
+                ? progStep.result
+                : BSL_Print.printValue(progStep.result as SI_STRUCT.Value)
+            }`), measures.maxChars)
+      }
       <img class="icon info-toggle info-expand"
               src="${circle_info}"
               onclick="expandInfo(event)">
       <img class="icon info-toggle info-collapse"
               src="${circle_xmark}"
               onclick="collapseInfo(event)">
-      ${
-        SI_STRUCT.isDefinitionStep(progStep) && SI_STRUCT.isProg(progStep.rule)
-          ? renderRuleInformation("Prog", false)
-          : renderRuleInformation("ProgError", false)
-      }
+      ${renderRuleInformation('Prog', false)}
     </div>
   </div>
   `;
@@ -364,7 +350,7 @@ function takeProgSteps(e: Event, amount: number): void {
     return;
   }
   const root = currentStep.parentElement;
-  if (!root) return;
+  if(!root) return;
   showEnvironment(root, targetIdx);
   showRemainingProgram(root, targetIdx);
   const newCurrentStep = showProgStep(root, targetIdx);
@@ -375,10 +361,7 @@ function showEnvironment(root: HTMLElement, step: number) {
   navigateDOM([root], ".environment/div").forEach((def) => {
     const idxString = def.getAttribute("data-progstep");
     if (idxString) {
-      def.setAttribute(
-        "data-visible",
-        parseInt(idxString) < step ? "true" : "false"
-      );
+      def.setAttribute('data-visible', parseInt(idxString) < step ? 'true': 'false');
     }
   });
 }
@@ -387,10 +370,7 @@ function showRemainingProgram(root: HTMLElement, step: number) {
   navigateDOM([root], ".program/div").forEach((prog) => {
     const idxString = prog.getAttribute("data-progstep");
     if (idxString) {
-      prog.setAttribute(
-        "data-visible",
-        parseInt(idxString) > step ? "true" : "false"
-      );
+      prog.setAttribute('data-visible', parseInt(idxString) > step ? 'true': 'false');
     }
   });
 }
@@ -399,21 +379,16 @@ function showProgStep(root: HTMLElement, index: number): HTMLElement {
   return navigateDOM([root], ".eval-steps").filter((progStep) => {
     const idxString = progStep.getAttribute("data-progstep");
     const current = idxString && parseInt(idxString) === index;
-    progStep.setAttribute("data-visible", current ? "true" : "false");
+    progStep.setAttribute('data-visible', current ? 'true' : 'false');
     return current;
   })[0];
 }
 
-function moveProgStepButton(
-  progStep: HTMLElement,
-  oldButtonPosition: number,
-  forward: boolean
-) {
+function moveProgStepButton(progStep: HTMLElement, oldButtonPosition: number, forward: boolean) {
   // move prev/next-button to stay under mouse
-  const currentStep = Array.from(progStep.children).filter(
-    (c) => c.getAttribute("data-currentstep") === "true"
-  )[0];
-  if (!currentStep) return;
+  const currentStep = Array.from(progStep.children)
+    .filter((c) => c.getAttribute("data-currentstep") === "true")[0];
+  if(!currentStep) return;
   const newButton = currentStep.querySelector(
     forward ? ".next-button" : ".prev-button"
   );
@@ -440,22 +415,21 @@ function renderStep(
     : step.rule;
   // result and rule name
   const redex: string = BSL_Print.sanitize(printRedex(redexRule.redex));
-  function renderResult(res: BSL_AST.expr | SI_STRUCT.Value | Error): {
-    html: string;
-    redex: string;
-  } {
+  function renderResult(res: BSL_AST.expr | SI_STRUCT.Value | Error): {html: string, redex: string} {
     if (SI_STRUCT.isValue(res)) {
       const redexResult = BSL_Print.printValue(res);
       const resultHtml = `${
         context.left
       }<span class="hole hole-result">${BSL_Print.sanitize(
         redexResult
-      )}</span>${context.right}`;
-      return { html: resultHtml, redex: redexResult };
+      )}</span>${
+        context.right
+      }`;
+      return {html: resultHtml, redex: redexResult};
     } else if (res instanceof Error) {
       const redexResult = `${res}`;
       const resultHtml = `<span class="hole hole-result hole-error">"${res}"</span>`; // to prevent indentation issues
-      return { redex: redexResult, html: resultHtml };
+      return {redex: redexResult, html: resultHtml};
     } else {
       const redexResult = BSL_Print.printE(res);
       const resultHtml = `${
@@ -463,7 +437,7 @@ function renderStep(
       }<span class="hole hole-result">${BSL_Print.sanitize(
         redexResult
       )}</span>${context.right}`;
-      return { redex: redexResult, html: resultHtml };
+      return {redex: redexResult, html: resultHtml};
     }
   }
   const result = renderResult(redexRule.result);
@@ -490,9 +464,7 @@ function renderStep(
       ? KONG_WIDTH
       : hole_position;
   // find out if we have place to repeat the holes
-  const ruleNameOnlyText = rules[ruleName]["name"]
-    .replaceAll("<cap>", "")
-    .replaceAll("</cap>", "");
+  const ruleNameOnlyText = rules[ruleName]["name"].replaceAll('<cap>', '').replaceAll('</cap>','');
   const space_left = // 3 for the arrow, 2 for the icon ---v
     measures.maxChars - left_offset_arrow - ruleNameOnlyText.length - 5;
   const renderHolesInRule = redex.length + result.redex.length <= space_left;
@@ -504,9 +476,7 @@ function renderStep(
          data-collapsed="false">
       <div class="prev-button"
            onclick="prevStep(event)">
-        ${
-          dictionary[lang]["previous step"]
-        } <img class="icon" src="${angle_up}">
+        ${dictionary[lang]["previous step"]} <img class="icon" src="${angle_up}">
       </div>
       <div class="next-button"
            onclick="nextStep(event)">
@@ -534,20 +504,18 @@ function renderStep(
           }
 
           <span class="rule left-arrowed one-rule"
-                style="--one-rule-margin-left: ${
-                  left_offset_arrow * measures.charWidth
-                }px">
+                style="--one-rule-margin-left: ${left_offset_arrow * measures.charWidth}px">
              <span class="rule-name">${rules[ruleName]["name"]}</span>${
-    renderHolesInRule
-      ? `:
+                renderHolesInRule
+                  ? `:
                    <span class="rule-description">
                      <span class="hole rule-hole">${redex}</span> →
-                     <span class="hole hole-result rule-hole">${BSL_Print.sanitize(
-                       result.redex
-                     )}</span>
+                     <span class="hole hole-result rule-hole">${
+                       BSL_Print.sanitize(result.redex)
+                     }</span>
                    </span>`
-      : ""
-  }
+                  : ""
+              }
            </span>
 
            <img src="${circle_info}"
@@ -570,9 +538,9 @@ function renderStep(
   const button = e.target as HTMLElement;
   const oldButtonPosition = button.getBoundingClientRect().y;
   const currentStep = getParentClassRecursive(button, "step");
-  if (!currentStep) return;
+  if(!currentStep) return;
   const newCurrentStep = currentStep.nextElementSibling;
-  if (!newCurrentStep) {
+  if(!newCurrentStep) {
     // continue with next expression
     takeProgSteps(e, 1);
     return;
@@ -592,9 +560,7 @@ function renderStep(
   const oldButtonPosition = button.getBoundingClientRect().y;
   const currentStep = getParentClassRecursive(button, "step");
   if (!currentStep) {
-    console.error(
-      "prevStep not called from within an element of the .step class"
-    );
+    console.error("prevStep not called from within an element of the .step class");
     return;
   }
   const position = currentStep.getAttribute("data-step");
@@ -603,14 +569,14 @@ function renderStep(
     return;
   }
   const newCurrentStep = currentStep.previousElementSibling;
-  if (!newCurrentStep) {
+  if(!newCurrentStep) {
     console.error("prevStep called on a step with no previous html element");
     return;
   }
   currentStep.setAttribute("data-currentStep", "false");
   currentStep.setAttribute("data-collapsed", "true");
-  newCurrentStep.setAttribute("data-currentStep", "true");
-  newCurrentStep.setAttribute("data-collapsed", "false");
+  newCurrentStep.setAttribute("data-currentStep","true");
+  newCurrentStep.setAttribute("data-collapsed","false");
   // move "prev" button to be under mouse
   const newButton = newCurrentStep.querySelector(".prev-button");
   if (!newButton) return;
@@ -650,9 +616,7 @@ function printContext(
   if (SI_STRUCT.isAppContext(ctx)) {
     const leftEls = [
       BSL_Print.printName(ctx.op),
-      ...ctx.values.map((v) =>
-        BSL_AST.isStructValue(v) ? BSL_Print.printValue(v) : `${v}`
-      ),
+      ...ctx.values.map((v) => BSL_AST.isStructValue(v) ? BSL_Print.printValue(v) : `${v}`),
     ];
     acc.left = `${acc.left}(${leftEls.join(" ")} `;
     acc.right =
@@ -672,8 +636,8 @@ function printContext(
   }
   return printContext(ctx.ctx, acc);
 }
-function printValueOrId(vOrId: SI_STRUCT.Value | SI_STRUCT.Id): string {
-  if (SI_STRUCT.isValue(vOrId)) {
+function printValueOrId(vOrId: (SI_STRUCT.Value | SI_STRUCT.Id)): string {
+  if(SI_STRUCT.isValue(vOrId)) {
     return BSL_Print.printValue(vOrId);
   } else {
     return printIdentifier(vOrId);
