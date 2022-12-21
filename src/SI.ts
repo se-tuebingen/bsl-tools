@@ -9,6 +9,7 @@ export function calculateProgram(
   const maybeEnv = initEnv();
   if (maybeEnv instanceof Error) return maybeEnv;
   let env: SI_STRUCT.Environment = maybeEnv;
+  
   const progSteps = program.map((defOrExpr) => {
     const newStep = calculateProgStep(defOrExpr, env);
     if (newStep instanceof Error) return newStep;
@@ -118,10 +119,20 @@ export function calculateDefSteps(
           originalDefOrExpr: def,
           result: newDef,
         };
-      } else {
-        return Error(
-          "calculateDefSteps: Last ExprStep is an Expr, not a Value"
-        );
+      } else if (value instanceof Error) {
+        return {
+          type: SI_STRUCT.Production.DefinitionStep,
+          env: env,
+          rule: {
+            type: SI_STRUCT.Rule.ProgError,
+            result: value,
+          },
+          evalSteps: stepList,
+          originalDefOrExpr: def,
+          result: value,
+        }
+      }else {
+        return new Error("Neither a value nor an error; Could not evaluate expression with call-by-value");
       }
     }
   } else if (BSL_AST.isFunDef(def)) {
