@@ -88,6 +88,7 @@ export interface DefinitionStep {
   type: Production.DefinitionStep;
   env: Environment;
   evalSteps: EvalStep[];
+  rule: Prog | ProgError;
   originalDefOrExpr: BSL_AST.definition;
   result: BSL_AST.definition | Error; //evaluated definition, which is given to env
 }
@@ -215,11 +216,11 @@ export interface CondError {
 export type ProgRule = Prog | ProgError;
 export interface Prog {
   type: Rule.Prog;
-  definition: BSL_AST.definition;
+  result: BSL_AST.definition;
 }
 export interface ProgError {
   type: Rule.ProgError;
-  definition: Error;
+  result: Error;
 }
 export type ConstRule = Const | ConstError;
 export interface Const {
@@ -303,7 +304,7 @@ export interface Kong {
 // ENVIRONMENT
 
 export type Environment = { [key: string]: EnvValue };
-// BSL_AST.expr zuerst auswerten (call by value)
+// BSL_AST.expr is evaluated first (call by value)
 // ##########################
 
 // runtime type checking
@@ -367,6 +368,15 @@ export function isOneRule(obj: any): obj is OneRule {
     obj.type === Rule.StructSelect ||
     obj.type === Rule.StructSelectError
   );
+}
+export function isProgRule(obj: any): obj is ProgRule {
+  return obj.type === Rule.Prog || obj.type === Rule.ProgError;
+}
+export function isProg(obj: any): obj is Prog {
+  return obj.type === Rule.Prog;
+}
+export function isProgError(obj: any): obj is ProgError {
+  return obj.type === Rule.ProgError;
 }
 export function isKong(obj: any): obj is Kong {
   return obj.type === Rule.Kong;
