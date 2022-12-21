@@ -13,6 +13,7 @@ export enum Production {
   AppContext = "AppContext",
   CondContext = "CondContext",
   Hole = "Hole",
+  PrimDef = "PrimDef",
   FunDef = "FunEnv",
   StructDef = "StructDef",
   MakeFun = "MakeFun",
@@ -64,7 +65,7 @@ export enum Rule {
   StructSelect = "StructSelect",
   StructSelectError = "StructSelectError",
 }
-export enum PrimNames {
+export enum PrimFuns {
   Add = "+",
   Sub = "-",
   Mul = "*",
@@ -156,10 +157,13 @@ export type Value =
   | `'()`
   | BSL_AST.StructValue /*| FunValue/*| Closure */;
 
-export type EnvValue = Value | FunDef | StructDef | StructFun;
+export type EnvValue = Value | PrimDef | FunDef | StructDef | StructFun;
 export interface Id {
   type: Production.Id;
   symbol: string;
+}
+export interface PrimDef {
+  type: Production.PrimDef;
 }
 export interface FunDef {
   type: Production.FunDef;
@@ -389,6 +393,9 @@ export function isValue(obj: any): obj is Value {
     obj === `'()` ||
     BSL_AST.isStructValue(obj)
   ); //|| isClosure(obj);
+}
+export function isPrimDef(obj: any): obj is PrimDef {
+  return obj.type === Production.PrimDef;
 }
 export function isFunDef(obj: any): obj is FunDef {
   return obj.type === Production.FunDef;

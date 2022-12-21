@@ -5,7 +5,10 @@ import * as SI_STRUCT from "./SI_STRUCT";
 export function calculateProgram(
   program: BSL_AST.program
 ): SI_STRUCT.Stepper | Error {
-  let env: SI_STRUCT.Environment = /*initializeEnv()*/ {};
+  // Initialize the environment
+  const maybeEnv = initEnv();
+  if (maybeEnv instanceof Error) return maybeEnv;
+  let env: SI_STRUCT.Environment = maybeEnv;
   const progSteps = program.map((defOrExpr) => {
     const newStep = calculateProgStep(defOrExpr, env);
     if (newStep instanceof Error) return newStep;
@@ -400,9 +403,11 @@ export function step(
     if (allArgsAreValues) {
       const args: SI_STRUCT.Value[] = r.args as SI_STRUCT.Value[];
       //check if r.name is primitive or in env
+      /* if (isPrimitive(r.name)) {
+       */
       const funDef = lookupEnv(env, r.name.symbol);
       //check if name is in primitive functions list
-      if (Object.values<string>(SI_STRUCT.PrimNames).includes(r.name.symbol)) {
+      if (SI_STRUCT.isPrimDef(funDef)) {
         const primResult = prim(r.name, args);
         if (primResult instanceof Error)
           return {
@@ -1029,6 +1034,19 @@ function substExpr(
 }
 
 // ####### Environment Functions #######
+
+// initialize environment with built-in functions
+function initEnv(): SI_STRUCT.Environment | Error {
+  let env: SI_STRUCT.Environment | Error = {};
+  //add built-in functions
+  Object.entries(SI_STRUCT.PrimFuns).forEach((name) => {
+    if (env instanceof Error) return env;
+    else env = addToEnv(env, name[1], { type: SI_STRUCT.Production.PrimDef });
+  });
+  if (env === undefined) return Error("initEnv: environment is undefined");
+  else if (env instanceof Error) return env;
+  return env;
+}
 
 //adds a Value to an Environment
 function addToEnv(
