@@ -10,20 +10,27 @@ export function calculateProgram(
   if (maybeEnv instanceof Error) return maybeEnv;
   let env: SI_STRUCT.Environment = maybeEnv;
   
+
+  // rewrite this 
   const progSteps = program.map((defOrExpr) => {
     const newStep = calculateProgStep(defOrExpr, env);
     if (newStep instanceof Error) return newStep;
     env = newStep.env;
     return newStep;
   });
-  const isProgStepError = progSteps.some((s) => s instanceof Error);
-  if (isProgStepError)
-    return progSteps.find((s) => s instanceof Error) as Error;
+  // if a ProgStep itself is an Error, return the Error
+  const isProgError = progSteps.some((s) => s instanceof Error);
+  if (isProgError) return progSteps.find((s) => s instanceof Error) as Error;
+  // else check if there is an error in the result
+  const isStepResError = progSteps.some(s=> (s as SI_STRUCT.ProgStep).result instanceof Error);
+  // if there is an error in the result, find the index of the error and slice the array at the last index after the error
+  const progStepErrorId = isStepResError ? progSteps.findIndex((s) => (s as SI_STRUCT.ProgStep).result instanceof Error) : -1;
+  const newProgSteps = isStepResError ? progSteps.slice(0, progStepErrorId + 1) as SI_STRUCT.ProgStep[] : progSteps as SI_STRUCT.ProgStep[];
 
   return {
     type: SI_STRUCT.Production.Stepper,
     originProgram: program,
-    progSteps: progSteps as SI_STRUCT.ProgStep[],
+    progSteps: newProgSteps,
   };
 }
 // calculate ProgStep
