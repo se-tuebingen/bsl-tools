@@ -15,7 +15,9 @@ export function ProcessGenerator(): void {
 
 // ######### INITIALIZATION ########
 export function initGenerator(el: Element): string {
-    return `<div class="generator">`
+    return `<div class="generator">
+    Hallo!
+    </div>`
 
 }
 
@@ -31,7 +33,7 @@ export function renderGenerator(el: Element): string {
 
 // ######### EVENT HANDLERS ########
 // # event handler for <generator> tag
-export function onGeneratorClick(e: Event): void {
+/*export function onGeneratorClick(e: Event): void {
     e.preventDefault();
     const el = e.target as HTMLElement;
     const id = el.getAttribute("data-id");
@@ -44,4 +46,4 @@ export function onGeneratorClick(e: Event): void {
         generator.innerHTML = renderGenerator(generator);
         }
     }
-}
+}*/
