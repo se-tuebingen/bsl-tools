@@ -188,10 +188,11 @@ If, for example, your production labels are significantly larger than the text i
 your nodes, you can give the nodes (represented by `<span>` elements)
 greater horizontal spacing with
 ```
-#:extrastyle ".bsl-tools-tree span { margin-left: 2em; margin-right: 2em;}"
+#:extrastyle "jsontree .bsl-tools-tree span { margin-left: 2em; margin-right: 2em;}"
 ```
 Note that you need to scope your styles to `.bsl-tools-tree`, or they are less
 specific than those in the general stylesheet and will be overridden.
+Also note that inline CSS is not scoped and will apply to all your `jsontree` elements (or whatever you specify).
 
 ### Stepper
 
