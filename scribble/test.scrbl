@@ -107,7 +107,7 @@ Internationalization currently only applies to quiz mode, since the regular tree
 
 @section{JSON-Tree Tests}
 
-@jsontree[#:quiz #t #:lang "de"]{
+@jsontree[#:quiz #t #:lang "de" #:extrastyle ".bsl-tools-tree span { margin-left: 2em; margin-right: 2em;}"]{
   {
     "grammar": {
       "<Expression>": ["<Addition>", "<Subtraction>", "<Number>"],
