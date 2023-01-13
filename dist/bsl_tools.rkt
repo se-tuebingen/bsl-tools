@@ -58,6 +58,10 @@
     (attributes (list (cons 'lang lang)))
   ))
 )
+(define
+  style-tag-wrapper
+  (style #f (list (alt-tag "style")))
+)
 
 ; Either (List of Syntax) or (Value)-> Either (List of String) or (String)
 (define (synlst-or-val->strlist-or-str lst)
@@ -85,6 +89,9 @@
 ; helper for "nothing" in order to not break pdf rendering by outputting nothing
 (define nothing (nested-flow (style #f '()) '()))
 
+; helper for inline styles
+(define (inline-style s) (elem #:style style-tag-wrapper s))
+
 ; render bsl-string
 (define
   (bsltree stx #:quiz [quiz #f] #:lang [lang "en"])
@@ -108,14 +115,18 @@
 
 ; render bsl-string
 (define
-  (jsontree #:quiz [quiz #f] #:lang [lang "en"] . json)
+  (jsontree #:quiz [quiz #f] #:lang [lang "en"] #:extrastyle [extrastyle ""] . json)
   (cond
   [(not (boolean? quiz))
    (raise-argument-error 'quiz "JSON-Tree #:quiz toggle has to be a boolean!" quiz)]
   [(not (implemented-language lang))
    (raise-argument-error 'lang "JSON-Tree #:lang needs to be an implemented language, currently either 'en' or 'de'" lang)]
   [(cond-block
-      [html (paragraph (jsontree-tag-wrapper quiz lang) json)]
+      [html (paragraph (style #f '())
+              (list
+                (inline-style extrastyle)
+                (elem #:style (jsontree-tag-wrapper quiz lang) json))
+            )]
       [else nothing]
      ;[latex (paragraph (style #f '()) (strlist-or-str->str(synlst-or-val->strlist-or-str stx)))]
   )]

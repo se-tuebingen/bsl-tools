@@ -8,6 +8,7 @@
   --wrong-background: red;
   --correct-background: lime;
   --hole-selection-background: white;
+  --node-margin-x: 1em; /* horizontally */
 }
 /*
 CSS for tree by Ross Angus
@@ -59,8 +60,8 @@ https://www.cssscript.com/clean-tree-diagram/
     border: solid .1em var(--branch-color);
     border-radius: .2em;
     display: inline-block;
-    margin-left: 1em;
-    margin-right: 1em;
+    margin-left: var(--node-margin-x);
+    margin-right: var(--node-margin-x);
     margin-top: 1.5em;
     padding: .2em .5em;
     position: relative;
