@@ -61,8 +61,7 @@
 (define
   style-tag-wrapper
   (style #f (list
-    (alt-tag "style")
-    (attributes (list (cons 'scoped "true")))))
+    (alt-tag "style")))
 )
 
 ; Either (List of Syntax) or (Value)-> Either (List of String) or (String)
