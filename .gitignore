@@ -5,3 +5,6 @@ tests/scribble/bsl_tools.js
 tests/scribble/bsl_tools.rkt
 dist/bsl_tools.js
 .vscode
+docs/books/**
+docs/index.html
+bin

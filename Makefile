@@ -41,6 +41,11 @@ test:
 	cd tests/javascript && cp ../../dist/bsl_tools.js bsl_tools.js
 	cd tests/scribble && ./test.sh
 
+doc:
+	test -d bin || mkdir bin
+	curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.27/mdbook-v0.4.27-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
+	bin/mdbook build docs --open
+
 update_fallback_build:
 	echo "Using pkg to create tspegjs binaries"
 	node_modules/.bin/pkg --out-path fallback_binaries node_modules/.bin/tspegjs

@@ -12,16 +12,16 @@ jobs:
       - name: Install Racket
         uses: Bogdanp/setup-racket@v1.7
         with:
-          architecture: 'x64'
-          distribution: 'full'
-          variant: 'CS'
-          version: 'stable'
+          architecture: "x64"
+          distribution: "full"
+          variant: "CS"
+          version: "stable"
       - run: raco pkg install --deps search-auto scribble-math
       - name: Install nodejs 16
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: 'npm'
+          cache: "npm"
       - run: npm install
       # - name: Install TexLive
       #   run: sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
@@ -31,10 +31,12 @@ jobs:
         run: make headless_build
       - name: Execute Tests
         run: make test
+      - name: Create Documentation
+        run: make doc
       - uses: JamesIves/github-pages-deploy-action@4.1.7
         with:
           branch: gh-pages
-          folder: tests
+          folder: doc
       - name: Publish compiled version as development version
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
