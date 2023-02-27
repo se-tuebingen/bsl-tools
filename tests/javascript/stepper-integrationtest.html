@@ -47,6 +47,10 @@
       [(&lt; 2 3) (* 2 3 4)])
       (define x (+ 40 2))
       (define y "hallo")
+      (define-struct p (x y))
+      (define p1 (make-p 1 2))
+      (p? p1)
+      (p-y p1)
       (&gt; 2 4)
     </stepper>
 
