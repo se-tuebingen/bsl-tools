@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>BSL Tools Generator</title>
+  <script>
+  let scriptNode = document.createElement('script');
+  if (window.location.href.startsWith('file://')) {
+    console.log('detected local dev testing, loading bsl_tools.js from dist');
+    scriptNode.src = '../../dist/bsl_tools.js';
+  } else {
+    scriptNode.src = 'bsl_tools.js';
+  }
+  document.getElementsByTagName('head')[0].appendChild(scriptNode);
+  </script>
+</head>
+
+<body>
+  <h1>BSL Tools Generator</h1>
+  <p>Generate Steppers and Trees from BSL Code</p>
+  <generator></generator>
+
+</body>
+
+</html>

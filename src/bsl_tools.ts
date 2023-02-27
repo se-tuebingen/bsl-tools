@@ -1,5 +1,5 @@
 import {processBslTrees} from './BSL_Tree';
-import { ProcessGenerator } from './Generator';
+import {processGenerators} from './Generator';
 import {processJsonTrees} from './JSON_Tree';
 import {processSteppers} from './SI_Renderer';
 
@@ -10,5 +10,5 @@ window.addEventListener('load', () => {
   processBslTrees();
   processJsonTrees();
   processSteppers();
-  ProcessGenerator();
+  processGenerators();
 });
