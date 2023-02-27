@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Page not found</title>
+        <title>Page not found - BSL-Tools</title>
         <base href="/">
 
 
@@ -37,7 +37,7 @@
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">1.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="demo-ast.html"><strong aria-hidden="true">2.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">3.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="demo-stepper.html"><strong aria-hidden="true">4.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Building locally</li><li class="chapter-item expanded "><a href="building.html"><strong aria-hidden="true">5.</strong> Building locally</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Contributing</li><li class="chapter-item expanded "><a href="contributing.html"><strong aria-hidden="true">1.</strong> Contributing</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">2.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="examples-ast.html"><strong aria-hidden="true">3.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">4.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="examples-stepper.html"><strong aria-hidden="true">5.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Scribble Demo</li><li class="chapter-item expanded "><a href="../demo/scribble/index.html"><strong aria-hidden="true">6.</strong> Scribble Demo</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -111,11 +111,14 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title"></h1>
+                    <h1 class="menu-title">BSL-Tools</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/se-tuebingen/bsl-tools" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
 
                     </div>
@@ -180,6 +183,7 @@
         <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="bsl_tools.js"></script>
 
 
     </div>

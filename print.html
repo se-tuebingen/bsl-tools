@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title></title>
+        <title>BSL-Tools</title>
         <meta name="robots" content="noindex" />
 
 
@@ -37,7 +37,7 @@
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">1.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="demo-ast.html"><strong aria-hidden="true">2.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">3.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="demo-stepper.html"><strong aria-hidden="true">4.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Building locally</li><li class="chapter-item expanded "><a href="building.html"><strong aria-hidden="true">5.</strong> Building locally</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Contributing</li><li class="chapter-item expanded "><a href="contributing.html"><strong aria-hidden="true">1.</strong> Contributing</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">2.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="examples-ast.html"><strong aria-hidden="true">3.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">4.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="examples-stepper.html"><strong aria-hidden="true">5.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Scribble Demo</li><li class="chapter-item expanded "><a href="../demo/scribble/index.html"><strong aria-hidden="true">6.</strong> Scribble Demo</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -111,11 +111,14 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title"></h1>
+                    <h1 class="menu-title">BSL-Tools</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/se-tuebingen/bsl-tools" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
 
                     </div>
@@ -169,6 +172,45 @@ of the main branch, you can download semantic versioned editions.</p>
 </code></pre>
 <p>For reference see also the <a href="https://docs.racket-lang.org/htdp-langs/beginner.html">Racket webpage for BSL</a>
 and the <a href="https://ps-tuebingen.github.io/informatik-1-skript/bsl-semantics.html">Info 1 script at 8.3</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="building-the-project"><a class="header" href="#building-the-project">Building the project</a></h2>
+<p>For building the project, you need to have CMake or a similar tool that can handle
+the <code>Makefile</code> installed. For Linux and MacOS, this should already be the case.</p>
+<p>If you only changed something in the TypeScript Source Code or updated the Grammar,
+and are on a 64bit Linux, MaxOS or Windows Computer, you can simply run <code>make fallback_build</code>,
+which depends on binaries.
+<em>Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes.</em></p>
+<p>If you are on another OS or want to change more, or update the fallback binaries,
+you need to have <a href="nodejs.org">NodeJS</a> installed.
+<em>On Ubuntu, it is recommended to install it via <a href="https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions">NodeSource</a>.</em></p>
+<p>You need to run <code>npm install</code> anytime dependencies might have changed.</p>
+<p>Then, you can run</p>
+<ul>
+<li><code>make build</code> to compile grammar and TypeScript Sources (<em>Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes.</em>)</li>
+<li><code>make update_fallback_build</code> to update the committed fallback binaries</li>
+</ul>
+<h2 id="dependencies"><a class="header" href="#dependencies">Dependencies</a></h2>
+<p>Install the latest TypeScript version via <code>npm</code>. Also see <a href="https://www.typescriptlang.org/download">https://www.typescriptlang.org/download</a>.</p>
+<p>We are using <a href="https://esbuild.github.io/getting-started/#build-scripts">esbuild</a>
+to compile TypeScript and bundle all resources into one single JavaScript file.</p>
+<p>For generating a BSL parser, we are using the <a href="https://github.com/metadevpro/ts-pegjs"><code>ts-pegjs</code></a> package, which builds upon <code>pegjs</code>.
+This package installs a node script which compiles the grammar found in <code>src/grammar/bsl.pegjs</code> to a TypeScript parser module. The best way to test and edit the grammar is the <a href="https://pegjs.org/online">pegjs online version</a>, since it has syntax highlighting and live testing.</p>
+<p>In order to generate a NodeJS-independent binary (effectively, a binary with
+NodeJS bundled, so not exactly lightweight) out of <code>ts-pegjs</code>, we are using
+the <a href="https://github.com/vercel/pkg"><code>pkg</code></a> package.</p>
+<p>If you want to contribute to the scribble part of <code>bsl-tools</code> you need to install Racket first. See <a href="https://download.racket-lang.org/">https://download.racket-lang.org/</a></p>
+<p>You also need to install dependencies for Scribble, the Racket Documentation Tool, preferably with the racket package manager raco. On Linux distributions you can install Scribble with <code>raco pkg install --deps search-auto scribble-math</code>.</p>
+<h2 id="testing"><a class="header" href="#testing">Testing</a></h2>
+<p>Running <code>make test</code> copies the generated JavaScript file and the latest version
+of the Scribble Plugin to the test folders and renders the Scribble test.</p>
+<p>In order to be able to render the Scribble test pages, you need to have
+<a href="https://racket-lang.org">Racket</a> installed.</p>
+<p>The HTML test pages load the JavaScript plugin from the <code>dist</code> folder if opened
+locally (served via <code>file://</code>).</p>
+<h2 id="publishing-a-version"><a class="header" href="#publishing-a-version">Publishing a version</a></h2>
+<p>Everytime a <a href="https://git-scm.com/book/en/v2/Git-Basics-Tagging">tag</a> starting with <code>v</code> is published, a github workflow similar to the one running when
+something is pushed on main will kick off, compile and test the code.
+If the tag has the form <code>vX.X.X</code> (3 numbers), the module will be released under
+this name, otherwise, the workflow will fail.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ast-view"><a class="header" href="#ast-view">AST View</a></h1>
 <p>The Abstract Syntax Tree View shows the Abstract Syntax Tree of a given expression in the BSL grammar (or another given grammar in JSON).</p>
 <h2 id="using-ast-view-with-html"><a class="header" href="#using-ast-view-with-html">Using AST View with HTML</a></h2>
@@ -181,7 +223,6 @@ follows:</p>
 <p>Note that if you add one or more of the following tools to your page, the script
 will add stylesheets to the <code>&lt;head&gt;</code> of your document which set styles for the
 <code>.bsl-tools-stepper</code> and <code>.bsl-tools-tree</code> classes.</p>
-<p><strong><code>&lt;</code> and <code>&gt;</code> need to be replaced with <code>&amp;lt;</code> and <code>&amp;gt;</code> in order to not break your HTML!</strong></p>
 <h3 id="planting-the-bsltree"><a class="header" href="#planting-the-bsltree">Planting the &lt;bsltree&gt;</a></h3>
 <p>The collapsible AST view can be used with BSL code, which will be parsed for you,
 or you can provide your own JSON structure.</p>
@@ -206,6 +247,7 @@ the correct production and mark all subexpressions ('holes').</p>
 &lt;/jsontree&gt;
 </code></pre>
 <p>Anything inside the <code>&lt;bsltree&gt;</code> tag is parsed according to the BSL Core Language as documented below.</p>
+<p><strong><code>&lt;</code> and <code>&gt;</code> need to be replaced with <code>&amp;lt;</code> and <code>&amp;gt;</code> in order to not break your HTML!</strong></p>
 <p>If you want to use <code>&lt;jsontree&gt;</code>, you need to provide valid JSON - so use double quotes (<code>&quot;</code>)!
 <code>&quot;code&quot;</code> always needs to be a string, mark holes (code of children) by putting <code>|</code>s
 around it. If you want to, you can provide your own grammar in the <code>&quot;grammar&quot;</code> field
@@ -283,7 +325,144 @@ greater horizontal spacing with</p>
 <p>Note that you need to scope your styles to <code>.bsl-tools-tree</code>, or they are less
 specific than those in the general stylesheet and will be overridden.
 Also note that inline CSS is not scoped and will apply to all your <code>jsontree</code> elements (or whatever you specify).</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="demo"><a class="header" href="#demo">Demo</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="examples-ast-view"><a class="header" href="#examples-ast-view">Examples AST View</a></h1>
+<bsltree>
+    (cond [e1 #t]
+    [else (asBool e2)])
+  </bsltree>
+  <bsltree>
+    (define (f x y) (+ x y))
+  </bsltree>
+  <bsltree>
+    (cond [(= x 3) "isThree"] [#false '()])
+  </bsltree>
+  <bsltree>
+    (define x 42)
+  </bsltree>
+  <bsltree>
+    (define-struct name (firstName lastName))
+  </bsltree>
+<h2 id="ast-as-a-quiz"><a class="header" href="#ast-as-a-quiz">AST as a quiz</a></h2>
+  <bsltree quiz="true">
+    (define (f x y) (+ x y))
+  </bsltree>
+  <bsltree quiz="true">
+    (cond [(< x 3) "isThree"] [#false '()])
+  </bsltree>
+  <bsltree quiz="true">
+    (define x 42)
+  </bsltree>
+  <bsltree quiz="true">
+    (define-struct name (firstName lastName))
+  </bsltree>
+<h2 id="internationalization"><a class="header" href="#internationalization">Internationalization</a></h2>
+  <h3 id="german"><a class="header" href="#german">German</a></h3>
+  <bsltree quiz="true" lang="de">
+    (define-struct name (firstName lastName))
+  </bsltree>
+<h2 id="handling-of-non-valid-bsl-code"><a class="header" href="#handling-of-non-valid-bsl-code">Handling of non-valid BSL code</a></h2>
+  <bsltree>nonvalid(code)</bsltree>
+<h2 id="general-ast-from-json"><a class="header" href="#general-ast-from-json">General AST from JSON</a></h2>
+  <jsontree quiz="true">
+    {
+      "grammar": {
+        "Expression": ["Addition", "Subtraction", "Number"],
+        "Subexpression": ["(Addition)", "(Subtraction)"],
+        "Addition": ["Subexpression + Subexpression",
+                     "Number + Subexpression",
+                     "Subexpression + Number",
+                     "Number + Number"],
+        "Subtraction": ["Subexpression - Subexpression",
+                        "Number - Subexpression",
+                        "Subexpression - Number",
+                        "Number - Number"],
+        "Number": []
+      },
+      "production": "Expression",
+      "code": "|(2 - 3) + 4|",
+      "holes": [{
+        "production": "Addition",
+        "code": "|(2 - 3)| + |4|",
+        "holes": [
+          {
+            "production": "Subexpression",
+            "code": "(|2 - 3|)",
+            "holes": [{
+              "production": "Subtraction",
+              "code": "|2| - |3|",
+              "holes": [
+                {
+                  "production": "Number",
+                  "code": "2"
+                },
+                {
+                  "production": "Number",
+                  "code": "3"
+                }
+              ]
+            }]
+          },
+          {
+            "production": "Number",
+            "code": "4"
+          }
+        ]
+      }]
+    }
+  </jsontree>
+<jsontree>
+    {
+      "production": "Subtraction",
+      "code": "(|2| - |3|)",
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        },
+        {
+          "production": "Number",
+          "code": "3"
+        }
+      ]
+    }
+  </jsontree>
+<h3 id="json-tree-error-rendering-tests"><a class="header" href="#json-tree-error-rendering-tests">JSON Tree Error Rendering Tests:</a></h3>
+<jsontree>
+    {
+      "production": "Subtraction",
+      "code": "(|2| - |3|)",
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        }
+      ]
+    }
+  </jsontree>
+  <jsontree>
+    {
+      "production": "Subtraction",
+      "code": 2,
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        }
+      ]
+    }
+  </jsontree>
+  <jsontree>
+    {
+      "production": {"hello": "there"},
+      "code": "(|2| - |3|)",
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        }
+      ]
+    }
+  </jsontree>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="small-step-interpreter-stepper"><a class="header" href="#small-step-interpreter-stepper">Small Step Interpreter (Stepper)</a></h1>
 <p>The Small Step Interpreter (Stepper) shows each step of BSL programs.</p>
 <p>The stepper accepts only syntactic valid BSL programs. It precomputes the evaluation steps
@@ -299,7 +478,6 @@ follows:</p>
 <p>Note that if you add one or more of the following tools to your page, the script
 will add stylesheets to the <code>&lt;head&gt;</code> of your document which set styles for the
 <code>.bsl-tools-stepper</code> and <code>.bsl-tools-tree</code> classes.</p>
-<p><strong><code>&lt;</code> and <code>&gt;</code> need to be replaced with <code>&amp;lt;</code> and <code>&amp;gt;</code> in order to not break your HTML!</strong></p>
 <h3 id="reducing-bsl-programs-with-stepper"><a class="header" href="#reducing-bsl-programs-with-stepper">Reducing BSL programs with &lt;stepper&gt;</a></h3>
 <p>The interface is as follows:</p>
 <pre><code class="language-html">&lt;stepper&gt; (valid bsl syntax) &lt;/stepper&gt;
@@ -307,6 +485,7 @@ will add stylesheets to the <code>&lt;head&gt;</code> of your document which set
 &lt;!-- for displaying user text in german, do --&gt;
 &lt;stepper lang=&quot;de&quot;&gt; (valid bsl syntax) &lt;/stepper&gt;
 </code></pre>
+<p><strong><code>&lt;</code> and <code>&gt;</code> need to be replaced with <code>&amp;lt;</code> and <code>&amp;gt;</code> in order to not break your HTML!</strong></p>
 <p>Font sizes and styles are deliberately left unset wherever possible in order to
 just conform to the styling of the rest of the document.</p>
 <p>For the code and explanation formats, however, setting the <code>font-family</code> attributes
@@ -347,8 +526,8 @@ need to be in the same folder as well as your scribble file so that everything w
 [(or #true #false) (_ 2 3 4)]))
 ]
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="demo-1"><a class="header" href="#demo-1">Demo</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="building-locally"><a class="header" href="#building-locally">Building locally</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="stepper-examples"><a class="header" href="#stepper-examples">Stepper Examples</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="scribble-demo"><a class="header" href="#scribble-demo">Scribble Demo</a></h1>
 
                     </main>
 
@@ -384,6 +563,7 @@ need to be in the same folder as well as your scribble file so that everything w
         <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="bsl_tools.js"></script>
 
         <script>
         window.addEventListener('load', function() {

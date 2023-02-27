@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Using AST View</title>
+        <title>Using AST View - BSL-Tools</title>
 
 
         <!-- Custom HTML head -->
@@ -36,7 +36,7 @@
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html" class="active"><strong aria-hidden="true">1.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="demo-ast.html"><strong aria-hidden="true">2.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">3.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="demo-stepper.html"><strong aria-hidden="true">4.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Building locally</li><li class="chapter-item expanded "><a href="building.html"><strong aria-hidden="true">5.</strong> Building locally</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Contributing</li><li class="chapter-item expanded "><a href="contributing.html"><strong aria-hidden="true">1.</strong> Contributing</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html" class="active"><strong aria-hidden="true">2.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="examples-ast.html"><strong aria-hidden="true">3.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">4.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="examples-stepper.html"><strong aria-hidden="true">5.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Scribble Demo</li><li class="chapter-item expanded "><a href="../demo/scribble/index.html"><strong aria-hidden="true">6.</strong> Scribble Demo</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -110,11 +110,14 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title"></h1>
+                    <h1 class="menu-title">BSL-Tools</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/se-tuebingen/bsl-tools" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
 
                     </div>
@@ -154,7 +157,6 @@ follows:</p>
 <p>Note that if you add one or more of the following tools to your page, the script
 will add stylesheets to the <code>&lt;head&gt;</code> of your document which set styles for the
 <code>.bsl-tools-stepper</code> and <code>.bsl-tools-tree</code> classes.</p>
-<p><strong><code>&lt;</code> and <code>&gt;</code> need to be replaced with <code>&amp;lt;</code> and <code>&amp;gt;</code> in order to not break your HTML!</strong></p>
 <h3 id="planting-the-bsltree"><a class="header" href="#planting-the-bsltree">Planting the &lt;bsltree&gt;</a></h3>
 <p>The collapsible AST view can be used with BSL code, which will be parsed for you,
 or you can provide your own JSON structure.</p>
@@ -179,6 +181,7 @@ the correct production and mark all subexpressions ('holes').</p>
 &lt;/jsontree&gt;
 </code></pre>
 <p>Anything inside the <code>&lt;bsltree&gt;</code> tag is parsed according to the BSL Core Language as documented below.</p>
+<p><strong><code>&lt;</code> and <code>&gt;</code> need to be replaced with <code>&amp;lt;</code> and <code>&amp;gt;</code> in order to not break your HTML!</strong></p>
 <p>If you want to use <code>&lt;jsontree&gt;</code>, you need to provide valid JSON - so use double quotes (<code>&quot;</code>)!
 <code>&quot;code&quot;</code> always needs to be a string, mark holes (code of children) by putting <code>|</code>s
 around it. If you want to, you can provide your own grammar in the <code>&quot;grammar&quot;</code> field
@@ -261,11 +264,11 @@ Also note that inline CSS is not scoped and will apply to all your <code>jsontre
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="preamble.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="contributing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="demo-ast.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="examples-ast.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -275,11 +278,11 @@ Also note that inline CSS is not scoped and will apply to all your <code>jsontre
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="preamble.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="contributing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="demo-ast.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="examples-ast.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -303,6 +306,7 @@ Also note that inline CSS is not scoped and will apply to all your <code>jsontre
         <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="bsl_tools.js"></script>
 
 
     </div>
