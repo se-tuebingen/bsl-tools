@@ -9,6 +9,8 @@ and semantical support for other grammars.
 The module is distributed as a single JavaScript file and an optional
 additional Racket file for use with Scribble.
 
+The documentation and demos are available at <https://se-tuebingen.github.io/bsl-tools/>.
+
 You can download them from [Releases](https://github.com/se-tuebingen/bsl-tools/releases),
 the current test build shows the "Development Build" and corresponds to the state
 of the main branch, you can download semantic versioned editions.
