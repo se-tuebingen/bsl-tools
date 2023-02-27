@@ -8,7 +8,7 @@ import { productionTree } from "./Production_Tree";
 
 // # main function: generate a tree or a stepper through <generator> tag
 export function processGenerators(): void {
-  Array.from(document.getElementsByTagName("generator")).map((el) => {
+  Array.from(document.getElementsByTagName("bsltoolsgenerator")).map((el) => {
     try {
       initGenerator(el);
     } catch (e) {
@@ -34,7 +34,7 @@ export function initGenerator(el: Element) {
         </button> |
         <button onclick="bsl_tools_generate(event)" data-type="tree-quiz">
           Generate Tree Quiz
-        </button> | 
+        </button> |
         <button onclick="bsl_tools_generate(event)" data-type="stepper">
           Generate Stepper
         </button>
