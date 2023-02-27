@@ -222,3 +222,130 @@ Hier ist noch ein extra-Absatz!
 (define y "hallo")
 (> 2 4))
 ]
+
+@section{Build your own Grammar!}
+@jsontree[
+  #:extrastyle "jsontree .bsl-tools-tree span {margin-left: 2.5em; margin-right: 2.5em}"
+]{
+  {
+    "production": "<Zahl>",
+    "code": "|0|",
+    "holes": [
+      {
+        "production": "<PositiveZahl>",
+        "code": "|0|",
+        "holes": [{
+          "production": "<GanzeZahl>",
+          "code": "0"
+        }]
+      }
+    ],
+    "grammar": {
+      "<Zahl>": ["<PositiveZahl>", "-<PositiveZahl>"],
+      "<PositiveZahl>": ["<GanzeZahl>", "<KommaZahl>"],
+      "<GanzeZahl>": ["<ZifferNichtNull><Ziffer>*", "0"],
+      "<KommaZahl>": ["<GanzeZahl>.<Ziffer>+"],
+      "<ZifferNichtNull>": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+      "<Ziffer>": ["0", "<ZifferNichtNull>"]
+    }
+  }
+}
+@jsontree[
+  #:extrastyle "jsontree .bsl-tools-tree span {margin-left: 2.5em; margin-right: 2.5em}"
+]{
+  {
+    "production": "<Zahl>",
+    "code": "-|3,14|",
+    "holes": [
+      {
+        "production": "<PositiveZahl>",
+        "code": "|3,14|",
+        "holes": [{
+          "production": "<KommaZahl>",
+          "code": "|3|,|1||4|",
+          "holes": [
+            {
+              "production": "<GanzeZahl>",
+              "code": "|3|",
+              "holes":[{
+                "production": "<ZifferNichtNull>",
+                "code": "3"
+                }]
+            },
+            {
+              "production": "<Ziffer>",
+              "code": "|1|",
+              "holes":[{
+                "production": "<ZifferNichtNull>",
+                "code": "1"
+                }]
+            },
+            {
+              "production": "<Ziffer>",
+              "code": "|4|",
+              "holes":[{
+                "production": "<ZifferNichtNull>",
+                "code": "4"
+                }]
+            }
+          ]
+        }]
+      }
+    ],
+    "grammar": {
+      "<Zahl>": ["<PositiveZahl>", "-<PositiveZahl>"],
+      "<PositiveZahl>": ["<GanzeZahl>", "<KommaZahl>"],
+      "<GanzeZahl>": ["<ZifferNichtNull><Ziffer>*", "0"],
+      "<KommaZahl>": ["<GanzeZahl>.<Ziffer>+"],
+      "<ZifferNichtNull>": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+      "<Ziffer>": ["0", "<ZifferNichtNull>"]
+    }
+  }
+}
+
+@jsontree[
+ #:quiz #t
+ #:lang "de"
+ #:extrastyle "jsontree .bsl-tools-tree span {margin-left: 2.5em; margin-right: 2.5em}"
+]{
+  {
+    "production": "<Zahl>",
+    "code": "|420|",
+    "holes": [
+      {
+        "production": "<PositiveZahl>",
+        "code": "|420|",
+        "holes": [{
+          "production": "<GanzeZahl>",
+          "code": "|4||2||0|",
+          "holes": [
+            {
+              "production": "<ZifferNichtNull>",
+              "code": "4"
+            },
+            {
+              "production": "<Ziffer>",
+              "code": "|2|",
+              "holes": [{
+                "production": "<ZifferNichtNull>",
+                "code": "2"
+              }]
+            },
+            {
+              "production": "<Ziffer>",
+              "code": "0"
+            }
+          ]
+        }]
+      }
+    ],
+    "grammar": {
+      "<Zahl>": ["<PositiveZahl>", "-<PositiveZahl>"],
+      "<PositiveZahl>": ["<GanzeZahl>", "<KommaZahl>"],
+      "<GanzeZahl>": ["<ZifferNichtNull><Ziffer>*", "0"],
+      "<KommaZahl>": ["<GanzeZahl>.<Ziffer>+"],
+      "<ZifferNichtNull>": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+      "<Ziffer>": ["0", "<ZifferNichtNull>"]
+    }
+  }
+}
