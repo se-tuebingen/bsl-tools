@@ -35,6 +35,16 @@
         (define y "hallo")
         (define x 2)
     </stepper>
+    
+    <!-- test that remaining program is not "eaten" when we show error as program result -->
+    <stepper>
+        (define x 40)
+        (define-struct y (y z))
+        (make-y 2)
+        (define x 2)
+        (+ 32 1)
+        (x 3)
+    </stepper>
 </body>
 
 </html>
