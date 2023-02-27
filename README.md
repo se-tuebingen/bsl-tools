@@ -180,6 +180,20 @@ If you set the optional keyword argument `#:quiz` to `#t`, it will add `quiz="tr
 
 Similarly, the `#:lang` keyword argument can be used to set the language code. This is only applicable for Quiz mode, since the regular tree does not display any text in natural language. Currently implemented codes are `en`(English, default) and `de`(German).
 
+For the `@jsontree`-helper, there also is the `#:extrastyle` option, whose string
+argument will be added inside a HTML `<style>` tag above the HTML that is processed
+by the Javascript part. This way, you can override some styles, but not set CSS
+variables (`--` will be converted to `&ndash;`, sadly).
+If, for example, your production labels are significantly larger than the text in
+your nodes, you can give the nodes (represented by `<span>` elements)
+greater horizontal spacing with
+```
+#:extrastyle "jsontree .bsl-tools-tree span { margin-left: 2em; margin-right: 2em;}"
+```
+Note that you need to scope your styles to `.bsl-tools-tree`, or they are less
+specific than those in the general stylesheet and will be overridden.
+Also note that inline CSS is not scoped and will apply to all your `jsontree` elements (or whatever you specify).
+
 ### Stepper
 
 The stepper accepts valid BSL programs. It precomputes the evaluation steps

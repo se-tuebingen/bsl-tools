@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>BSL Tools Test Page</title>
+
+  <script>
+  let scriptNode = document.createElement('script');
+  if (window.location.href.startsWith('file://')) {
+    console.log('detected local dev testing, loading bsl_tools.js from dist');
+    scriptNode.src = '../../dist/bsl_tools.js';
+  } else {
+    scriptNode.src = 'bsl_tools.js';
+  }
+  document.getElementsByTagName('head')[0].appendChild(scriptNode);
+  </script>
+</head>
+
+<body>
+  <h2>Standard collapsible AST</h2>
+  <bsltree>
+    (cond [e1 #t]
+    [else (asBool e2)])
+  </bsltree>
+  <bsltree>
+    (define (f x y) (+ x y))
+  </bsltree>
+  <bsltree>
+    (cond [(= x 3) "isThree"] [#false '()])
+  </bsltree>
+  <bsltree>
+    (define x 42)
+  </bsltree>
+  <bsltree>
+    (define-struct name (firstName lastName))
+  </bsltree>
+
+  <h2>AST as a quiz</h2>
+  <bsltree quiz="true">
+    (define (f x y) (+ x y))
+  </bsltree>
+  <bsltree quiz="true">
+    (cond [(< x 3) "isThree"] [#false '()])
+  </bsltree>
+  <bsltree quiz="true">
+    (define x 42)
+  </bsltree>
+  <bsltree quiz="true">
+    (define-struct name (firstName lastName))
+  </bsltree>
+
+  <h2>Internationalization</h2>
+  <h3>German</h3>
+  <bsltree quiz="true" lang="de">
+    (define-struct name (firstName lastName))
+  </bsltree>
+
+  <h2>Handling of non-valid BSL code</h2>
+  <bsltree>nonvalid(code)</bsltree>
+
+  <h2>General AST from JSON</h2>
+  <jsontree quiz="true">
+    {
+      "grammar": {
+        "Expression": ["Addition", "Subtraction", "Number"],
+        "Subexpression": ["(Addition)", "(Subtraction)"],
+        "Addition": ["Subexpression + Subexpression",
+                     "Number + Subexpression",
+                     "Subexpression + Number",
+                     "Number + Number"],
+        "Subtraction": ["Subexpression - Subexpression",
+                        "Number - Subexpression",
+                        "Subexpression - Number",
+                        "Number - Number"],
+        "Number": []
+      },
+      "production": "Expression",
+      "code": "|(2 - 3) + 4|",
+      "holes": [{
+        "production": "Addition",
+        "code": "|(2 - 3)| + |4|",
+        "holes": [
+          {
+            "production": "Subexpression",
+            "code": "(|2 - 3|)",
+            "holes": [{
+              "production": "Subtraction",
+              "code": "|2| - |3|",
+              "holes": [
+                {
+                  "production": "Number",
+                  "code": "2"
+                },
+                {
+                  "production": "Number",
+                  "code": "3"
+                }
+              ]
+            }]
+          },
+          {
+            "production": "Number",
+            "code": "4"
+          }
+        ]
+      }]
+    }
+  </jsontree>
+
+  <jsontree>
+    {
+      "production": "Subtraction",
+      "code": "(|2| - |3|)",
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        },
+        {
+          "production": "Number",
+          "code": "3"
+        }
+      ]
+    }
+  </jsontree>
+
+  <h3>JSON Tree Error Rendering Tests:</h3>
+
+  <jsontree>
+    {
+      "production": "Subtraction",
+      "code": "(|2| - |3|)",
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        }
+      ]
+    }
+  </jsontree>
+  <jsontree>
+    {
+      "production": "Subtraction",
+      "code": 2,
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        }
+      ]
+    }
+  </jsontree>
+  <jsontree>
+    {
+      "production": {"hello": "there"},
+      "code": "(|2| - |3|)",
+      "holes": [
+        {
+          "production": "Number",
+          "code": "2"
+        }
+      ]
+    }
+  </jsontree>
+</body>
+
+</html>

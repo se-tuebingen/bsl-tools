@@ -125,6 +125,7 @@ const dictionary = {
     "remaining program": "Remaining Program",
     "start evaluation": "Start Evaluation",
     "evaluation finished": "Evaluation Finished",
+    "evaluation finished with error": "Evaluation Finished because of Error",
     "go back": "Go Back",
   },
   de: {
@@ -135,6 +136,7 @@ const dictionary = {
     "remaining program": "Verbleibendes Programm",
     "start evaluation": "Auswertung Starten",
     "evaluation finished": "Auswertung Beendet",
+    "evaluation finished with error": "Auswertung wegen Fehler beendet",
     "go back": "Schritt zurück",
   },
 };
@@ -190,7 +192,11 @@ function renderStepper(
          <div class="boxlabel">${dictionary[lang]["current evaluation"]}</div>
          <div class="step"
               data-currentStep="true">
-            <div class="code">${dictionary[lang]["evaluation finished"]}</div>
+            <div class="code">${
+              progSteps[progSteps.length - 1].result instanceof Error
+              ? `<span class="hole-error">${dictionary[lang]["evaluation finished with error"]}</span>`
+              : dictionary[lang]["evaluation finished"]
+            }</div>
             <div class="prev-button"
                  onclick="takeProgSteps(event, -1)">
               ${
@@ -202,7 +208,7 @@ function renderStepper(
 
        <div class="box program">
          <div class="boxlabel">${dictionary[lang]["remaining program"]}</div>
-         ${stepper.originProgram.map((s,i) => renderOriginalExpression(s,i,measures)).join("")}
+         ${stepper.originProgram.map((s,i) => renderOriginalExpression(s,i,measures,progSteps.length)).join("")}
        </div>
 
     </div>`;
@@ -231,11 +237,12 @@ function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number, measures: P
 function renderOriginalExpression(
   expression: BSL_AST.defOrExpr,
   idx: number,
-  measures: PixelMeasurements
+  measures: PixelMeasurements,
+  validUntil: number
 ): string {
   return `
     <div class="step code"
-         data-progstep="${idx}"
+         data-progstep="${idx <= validUntil - 1 ? idx : idx + 100 /*prevent next button from "eating" never executed steps*/}"
          data-visible="true">
       ${BSL_Print.indent(
         BSL_Print.sanitize(
@@ -299,7 +306,7 @@ function renderLastStep(
       } <img class="icon" src="${angle_down}">
     </div>
 
-    <div class="plug-result code"
+    <div class="plug-result code ${progStep.result instanceof Error ? 'hole-error' : ''}"
          data-info-collapsed="true">
       ${
         BSL_Print.indent(BSL_Print.sanitize(
@@ -317,7 +324,7 @@ function renderLastStep(
       <img class="icon info-toggle info-collapse"
               src="${circle_xmark}"
               onclick="collapseInfo(event)">
-      ${renderRuleInformation('Prog', false)}
+      ${renderRuleInformation(progStep.result instanceof Error ? 'ProgError' : 'Prog', false)}
     </div>
   </div>
   `;
@@ -416,7 +423,7 @@ function renderStep(
     : step.rule;
   // result and rule name
   const redex: string = BSL_Print.sanitize(printRedex(redexRule.redex));
-  function renderResult(res: BSL_AST.expr | SI_STRUCT.Value | Error): {html: string, redex: string} {
+  function renderResult(res: BSL_AST.expr | SI_STRUCT.Value | Error): {html: string, redex: string, error: boolean} {
     if (SI_STRUCT.isValue(res)) {
       const redexResult = BSL_Print.printValue(res);
       const resultHtml = `${
@@ -426,11 +433,11 @@ function renderStep(
       )}</span>${
         context.right
       }`;
-      return {html: resultHtml, redex: redexResult};
+      return {html: resultHtml, redex: redexResult, error: false};
     } else if (res instanceof Error) {
       const redexResult = `${res}`;
       const resultHtml = `<span class="hole hole-result hole-error">"${res}"</span>`; // to prevent indentation issues
-      return {redex: redexResult, html: resultHtml};
+      return {redex: redexResult, html: resultHtml, error: true};
     } else {
       const redexResult = BSL_Print.printE(res);
       const resultHtml = `${
@@ -438,7 +445,7 @@ function renderStep(
       }<span class="hole hole-result">${BSL_Print.sanitize(
         redexResult
       )}</span>${context.right}`;
-      return {redex: redexResult, html: resultHtml};
+      return {redex: redexResult, html: resultHtml, error: false};
     }
   }
   const result = renderResult(redexRule.result);
@@ -511,7 +518,7 @@ function renderStep(
                   ? `:
                    <span class="rule-description">
                      <span class="hole rule-hole">${redex}</span> →
-                     <span class="hole hole-result rule-hole">${
+                     <span class="hole hole-result rule-hole ${result.error ? 'hole-error' : ''}">${
                        BSL_Print.sanitize(result.redex)
                      }</span>
                    </span>`
@@ -859,7 +866,9 @@ const rules = {
     Strukturdefinition, so wird diese Definition in die Umgebung aufgenommen
     und die Ausführung mit dem nächsten Programmelement in der erweiterten
     Umgebung fortgesetzt. Sofern die Definition allerdings schon in der Umgebung
-    vorhanden ist, wird ein Fehler ausgegeben.
+    vorhanden ist, wird ein Fehler ausgegeben und die Auswertung beendet. Ist das
+    nächste Programmelement ein Ausdruck, der in einem Fehler resultiert, wird
+    die Auswertung ebenfalls beendet.
     `,
   },
 };
