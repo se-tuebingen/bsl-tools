@@ -2,16 +2,20 @@
 
 [BSL-Tools](preamble.md)
 
+# Contributing
+
+- [Contributing](contributing.md)
+
 # Abstract Syntax Tree View (AST)
 
 - [Using AST View](ast.md)
-- [Demo](demo-ast.md)
+- [Examples](examples-ast.md)
 
 # Small Step Interpreter (Stepper)
 
 - [Using Stepper](stepper.md)
-- [Demo](demo-stepper.md)
+- [Examples](examples-stepper.md)
 
-# Building locally
+# Scribble Demo
 
-- [Building locally](building.md)
+- [Scribble Demo](../demo/scribble/index.html)

@@ -18,8 +18,6 @@ Note that if you add one or more of the following tools to your page, the script
 will add stylesheets to the `<head>` of your document which set styles for the
 `.bsl-tools-stepper` and `.bsl-tools-tree` classes.
 
-**`<` and `>` need to be replaced with `&lt;` and `&gt;` in order to not break your HTML!**
-
 ### Planting the &lt;bsltree&gt;
 
 The collapsible AST view can be used with BSL code, which will be parsed for you,
@@ -52,6 +50,8 @@ the correct production and mark all subexpressions ('holes').
 ```
 
 Anything inside the `<bsltree>` tag is parsed according to the BSL Core Language as documented below.
+
+**`<` and `>` need to be replaced with `&lt;` and `&gt;` in order to not break your HTML!**
 
 If you want to use `<jsontree>`, you need to provide valid JSON - so use double quotes (`"`)!
 `"code"` always needs to be a string, mark holes (code of children) by putting `|`s

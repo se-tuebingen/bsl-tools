@@ -22,8 +22,6 @@ Note that if you add one or more of the following tools to your page, the script
 will add stylesheets to the `<head>` of your document which set styles for the
 `.bsl-tools-stepper` and `.bsl-tools-tree` classes.
 
-**`<` and `>` need to be replaced with `&lt;` and `&gt;` in order to not break your HTML!**
-
 ### Reducing BSL programs with &lt;stepper&gt;
 
 The interface is as follows:
@@ -34,6 +32,8 @@ The interface is as follows:
 <!-- for displaying user text in german, do -->
 <stepper lang="de"> (valid bsl syntax) </stepper>
 ```
+
+**`<` and `>` need to be replaced with `&lt;` and `&gt;` in order to not break your HTML!**
 
 Font sizes and styles are deliberately left unset wherever possible in order to
 just conform to the styling of the rest of the document.
