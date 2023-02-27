@@ -417,7 +417,9 @@ function renderStep(
   // context and redex
   const context: Context = SI_STRUCT.isKong(step.rule)
     ? printContext(step.rule.context, ctx)
-    : ctx;
+    : (step.result instanceof Error
+      ? printContext(step.context, ctx)
+      : ctx);
   const redexRule = SI_STRUCT.isKong(step.rule)
     ? step.rule.redexRule
     : step.rule;

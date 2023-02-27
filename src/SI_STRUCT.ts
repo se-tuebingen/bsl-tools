@@ -104,6 +104,7 @@ export interface EvalStep {
   type: Production.EvalStep;
   env: Environment;
   rule: Kong | OneRule;
+  context: Context;
   result: BSL_AST.expr | Value | Error;
 }
 export type SplitResult = Split | Value;

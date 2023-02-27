@@ -9,9 +9,9 @@ export function calculateProgram(
   const maybeEnv = initEnv();
   if (maybeEnv instanceof Error) return maybeEnv;
   let env: SI_STRUCT.Environment = maybeEnv;
-  
 
-  // rewrite this 
+
+  // rewrite this
   const progSteps = program.map((defOrExpr) => {
     const newStep = calculateProgStep(defOrExpr, env);
     if (newStep instanceof Error) return newStep;
@@ -617,6 +617,7 @@ export function plug(
       type: SI_STRUCT.Production.EvalStep,
       env: env,
       rule: oneRule,
+      context: c,
       result: oneRule.result,
     };
   } else {
@@ -624,7 +625,13 @@ export function plug(
     const exprStep = plug(oneRule, c.ctx, env);
     if (SI_STRUCT.isEvalStep(exprStep)) {
       // Result is RuleError
-      if (exprStep.result instanceof Error) return exprStep;
+      if (exprStep.result instanceof Error) return {
+        type: SI_STRUCT.Production.EvalStep,
+        env: exprStep.env,
+        rule: exprStep.rule,
+        context: c,
+        result: exprStep.result
+      };
       //AppContext
       if (SI_STRUCT.isAppContext(c)) {
         const args = [c.values, exprStep.result, c.args].flat();
@@ -656,6 +663,7 @@ export function plug(
             context: c,
             redexRule: oneRule,
           },
+          context: c,
           result: finalExpr,
         };
         //CondContext
@@ -682,6 +690,7 @@ export function plug(
             context: c,
             redexRule: oneRule,
           },
+          context: c,
           result: finalExpr,
         };
       } else {

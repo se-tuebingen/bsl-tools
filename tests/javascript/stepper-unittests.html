@@ -34,9 +34,9 @@
 
 <body>
   <h1>Stepper Tests</h1>
-  
+
   <h2>Features</h2>
-  
+
   <h3>German Language and values</h3>
   <stepper lang="de">
       "hallo"
@@ -47,10 +47,10 @@
       (make-foo 2 3)
       zwei
     </stepper>
-    
-    
+
+
     <h2>Reduction Rules and Errors</h2>
-    
+
     <h3>(Kong with) Prim</h3>
     <h4>Example #1</h4>
     <stepper>
@@ -60,7 +60,7 @@
       <stepper>
         (+ 2 (+ (+ 9 8) 3)(- 5 9) 2)
       </stepper>
-      
+
       <h3>Prim-Function-Errors</h3>
       <h4>Example #1</h4>
       <stepper>
@@ -83,7 +83,7 @@
         (&gt;= #true #false)
       </stepper>
       </stepper>
-      
+
       <h3>(Kong with) Cond</h3>
       <h4>Cond-True #1</h4>
       <stepper>
@@ -121,7 +121,7 @@
         (cond [2 "maybe"])
         (define x 2)
       </stepper>
-      
+
   <h3>Prog</h3>
     <h4>Simple Prog application for a constant</h4>
     <stepper>
@@ -159,8 +159,8 @@
     <stepper>
       (define-struct + (x y))
     </stepper>
-    
-    
+
+
     <h3>Const</h3>
     <h4>Example #1</h4>
     <stepper>
@@ -185,16 +185,16 @@
       (define x (cond [#true #false]))
       x
     </stepper>
-    
-    
+
+
     <h3>ConstError</h3>
     <h4>Undefined constant</h4>
     <stepper>
       (define x (+ 2 4))
       (+ x y)
     </stepper>
-    
-    
+
+
     <h3>FUN</h3>
     <h4>Example #1</h4>
     <stepper>
@@ -229,8 +229,8 @@
     <stepper>
       (f 3)
     </stepper>
-    
-    
+
+
     <h3>Struct-make</h3>
     <stepper>
       (define-struct pos (x y))
@@ -246,16 +246,16 @@
     <stepper>
       (make-pos 3 4)
     </stepper>
-    
-    
+
+
     <h3>Struct-select</h3>
     <stepper>
       (define-struct pos (x y))
       (define p (make-pos 3 4))
       (pos-x p)
     </stepper>
-    
-    
+
+
     <h3>Struct-select-error</h3>
     <h4>Arity mismatch</h4>
     <stepper>
@@ -268,8 +268,8 @@
       (define p (make-pos 3 4))
       (pos-x p)
     </stepper>
-    
-    
+
+
     <h3>Struct-pred</h3>
     <h4>Struct-pred-true</h4>
     <stepper>
@@ -283,8 +283,8 @@
       (define p 3)
       (pos? p)
     </stepper>
-    
-    
+
+
     <h3>Struct-pred-error</h3>
     <h4>Arity mismatch</h4>
     <stepper>
@@ -297,7 +297,7 @@
       (define p (make-pos 3 4))
       (pos? p)
     </stepper>
-  
+
   <h2>Specific Visual Errors (Regression Tests)</h2>
   <h3> test that remaining program is not &quot;eaten&quot; when we show error as program result </h3>
   <stepper>
@@ -308,8 +308,13 @@
     (+ 32 1)
     (x 3)
   </stepper>
-  
-  
+
+  <h3>Display of errors in function definitions for Prim-functions</h3>
+  <stepper>
+    (define f (x y 2))
+  </stepper>
+
+
 </body>
 
 </html>
