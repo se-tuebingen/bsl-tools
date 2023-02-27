@@ -20,13 +20,69 @@ Here you can see a few examples of valid Abstract Syntax Trees in BSL Core Langu
 
 ## Build your own grammar!
 
+Given is the following Grammar:
+
 ```json
     "grammar": {
-      "<Number>": ["<PositiveNumber>", "-<PositiveNumber>"],
-      "<PositiveNumber>": ["<Integer>", "<Decimal>"],
-      "<Integer>": ["<DigitNotZero><Digit>*", "0"],
-      "<Decimal>": ["<Integer>.<Digit>+"],
-      "<DigitNotZero>": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
-      "<Digit>": ["0", "<DigitNotZero>"]
+      "<FavouriteNumber>": ["<RoundedNumber>", "<Mystery>"],
+      "<RoundedNumber>": ["0", "3", "6", "8", "9"],
+      "<Mystery>": ["<Pair>+", "7"],
+      "<Pair>": ["<RoundedNumber><RoundedNumber>"],
     }
 ```
+
+We can also make quizzes based on this custom Grammar. For example, why is **68087** a FavouriteNumber?
+
+<style>
+jsontree .bsl-tools-tree span {
+  margin-left: 5.5em; 
+  margin-right: 5.5em;
+  }
+  </style>
+<jsontree quiz="false" lang="de">
+{
+	"grammar": {
+		"FavouriteNumber": ["RoundedNumber", "Mystery"],
+		"RoundedNumber": ["0", "3", "6", "8", "9"],
+		"Mystery": ["Pair+7"],
+		"Pair": ["RoundedNumberRoundedNumber"]
+	},
+	"production": "FavouriteNumber",
+	"code": "|68087|",
+	"holes": [{
+		"production": "Mystery",
+		"code": "|6808|7",
+		"holes": [{
+			"production": "Pair+",
+			"code": "|68||08|",
+			"holes": [{
+					"production": "Pair",
+					"code": "|6||8|",
+					"holes": [{
+							"production": "RoundedNumber",
+							"code": "6"
+						},
+						{
+							"production": "RoundedNumber",
+							"code": "8"
+						}
+					]
+				},
+				{
+					"production": "Pair",
+					"code": "|0||8|",
+					"holes": [{
+							"production": "RoundedNumber",
+							"code": "0"
+						},
+						{
+							"production": "RoundedNumber",
+							"code": "8"
+						}
+					]
+				}
+			]
+		}]
+	}]
+}
+</jsontree>

@@ -41,8 +41,8 @@ the correct production and mark all subexpressions ('holes').
 <bsltree quiz="true" lang="de"> (valid bsl syntax) </bsltree>
 
 <!-- displaying code trees for stuff that is not BSL -->
-<jsontree quiz="true" lang="de"
-  ><!-- same options as for bsltree -->
+<jsontree quiz="true" lang="de">
+  <!-- same options as for bsltree -->
   { "production": "Subtraction", "code": "(|2| - |3|)", "holes": [ {
   "production": "Number", "code": "2"}, { "production": "Number", "code": "3"} ]
   }
@@ -150,3 +150,12 @@ greater horizontal spacing with
 Note that you need to scope your styles to `.bsl-tools-tree`, or they are less
 specific than those in the general stylesheet and will be overridden.
 Also note that inline CSS is not scoped and will apply to all your `jsontree` elements (or whatever you specify).
+
+Sometimes it might be usefulto readjust the width of the tree leafs, for example with
+
+```css
+jsontree .bsl-tools-tree span {
+  margin-left: 5em;
+  margin-right: 5em;
+}
+```
