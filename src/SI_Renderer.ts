@@ -309,6 +309,14 @@ function renderLastStep(
     <div class="plug-result code ${progStep.result instanceof Error ? 'hole-error' : ''}"
          data-info-collapsed="true">
       ${
+        SI_STRUCT.isDefinitionStep(progStep) && SI_STRUCT.isProgError(progStep.rule)
+          ? `${BSL_Print.indent(
+            BSL_Print.sanitize(
+              BSL_Print.printDefOrExpr(progStep.originalDefOrExpr)),
+            measures.maxChars)}<br>`
+          : ''
+      }
+      ${
         BSL_Print.indent(BSL_Print.sanitize(
           SI_STRUCT.isDefinitionStep(progStep) && !(progStep.result instanceof Error)
           ? BSL_Print.printDefinition(progStep.result)
