@@ -160,15 +160,68 @@
     (define-struct name (firstName lastName))
   </bsltree>
 <h2 id="build-your-own-grammar"><a class="header" href="#build-your-own-grammar">Build your own grammar!</a></h2>
+<p>Given is the following Grammar:</p>
 <pre><code class="language-json">    &quot;grammar&quot;: {
-      &quot;&lt;Number&gt;&quot;: [&quot;&lt;PositiveNumber&gt;&quot;, &quot;-&lt;PositiveNumber&gt;&quot;],
-      &quot;&lt;PositiveNumber&gt;&quot;: [&quot;&lt;Integer&gt;&quot;, &quot;&lt;Decimal&gt;&quot;],
-      &quot;&lt;Integer&gt;&quot;: [&quot;&lt;DigitNotZero&gt;&lt;Digit&gt;*&quot;, &quot;0&quot;],
-      &quot;&lt;Decimal&gt;&quot;: [&quot;&lt;Integer&gt;.&lt;Digit&gt;+&quot;],
-      &quot;&lt;DigitNotZero&gt;&quot;: [&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;],
-      &quot;&lt;Digit&gt;&quot;: [&quot;0&quot;, &quot;&lt;DigitNotZero&gt;&quot;]
+      &quot;&lt;FavouriteNumber&gt;&quot;: [&quot;&lt;RoundedNumber&gt;&quot;, &quot;&lt;Mystery&gt;&quot;],
+      &quot;&lt;RoundedNumber&gt;&quot;: [&quot;0&quot;, &quot;3&quot;, &quot;6&quot;, &quot;8&quot;, &quot;9&quot;],
+      &quot;&lt;Mystery&gt;&quot;: [&quot;&lt;Pair&gt;+&quot;, &quot;7&quot;],
+      &quot;&lt;Pair&gt;&quot;: [&quot;&lt;RoundedNumber&gt;&lt;RoundedNumber&gt;&quot;],
     }
 </code></pre>
+<p>We can also make quizzes based on this custom Grammar. For example, why is <strong>68087</strong> a FavouriteNumber?</p>
+<style>
+jsontree .bsl-tools-tree span {
+  margin-left: 5.5em; 
+  margin-right: 5.5em;
+  }
+  </style>
+<jsontree quiz="false" lang="de">
+{
+	"grammar": {
+		"FavouriteNumber": ["RoundedNumber", "Mystery"],
+		"RoundedNumber": ["0", "3", "6", "8", "9"],
+		"Mystery": ["Pair+7"],
+		"Pair": ["RoundedNumberRoundedNumber"]
+	},
+	"production": "FavouriteNumber",
+	"code": "|68087|",
+	"holes": [{
+		"production": "Mystery",
+		"code": "|6808|7",
+		"holes": [{
+			"production": "Pair+",
+			"code": "|68||08|",
+			"holes": [{
+					"production": "Pair",
+					"code": "|6||8|",
+					"holes": [{
+							"production": "RoundedNumber",
+							"code": "6"
+						},
+						{
+							"production": "RoundedNumber",
+							"code": "8"
+						}
+					]
+				},
+				{
+					"production": "Pair",
+					"code": "|0||8|",
+					"holes": [{
+							"production": "RoundedNumber",
+							"code": "0"
+						},
+						{
+							"production": "RoundedNumber",
+							"code": "8"
+						}
+					]
+				}
+			]
+		}]
+	}]
+}
+</jsontree>
 
                     </main>
 
