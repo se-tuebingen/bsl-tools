@@ -20,7 +20,7 @@ will add stylesheets to the `<head>` of your document which set styles for the
 
 **`<` and `>` need to be replaced with `&lt;` and `&gt;` in order to not break your HTML!**
 
-### Planting the <bsltree>
+### Planting the &lt;bsltree&gt;
 
 The collapsible AST view can be used with BSL code, which will be parsed for you,
 or you can provide your own JSON structure.

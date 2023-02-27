@@ -1,9 +1,6 @@
 # Summary
 
-[Short words of Hi](preamble.md)
-
-- [How to use: HTML](how-to-use-html.md)
-- [How to use: Scribble](how-to-use-scribble.md)
+[BSL-Tools](preamble.md)
 
 # Abstract Syntax Tree View (AST)
 
@@ -14,3 +11,7 @@
 
 - [Using Stepper](stepper.md)
 - [Demo](demo-stepper.md)
+
+# Building locally
+
+- [Building locally](building.md)

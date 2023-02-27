@@ -24,7 +24,7 @@ will add stylesheets to the `<head>` of your document which set styles for the
 
 **`<` and `>` need to be replaced with `&lt;` and `&gt;` in order to not break your HTML!**
 
-###
+### Reducing BSL programs with &lt;stepper&gt;
 
 The interface is as follows:
 
@@ -53,3 +53,42 @@ variable:
 Place this somewhere where it overrides the default stylesheet that is added to the
 document head, e.g. in a `style` tag above the first stepper. Other CSS variables
 that can be set can be found at the head of [`src/ressources/small-interpreter.css`](src/ressources/small-interpreter.css).
+
+## Using the Stepper with Scribble
+
+### Including the Files
+
+To use the provided scribble module, you need to import it in your document:
+
+```racket
+@(require "bsl_tools.rkt")
+```
+
+The scribble module does only very little input sanitation and mostly just adds
+the JavaScript-Module to your rendered HTML as well as wrapping the input in
+the correct custom HTML tags. Both files (`bsl_tools.rkt` **AND** `bsl_tools.js`)
+need to be in the same folder as well as your scribble file so that everything works.
+
+###
+
+Similar to the AST view functionality, programs are entered as Racket Syntax Objects.
+
+```racket
+@stepper[
+  #'((* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+  (cond [(>= 5 5) "isThree"]
+  [#false 3]
+  [(or #true #false) (* 2 3 4)]))
+]
+```
+
+For German Language support add `#:lang "de"` as additional parameter:
+
+```racket
+@stepper[ #:lang "de"
+#'((_ (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+(cond [(>= 5 5) "isThree"]
+[#false 3]
+[(or #true #false) (_ 2 3 4)]))
+]
+```
