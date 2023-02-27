@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Contributing</li><li class="chapter-item expanded "><a href="contributing.html"><strong aria-hidden="true">1.</strong> Contributing</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">2.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="examples-ast.html"><strong aria-hidden="true">3.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">4.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="examples-stepper.html"><strong aria-hidden="true">5.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Scribble Demo</li><li class="chapter-item expanded "><a href="../demo/scribble/index.html"><strong aria-hidden="true">6.</strong> Scribble Demo</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Contributing</li><li class="chapter-item expanded "><a href="contributing.html"><strong aria-hidden="true">1.</strong> Contributing</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">2.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="example-ast.html"><strong aria-hidden="true">3.</strong> Example</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">4.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="example-stepper.html"><strong aria-hidden="true">5.</strong> Example</a></li><li class="chapter-item expanded affix "><li class="part-title">Generate ASTs and Steppers in HTML</li><li class="chapter-item expanded "><a href="generator.html"><strong aria-hidden="true">6.</strong> Using Generator</a></li><li class="chapter-item expanded affix "><li class="part-title">Scribble Demo</li><li class="chapter-item expanded "><a href="../demo/scribble/index.html"><strong aria-hidden="true">7.</strong> Scribble Demo</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -150,7 +150,7 @@
 <ul>
 <li>Abstract Syntax Tree</li>
 <li>Stepper (Auswertungskontext)</li>
-<li>BSL &quot;Try out&quot; box (Interpreter)</li>
+<li>BSL &quot;Try out&quot; box (Generator)</li>
 </ul>
 <p>and semantical support for other grammars.</p>
 <p>The module is distributed as a single JavaScript file and an optional
@@ -180,7 +180,7 @@ and are on a 64bit Linux, MaxOS or Windows Computer, you can simply run <code>ma
 which depends on binaries.
 <em>Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes.</em></p>
 <p>If you are on another OS or want to change more, or update the fallback binaries,
-you need to have <a href="nodejs.org">NodeJS</a> installed.
+you need to have <a href="https://nodejs.org">NodeJS</a> installed.
 <em>On Ubuntu, it is recommended to install it via <a href="https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions">NodeSource</a>.</em></p>
 <p>You need to run <code>npm install</code> anytime dependencies might have changed.</p>
 <p>Then, you can run</p>
@@ -325,41 +325,30 @@ greater horizontal spacing with</p>
 <p>Note that you need to scope your styles to <code>.bsl-tools-tree</code>, or they are less
 specific than those in the general stylesheet and will be overridden.
 Also note that inline CSS is not scoped and will apply to all your <code>jsontree</code> elements (or whatever you specify).</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="examples-ast-view"><a class="header" href="#examples-ast-view">Examples AST View</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="example-ast-view"><a class="header" href="#example-ast-view">Example AST View</a></h1>
+<p>Here you can see a few examples of valid Abstract Syntax Trees in BSL Core Language.
 <bsltree>
-    (cond [e1 #t]
-    [else (asBool e2)])
-  </bsltree>
-  <bsltree>
-    (define (f x y) (+ x y))
-  </bsltree>
-  <bsltree>
-    (cond [(= x 3) "isThree"] [#false '()])
-  </bsltree>
-  <bsltree>
-    (define x 42)
-  </bsltree>
-  <bsltree>
-    (define-struct name (firstName lastName))
-  </bsltree>
+(cond [e1 #t]
+[else (asBool e2)])
+</bsltree></p>
 <h2 id="ast-as-a-quiz"><a class="header" href="#ast-as-a-quiz">AST as a quiz</a></h2>
-  <bsltree quiz="true">
+<bsltree quiz="true">
     (define (f x y) (+ x y))
   </bsltree>
-  <bsltree quiz="true">
-    (cond [(< x 3) "isThree"] [#false '()])
-  </bsltree>
-  <bsltree quiz="true">
-    (define x 42)
-  </bsltree>
-  <bsltree quiz="true">
+<h2 id="ast-in-german"><a class="header" href="#ast-in-german">AST in German</a></h2>
+<bsltree quiz="true" lang="de">
     (define-struct name (firstName lastName))
   </bsltree>
-<h2 id="internationalization"><a class="header" href="#internationalization">Internationalization</a></h2>
-  <h3 id="german"><a class="header" href="#german">German</a></h3>
-  <bsltree quiz="true" lang="de">
-    (define-struct name (firstName lastName))
-  </bsltree>
+<h2 id="build-your-own-grammar"><a class="header" href="#build-your-own-grammar">Build your own grammar!</a></h2>
+<pre><code class="language-json">    &quot;grammar&quot;: {
+      &quot;&lt;Number&gt;&quot;: [&quot;&lt;PositiveNumber&gt;&quot;, &quot;-&lt;PositiveNumber&gt;&quot;],
+      &quot;&lt;PositiveNumber&gt;&quot;: [&quot;&lt;Integer&gt;&quot;, &quot;&lt;Decimal&gt;&quot;],
+      &quot;&lt;Integer&gt;&quot;: [&quot;&lt;DigitNotZero&gt;&lt;Digit&gt;*&quot;, &quot;0&quot;],
+      &quot;&lt;Decimal&gt;&quot;: [&quot;&lt;Integer&gt;.&lt;Digit&gt;+&quot;],
+      &quot;&lt;DigitNotZero&gt;&quot;: [&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;],
+      &quot;&lt;Digit&gt;&quot;: [&quot;0&quot;, &quot;&lt;DigitNotZero&gt;&quot;]
+    }
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="small-step-interpreter-stepper"><a class="header" href="#small-step-interpreter-stepper">Small Step Interpreter (Stepper)</a></h1>
 <p>The Small Step Interpreter (Stepper) shows each step of BSL programs.</p>
 <p>The stepper accepts only syntactic valid BSL programs. It precomputes the evaluation steps
@@ -423,7 +412,34 @@ need to be in the same folder as well as your scribble file so that everything w
 [(or #true #false) (_ 2 3 4)]))
 ]
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="stepper-examples"><a class="header" href="#stepper-examples">Stepper Examples</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="stepper-example"><a class="header" href="#stepper-example">Stepper Example</a></h1>
+<stepper>
+    (* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+    (cond [(&gt;= 5 5) "isThree"]
+    [#false 3]
+    [(or #true #false) (* 2 3 4)])
+    (cond
+      [(cond
+      [(and #false #true) #false]
+      [#false 3]
+      [(or #true #false) #false])
+      "isThree"]
+    [#false 3]
+    [(&lt; 2 3) (* 2 3 4)])
+    (define x (+ 40 2))
+    (define y "hallo")
+    (define-struct p (x y))
+    (define p1 (make-p 1 2))
+    (p? p1)
+    (p-y p1)
+    (&gt; 2 4)
+</stepper>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="generator"><a class="header" href="#generator">Generator</a></h1>
+<p>You can generate with a simple</p>
+<pre><code class="language-html">&lt;bsltoolsgenerator&gt;&lt;/bsltoolsgenerator&gt;
+</code></pre>
+<p>your own Stepper and AST Views, if you give valid BSL programs! Unfortunately there is no support for Scribble yet.</p>
+<p><bsltoolsgenerator> </bsltoolsgenerator></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="scribble-demo"><a class="header" href="#scribble-demo">Scribble Demo</a></h1>
 
                     </main>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Examples - BSL-Tools</title>
+        <title>Example - BSL-Tools</title>
 
 
         <!-- Custom HTML head -->
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Contributing</li><li class="chapter-item expanded "><a href="contributing.html"><strong aria-hidden="true">1.</strong> Contributing</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">2.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="examples-ast.html"><strong aria-hidden="true">3.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">4.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="examples-stepper.html" class="active"><strong aria-hidden="true">5.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Scribble Demo</li><li class="chapter-item expanded "><a href="../demo/scribble/index.html"><strong aria-hidden="true">6.</strong> Scribble Demo</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Contributing</li><li class="chapter-item expanded "><a href="contributing.html"><strong aria-hidden="true">1.</strong> Contributing</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">2.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="example-ast.html"><strong aria-hidden="true">3.</strong> Example</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">4.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="example-stepper.html" class="active"><strong aria-hidden="true">5.</strong> Example</a></li><li class="chapter-item expanded affix "><li class="part-title">Generate ASTs and Steppers in HTML</li><li class="chapter-item expanded "><a href="generator.html"><strong aria-hidden="true">6.</strong> Using Generator</a></li><li class="chapter-item expanded affix "><li class="part-title">Scribble Demo</li><li class="chapter-item expanded "><a href="../demo/scribble/index.html"><strong aria-hidden="true">7.</strong> Scribble Demo</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -145,7 +145,28 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="stepper-examples"><a class="header" href="#stepper-examples">Stepper Examples</a></h1>
+                        <h1 id="stepper-example"><a class="header" href="#stepper-example">Stepper Example</a></h1>
+<stepper>
+    (* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+    (cond [(&gt;= 5 5) "isThree"]
+    [#false 3]
+    [(or #true #false) (* 2 3 4)])
+    (cond
+      [(cond
+      [(and #false #true) #false]
+      [#false 3]
+      [(or #true #false) #false])
+      "isThree"]
+    [#false 3]
+    [(&lt; 2 3) (* 2 3 4)])
+    (define x (+ 40 2))
+    (define y "hallo")
+    (define-struct p (x y))
+    (define p1 (make-p 1 2))
+    (p? p1)
+    (p-y p1)
+    (&gt; 2 4)
+</stepper>
 
                     </main>
 
@@ -155,7 +176,7 @@
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../demo/scribble/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="generator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -169,7 +190,7 @@
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../demo/scribble/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="generator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

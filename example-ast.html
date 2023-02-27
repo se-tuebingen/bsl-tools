@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Examples - BSL-Tools</title>
+        <title>Example - BSL-Tools</title>
 
 
         <!-- Custom HTML head -->
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Contributing</li><li class="chapter-item expanded "><a href="contributing.html"><strong aria-hidden="true">1.</strong> Contributing</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">2.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="examples-ast.html" class="active"><strong aria-hidden="true">3.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">4.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="examples-stepper.html"><strong aria-hidden="true">5.</strong> Examples</a></li><li class="chapter-item expanded affix "><li class="part-title">Scribble Demo</li><li class="chapter-item expanded "><a href="../demo/scribble/index.html"><strong aria-hidden="true">6.</strong> Scribble Demo</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Contributing</li><li class="chapter-item expanded "><a href="contributing.html"><strong aria-hidden="true">1.</strong> Contributing</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">2.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="example-ast.html" class="active"><strong aria-hidden="true">3.</strong> Example</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">4.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="example-stepper.html"><strong aria-hidden="true">5.</strong> Example</a></li><li class="chapter-item expanded affix "><li class="part-title">Generate ASTs and Steppers in HTML</li><li class="chapter-item expanded "><a href="generator.html"><strong aria-hidden="true">6.</strong> Using Generator</a></li><li class="chapter-item expanded affix "><li class="part-title">Scribble Demo</li><li class="chapter-item expanded "><a href="../demo/scribble/index.html"><strong aria-hidden="true">7.</strong> Scribble Demo</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -145,41 +145,30 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="examples-ast-view"><a class="header" href="#examples-ast-view">Examples AST View</a></h1>
+                        <h1 id="example-ast-view"><a class="header" href="#example-ast-view">Example AST View</a></h1>
+<p>Here you can see a few examples of valid Abstract Syntax Trees in BSL Core Language.
 <bsltree>
-    (cond [e1 #t]
-    [else (asBool e2)])
-  </bsltree>
-  <bsltree>
-    (define (f x y) (+ x y))
-  </bsltree>
-  <bsltree>
-    (cond [(= x 3) "isThree"] [#false '()])
-  </bsltree>
-  <bsltree>
-    (define x 42)
-  </bsltree>
-  <bsltree>
-    (define-struct name (firstName lastName))
-  </bsltree>
+(cond [e1 #t]
+[else (asBool e2)])
+</bsltree></p>
 <h2 id="ast-as-a-quiz"><a class="header" href="#ast-as-a-quiz">AST as a quiz</a></h2>
-  <bsltree quiz="true">
+<bsltree quiz="true">
     (define (f x y) (+ x y))
   </bsltree>
-  <bsltree quiz="true">
-    (cond [(< x 3) "isThree"] [#false '()])
-  </bsltree>
-  <bsltree quiz="true">
-    (define x 42)
-  </bsltree>
-  <bsltree quiz="true">
+<h2 id="ast-in-german"><a class="header" href="#ast-in-german">AST in German</a></h2>
+<bsltree quiz="true" lang="de">
     (define-struct name (firstName lastName))
   </bsltree>
-<h2 id="internationalization"><a class="header" href="#internationalization">Internationalization</a></h2>
-  <h3 id="german"><a class="header" href="#german">German</a></h3>
-  <bsltree quiz="true" lang="de">
-    (define-struct name (firstName lastName))
-  </bsltree>
+<h2 id="build-your-own-grammar"><a class="header" href="#build-your-own-grammar">Build your own grammar!</a></h2>
+<pre><code class="language-json">    &quot;grammar&quot;: {
+      &quot;&lt;Number&gt;&quot;: [&quot;&lt;PositiveNumber&gt;&quot;, &quot;-&lt;PositiveNumber&gt;&quot;],
+      &quot;&lt;PositiveNumber&gt;&quot;: [&quot;&lt;Integer&gt;&quot;, &quot;&lt;Decimal&gt;&quot;],
+      &quot;&lt;Integer&gt;&quot;: [&quot;&lt;DigitNotZero&gt;&lt;Digit&gt;*&quot;, &quot;0&quot;],
+      &quot;&lt;Decimal&gt;&quot;: [&quot;&lt;Integer&gt;.&lt;Digit&gt;+&quot;],
+      &quot;&lt;DigitNotZero&gt;&quot;: [&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;],
+      &quot;&lt;Digit&gt;&quot;: [&quot;0&quot;, &quot;&lt;DigitNotZero&gt;&quot;]
+    }
+</code></pre>
 
                     </main>
 
