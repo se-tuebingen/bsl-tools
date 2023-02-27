@@ -9,12 +9,16 @@
 # Abstract Syntax Tree View (AST)
 
 - [Using AST View](ast.md)
-- [Examples](examples-ast.md)
+- [Example](example-ast.md)
 
 # Small Step Interpreter (Stepper)
 
 - [Using Stepper](stepper.md)
-- [Examples](examples-stepper.md)
+- [Example](example-stepper.md)
+
+# Generate ASTs and Steppers in HTML
+
+- [Using Generator](generator.md)
 
 # Scribble Demo
 

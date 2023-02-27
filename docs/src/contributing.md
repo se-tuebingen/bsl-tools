@@ -9,7 +9,7 @@ which depends on binaries.
 _Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes._
 
 If you are on another OS or want to change more, or update the fallback binaries,
-you need to have [NodeJS](nodejs.org) installed.
+you need to have [NodeJS](https://nodejs.org) installed.
 _On Ubuntu, it is recommended to install it via [NodeSource](https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions)._
 
 You need to run `npm install` anytime dependencies might have changed.

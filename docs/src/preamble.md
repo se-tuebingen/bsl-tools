@@ -2,7 +2,7 @@ Beginning Student Language (BSL) is a programming language in DrRacket. This rep
 
 - Abstract Syntax Tree
 - Stepper (Auswertungskontext)
-- BSL "Try out" box (Interpreter)
+- BSL "Try out" box (Generator)
 
 and semantical support for other grammars.
 

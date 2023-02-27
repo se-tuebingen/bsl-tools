@@ -1,6 +1,8 @@
 #lang scribble/manual
 @(require "bsl_tools.rkt")
-@; @(require scribble/eval)
+@(require scribble/bnf)
+@(require scribble/eval)
+@(require scribble/core)
 @title[#:version ""]{Abstract Syntax Tree}
 @author["Linus Szillat"]
 
@@ -224,67 +226,65 @@ Hier ist noch ein extra-Absatz!
 ]
 
 @section{Build your own Grammar!}
+@subsection{Example of a context free grammar}
+Below is an example for a grammar for numbers:
+@BNF[
+  (list @nonterm{Number}
+          @nonterm{PositiveNumber}
+          @(make-element #f (list @litchar{-} @nonterm{PositiveNumber})))
+  (list @nonterm{PositiveNumber}
+          @nonterm{Integer}
+          @nonterm{Decimal})
+  (list @nonterm{Integer}
+          @BNF-seq[@nonterm{DigitNotZero} @kleenestar[@nonterm{Digit}]]
+          @litchar{0})
+  (list @nonterm{Decimal}
+          @BNF-seq[@nonterm{Integer} @litchar{.} @kleeneplus[@nonterm{Digit}]])
+  (list @nonterm{DigitNotZero}
+        @BNF-alt[@litchar{1} @litchar{2} @litchar{3} @litchar{4} @litchar{5} @litchar{6} @litchar{7} @litchar{8} @litchar{9}])
+  (list @nonterm{Digit}
+        @BNF-alt[@litchar{0} @nonterm{DigitNotZero}])]
+Examples for Strings that fulfill the @nonterm{Number} definition of this grammar are: @litchar{0}, @litchar{420}, @litchar{-87}, @litchar{3.1416}, @litchar{-2.09900}.
+
+Examples for Strings that do not fulfill the @nonterm{Number} definition of this grammar are: @litchar{007}, @litchar{-.65}, @litchar{13.}, @litchar{zwölf}, @litchar{111Nonsense222}.
+
+Here is an example of an AST based on the previous grammar.
+
 @jsontree[
   #:extrastyle "jsontree .bsl-tools-tree span {margin-left: 2.5em; margin-right: 2.5em}"
 ]{
   {
-    "production": "<Zahl>",
-    "code": "|0|",
-    "holes": [
-      {
-        "production": "<PositiveZahl>",
-        "code": "|0|",
-        "holes": [{
-          "production": "<GanzeZahl>",
-          "code": "0"
-        }]
-      }
-    ],
-    "grammar": {
-      "<Zahl>": ["<PositiveZahl>", "-<PositiveZahl>"],
-      "<PositiveZahl>": ["<GanzeZahl>", "<KommaZahl>"],
-      "<GanzeZahl>": ["<ZifferNichtNull><Ziffer>*", "0"],
-      "<KommaZahl>": ["<GanzeZahl>.<Ziffer>+"],
-      "<ZifferNichtNull>": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
-      "<Ziffer>": ["0", "<ZifferNichtNull>"]
-    }
-  }
-}
-@jsontree[
-  #:extrastyle "jsontree .bsl-tools-tree span {margin-left: 2.5em; margin-right: 2.5em}"
-]{
-  {
-    "production": "<Zahl>",
+    "production": "<Number>",
     "code": "-|3,14|",
     "holes": [
       {
-        "production": "<PositiveZahl>",
+        "production": "<PositiveNumber>",
         "code": "|3,14|",
         "holes": [{
-          "production": "<KommaZahl>",
+          "production": "<Decimal>",
           "code": "|3|,|1||4|",
           "holes": [
             {
-              "production": "<GanzeZahl>",
+              "production": "<Integer>",
               "code": "|3|",
               "holes":[{
-                "production": "<ZifferNichtNull>",
+                "production": "<DigitNotZero>",
                 "code": "3"
                 }]
             },
             {
-              "production": "<Ziffer>",
+              "production": "<Digit>",
               "code": "|1|",
               "holes":[{
-                "production": "<ZifferNichtNull>",
+                "production": "<DigitNotZero>",
                 "code": "1"
                 }]
             },
             {
-              "production": "<Ziffer>",
+              "production": "<Digit>",
               "code": "|4|",
               "holes":[{
-                "production": "<ZifferNichtNull>",
+                "production": "<DigitNotZero>",
                 "code": "4"
                 }]
             }
@@ -293,12 +293,12 @@ Hier ist noch ein extra-Absatz!
       }
     ],
     "grammar": {
-      "<Zahl>": ["<PositiveZahl>", "-<PositiveZahl>"],
-      "<PositiveZahl>": ["<GanzeZahl>", "<KommaZahl>"],
-      "<GanzeZahl>": ["<ZifferNichtNull><Ziffer>*", "0"],
-      "<KommaZahl>": ["<GanzeZahl>.<Ziffer>+"],
-      "<ZifferNichtNull>": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
-      "<Ziffer>": ["0", "<ZifferNichtNull>"]
+      "<Number>": ["<PositiveNumber>", "-<PositiveNumber>"],
+      "<PositiveNumber>": ["<Integer>", "<Decimal>"],
+      "<Integer>": ["<DigitNotZero><Digit>*", "0"],
+      "<Decimal>": ["<Integer>.<Digit>+"],
+      "<DigitNotZero>": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+      "<Digit>": ["0", "<DigitNotZero>"]
     }
   }
 }
@@ -309,30 +309,30 @@ Hier ist noch ein extra-Absatz!
  #:extrastyle "jsontree .bsl-tools-tree span {margin-left: 2.5em; margin-right: 2.5em}"
 ]{
   {
-    "production": "<Zahl>",
+    "production": "<Number>",
     "code": "|420|",
     "holes": [
       {
-        "production": "<PositiveZahl>",
+        "production": "<PositiveNumber>",
         "code": "|420|",
         "holes": [{
-          "production": "<GanzeZahl>",
+          "production": "<Integer>",
           "code": "|4||2||0|",
           "holes": [
             {
-              "production": "<ZifferNichtNull>",
+              "production": "<DigitNotZero>",
               "code": "4"
             },
             {
-              "production": "<Ziffer>",
+              "production": "<Digit>",
               "code": "|2|",
               "holes": [{
-                "production": "<ZifferNichtNull>",
+                "production": "<DigitNotZero>",
                 "code": "2"
               }]
             },
             {
-              "production": "<Ziffer>",
+              "production": "<Digit>",
               "code": "0"
             }
           ]
@@ -340,12 +340,12 @@ Hier ist noch ein extra-Absatz!
       }
     ],
     "grammar": {
-      "<Zahl>": ["<PositiveZahl>", "-<PositiveZahl>"],
-      "<PositiveZahl>": ["<GanzeZahl>", "<KommaZahl>"],
-      "<GanzeZahl>": ["<ZifferNichtNull><Ziffer>*", "0"],
-      "<KommaZahl>": ["<GanzeZahl>.<Ziffer>+"],
-      "<ZifferNichtNull>": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
-      "<Ziffer>": ["0", "<ZifferNichtNull>"]
+      "<Number>": ["<PositiveNumber>", "-<PositiveNumber>"],
+      "<PositiveNumber>": ["<Integer>", "<Decimal>"],
+      "<Integer>": ["<DigitNotZero><Digit>*", "0"],
+      "<Decimal>": ["<Integer>.<Digit>+"],
+      "<DigitNotZero>": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+      "<Digit>": ["0", "<DigitNotZero>"]
     }
   }
 }
