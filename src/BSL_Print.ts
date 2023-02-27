@@ -169,6 +169,7 @@ export const testprogram: BSL_AST.program = [
 ];
 
 // indent code that is wider than maxLength characters
+// assume there are no html tags in struct values, otherwise stuff breaks
 export function indent(
   code: string,
   maxWidth: number,
@@ -183,7 +184,8 @@ export function indent(
   let acc = "";
   let inString = false;
   let inTag = false;
-  code.split("").forEach((char) => {
+  let structLevel = 0;
+  code.split("").forEach((char, i) => {
     if (inString && char !== '"') {
       acc += char;
       return;
@@ -205,10 +207,32 @@ export function indent(
         inString = !inString;
         break;
       case "<":
-        inTag = mode === "html";
+        if(code.substring(i).startsWith('<make')) {
+          nextLevel++;
+          structLevel++;
+        } else {
+          inTag = mode === "html";
+        }
+        break;
+      case "&":
+        if(mode === "html") {
+          const rest = code.substring(i);
+          if(rest.startsWith('&lt;make')) {
+            nextLevel++;
+            structLevel++;
+          } else if(rest.startsWith('&gt;') && structLevel > 0) {
+            nextLevel--;
+            structLevel--;
+          }
+        }
         break;
       case ">":
-        if (mode === "html") inTag = false;
+        if(structLevel > 0) {
+          nextLevel--;
+          structLevel--;
+        } else if (mode === "html" && inTag) {
+          inTag = false;
+        }
         break;
       case " ":
       case "\n":
