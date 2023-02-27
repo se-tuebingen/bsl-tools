@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Short words of Hi</title>
+        <title>BSL-Tools</title>
 
 
         <!-- Custom HTML head -->
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html" class="active">Short words of Hi</a></li><li class="chapter-item expanded "><a href="how-to-use-html.html"><strong aria-hidden="true">1.</strong> How to use: HTML</a></li><li class="chapter-item expanded "><a href="how-to-use-scribble.html"><strong aria-hidden="true">2.</strong> How to use: Scribble</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">3.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="demo-ast.html"><strong aria-hidden="true">4.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">5.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="demo-stepper.html"><strong aria-hidden="true">6.</strong> Demo</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html" class="active">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">1.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="demo-ast.html"><strong aria-hidden="true">2.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html"><strong aria-hidden="true">3.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="demo-stepper.html"><strong aria-hidden="true">4.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Building locally</li><li class="chapter-item expanded "><a href="building.html"><strong aria-hidden="true">5.</strong> Building locally</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -154,13 +154,27 @@ additional Racket file for use with Scribble.</p>
 <p>You can download them from <a href="https://github.com/se-tuebingen/bsl-tools/releases">Releases</a>,
 the current test build shows the &quot;Development Build&quot; and corresponds to the state
 of the main branch, you can download semantic versioned editions.</p>
+<h2 id="bsl-abstract-syntax-tree"><a class="header" href="#bsl-abstract-syntax-tree">BSL Abstract Syntax Tree</a></h2>
+<p>Here we provide the grammar of the BSL Core Language from the Info 1 script, which was our motivation to develop these tools.</p>
+<pre><code>&lt;program&gt;     ::=    &lt;def-or-expr&gt;*
+&lt;def-or-expr&gt; ::=    &lt;definition&gt; | &lt;e&gt;
+&lt;definition&gt;  ::=    ( define ( &lt;name&gt; &lt;name&gt;+ ) &lt;e&gt; )
+               |     ( define &lt;name&gt; &lt;e&gt; )
+               |     ( define-struct &lt;name&gt; ( &lt;name&gt;* ) )
+&lt;e&gt;           ::=    ( &lt;name&gt; &lt;e&gt;*)
+               |     ( cond {[&lt;e&gt;,&lt;e&gt;]}+)
+               |     &lt;name&gt;
+               |     &lt;v&gt;
+</code></pre>
+<p>For reference see also the <a href="https://docs.racket-lang.org/htdp-langs/beginner.html">Racket webpage for BSL</a>
+and the <a href="https://ps-tuebingen.github.io/informatik-1-skript/bsl-semantics.html">Info 1 script at 8.3</a></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
 
-                            <a rel="next" href="how-to-use-html.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="ast.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -171,7 +185,7 @@ of the main branch, you can download semantic versioned editions.</p>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
 
-                    <a rel="next" href="how-to-use-html.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="ast.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">Short words of Hi</a></li><li class="chapter-item expanded "><a href="how-to-use-html.html"><strong aria-hidden="true">1.</strong> How to use: HTML</a></li><li class="chapter-item expanded "><a href="how-to-use-scribble.html"><strong aria-hidden="true">2.</strong> How to use: Scribble</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">3.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="demo-ast.html"><strong aria-hidden="true">4.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html" class="active"><strong aria-hidden="true">5.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="demo-stepper.html"><strong aria-hidden="true">6.</strong> Demo</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preamble.html">BSL-Tools</a></li><li class="chapter-item expanded affix "><li class="part-title">Abstract Syntax Tree View (AST)</li><li class="chapter-item expanded "><a href="ast.html"><strong aria-hidden="true">1.</strong> Using AST View</a></li><li class="chapter-item expanded "><a href="demo-ast.html"><strong aria-hidden="true">2.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Small Step Interpreter (Stepper)</li><li class="chapter-item expanded "><a href="stepper.html" class="active"><strong aria-hidden="true">3.</strong> Using Stepper</a></li><li class="chapter-item expanded "><a href="demo-stepper.html"><strong aria-hidden="true">4.</strong> Demo</a></li><li class="chapter-item expanded affix "><li class="part-title">Building locally</li><li class="chapter-item expanded "><a href="building.html"><strong aria-hidden="true">5.</strong> Building locally</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -158,7 +158,7 @@ follows:</p>
 will add stylesheets to the <code>&lt;head&gt;</code> of your document which set styles for the
 <code>.bsl-tools-stepper</code> and <code>.bsl-tools-tree</code> classes.</p>
 <p><strong><code>&lt;</code> and <code>&gt;</code> need to be replaced with <code>&amp;lt;</code> and <code>&amp;gt;</code> in order to not break your HTML!</strong></p>
-<h3 id=""><a class="header" href="#"></a></h3>
+<h3 id="reducing-bsl-programs-with-stepper"><a class="header" href="#reducing-bsl-programs-with-stepper">Reducing BSL programs with &lt;stepper&gt;</a></h3>
 <p>The interface is as follows:</p>
 <pre><code class="language-html">&lt;stepper&gt; (valid bsl syntax) &lt;/stepper&gt;
 
@@ -179,6 +179,32 @@ variable:</p>
 <p>Place this somewhere where it overrides the default stylesheet that is added to the
 document head, e.g. in a <code>style</code> tag above the first stepper. Other CSS variables
 that can be set can be found at the head of <a href="src/ressources/small-interpreter.css"><code>src/ressources/small-interpreter.css</code></a>.</p>
+<h2 id="using-the-stepper-with-scribble"><a class="header" href="#using-the-stepper-with-scribble">Using the Stepper with Scribble</a></h2>
+<h3 id="including-the-files"><a class="header" href="#including-the-files">Including the Files</a></h3>
+<p>To use the provided scribble module, you need to import it in your document:</p>
+<pre><code class="language-racket">@(require &quot;bsl_tools.rkt&quot;)
+</code></pre>
+<p>The scribble module does only very little input sanitation and mostly just adds
+the JavaScript-Module to your rendered HTML as well as wrapping the input in
+the correct custom HTML tags. Both files (<code>bsl_tools.rkt</code> <strong>AND</strong> <code>bsl_tools.js</code>)
+need to be in the same folder as well as your scribble file so that everything works.</p>
+<h3 id=""><a class="header" href="#"></a></h3>
+<p>Similar to the AST view functionality, programs are entered as Racket Syntax Objects.</p>
+<pre><code class="language-racket">@stepper[
+  #'((* (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+  (cond [(&gt;= 5 5) &quot;isThree&quot;]
+  [#false 3]
+  [(or #true #false) (* 2 3 4)]))
+]
+</code></pre>
+<p>For German Language support add <code>#:lang &quot;de&quot;</code> as additional parameter:</p>
+<pre><code class="language-racket">@stepper[ #:lang &quot;de&quot;
+#'((_ (+ 1 2 (- 3 9 12) (/ 200 4 5)) (/ 1 2 3) 2)
+(cond [(&gt;= 5 5) &quot;isThree&quot;]
+[#false 3]
+[(or #true #false) (_ 2 3 4)]))
+]
+</code></pre>
 
                     </main>
 
