@@ -52,7 +52,7 @@ function renderError(el: HTMLElement, error:string){
 }
 
 // ### known list of productions
-const productions = {
+export const productions = {
   '<program>':      ['<def-or-expr>*'],
   '<def-or-expr>*': [], // ['<def-or-expr> <def-or-expr>*',
                         // ''],
@@ -79,7 +79,7 @@ const productions = {
 };
 
 // ### transform AST into node helper structure
-function programToNode(p: BSL_AST.program): node {
+export function programToNode(p: BSL_AST.program): node {
   const expressions = p.map(BSL_Print.printDefOrExpr);
   const indices = [];
   let program = '';
