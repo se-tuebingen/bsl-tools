@@ -202,7 +202,7 @@ function renderStepper(
 
        <div class="box program">
          <div class="boxlabel">${dictionary[lang]["remaining program"]}</div>
-         ${stepper.originProgram.map((s,i) => renderOriginalExpression(s,i,measures)).join("")}
+         ${stepper.originProgram.map((s,i) => renderOriginalExpression(s,i,measures,progSteps.length)).join("")}
        </div>
 
     </div>`;
@@ -231,11 +231,12 @@ function renderDefinition(progStep: SI_STRUCT.ProgStep, idx: number, measures: P
 function renderOriginalExpression(
   expression: BSL_AST.defOrExpr,
   idx: number,
-  measures: PixelMeasurements
+  measures: PixelMeasurements,
+  validUntil: number
 ): string {
   return `
     <div class="step code"
-         data-progstep="${idx}"
+         data-progstep="${idx <= validUntil - 1 ? idx : idx + 100 /*prevent next button from "eating" never executed steps*/}"
          data-visible="true">
       ${BSL_Print.indent(
         BSL_Print.sanitize(
