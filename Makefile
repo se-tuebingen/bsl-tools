@@ -43,8 +43,8 @@ doc:
 	test -f bin/mdbook.exe || wget https://github.com/rust-lang/mdBook/releases/download/v0.4.27/mdbook-v0.4.27-x86_64-pc-windows-msvc.zip && unzip mdbook-v0.4.27-x86_64-pc-windows-msvc.zip -d bin && rm -f mdbook-v0.4.27-x86_64-pc-windows-msvc.zip
 	bin/mdbook.exe build docs --open
 	echo "workaround for mdbooks, so it points correctly to scribble demo"
-	test -d docs/demo && rm -rf docs/demo/scribble/ || mkdir docs/demo
-	cd docs/demo && cp -R ../../tests/scribble/output/html/test scribble
+	test -d docs/demo/ && rm -rf docs/demo/scribble/ || mkdir docs/demo
+	cp -R tests/scribble/output/html/test docs/demo/scribble
 endif
 ifeq ($(uname_S), Darwin)
 doc:
@@ -55,7 +55,7 @@ doc:
 	bin/mdbook build docs --open
 	echo "workaround for mdbooks, so it points correctly to scribble demo"
 	test -d docs/demo && rm -rf docs/demo/scribble/ || mkdir docs/demo
-	cd docs/demo && cp -R ../../tests/scribble/output/html/test scribble
+	cp -R tests/scribble/output/html/test docs/demo/scribble
 endif
 ifeq ($(uname_S), Linux)
 doc:
@@ -66,7 +66,7 @@ doc:
 	bin/mdbook build docs --open
 	echo "workaround for mdbooks, so it points correctly to scribble demo"
 	test -d docs/demo && rm -rf docs/demo/scribble/ || mkdir docs/demo
-	cd docs/demo && cp -R ../../tests/scribble/output/html/test scribble
+	cp -R tests/scribble/output/html/test docs/demo/scribble
 endif
 
 update_fallback_build:
