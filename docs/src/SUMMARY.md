@@ -22,4 +22,4 @@
 
 # Scribble Demo
 
-- [Scribble Demo](../demo/scribble/index.html)
+- [Scribble Demo](demo/scribble/index.html)

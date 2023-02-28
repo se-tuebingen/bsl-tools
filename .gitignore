@@ -7,5 +7,5 @@ dist/bsl_tools.js
 .vscode
 docs/book/**
 docs/index.html
-docs/demo/**
+docs/src/demo/**
 bin
