@@ -37,38 +37,35 @@ test:
 
 ifeq ($(uname_S), Windows)
 doc:
-	test -d docs/demo || mkdir docs/demo
 	echo "Copy JS"
 	cp dist/bsl_tools.js docs/bsl_tools.js
 	test -d bin || mkdir bin
 	test -f bin/mdbook.exe || wget https://github.com/rust-lang/mdBook/releases/download/v0.4.27/mdbook-v0.4.27-x86_64-pc-windows-msvc.zip && unzip mdbook-v0.4.27-x86_64-pc-windows-msvc.zip -d bin && rm -f mdbook-v0.4.27-x86_64-pc-windows-msvc.zip
 	bin/mdbook.exe build docs --open
 	echo "workaround for mdbooks, so it points correctly to scribble demo"
-	rm -rf docs/demo/scribble/
+	test -d docs/demo && rm -rf docs/demo/scribble/ || mkdir docs/demo
 	cd docs/demo && cp -R ../../tests/scribble/output/html/test scribble
 endif
 ifeq ($(uname_S), Darwin)
 doc:
-	test -d docs/demo || mkdir docs/demo
 	echo "Copy JS"
 	cp dist/bsl_tools.js docs/bsl_tools.js
 	test -d bin || mkdir bin
 	test -f bin/mdbook || curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.27/mdbook-v0.4.27-x86_64-apple-darwin.tar.gz | tar -xz --directory=bin
 	bin/mdbook build docs --open
 	echo "workaround for mdbooks, so it points correctly to scribble demo"
-	rm -rf docs/demo/scribble/
+	test -d docs/demo && rm -rf docs/demo/scribble/ || mkdir docs/demo
 	cd docs/demo && cp -R ../../tests/scribble/output/html/test scribble
 endif
 ifeq ($(uname_S), Linux)
 doc:
-	test -d docs/demo || mkdir docs/demo
 	echo "Copy JS"
 	cp dist/bsl_tools.js docs/bsl_tools.js
 	test -d bin || mkdir bin
 	test -f bin/mdbook || curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.27/mdbook-v0.4.27-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
 	bin/mdbook build docs --open
 	echo "workaround for mdbooks, so it points correctly to scribble demo"
-	rm -rf docs/demo/scribble/
+	test -d docs/demo && rm -rf docs/demo/scribble/ || mkdir docs/demo
 	cd docs/demo && cp -R ../../tests/scribble/output/html/test scribble
 endif
 
