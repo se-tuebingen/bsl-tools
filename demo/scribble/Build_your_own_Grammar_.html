@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"/><meta name="viewport" content="width=device-width, initial-scale=0.8"/><title>7&nbsp;Build your own Grammar!</title><link rel="stylesheet" type="text/css" href="scribble.css" title="default"/><link rel="stylesheet" type="text/css" href="racket.css" title="default"/><link rel="stylesheet" type="text/css" href="manual-style.css" title="default"/><link rel="stylesheet" type="text/css" href="manual-racket.css" title="default"/><script type="text/javascript" src="scribble-common.js"></script><script type="text/javascript" src="bsl_tools.js"></script><script type="text/javascript" src="manual-racket.js"></script><!--[if IE 6]><style type="text/css">.SIEHidden { overflow: hidden; }</style><![endif]--></head><body id="scribble-racket-lang-org"><div class="tocset"><div class="tocview"><div class="tocviewlist tocviewlisttopspace"><div class="tocviewtitle"><table cellspacing="0" cellpadding="0"><tr><td style="width: 1em;"><a href="javascript:void(0);" title="Expand/Collapse" class="tocviewtoggle" onclick="TocviewToggle(this,&quot;tocview_0&quot;);">&#9660;</a></td><td></td><td><a href="index.html" class="tocviewlink" data-pltdoc="x">Abstract Syntax Tree</a></td></tr></table></div><div class="tocviewsublisttop" style="display: block;" id="tocview_0"><table cellspacing="0" cellpadding="0"><tr><td align="right">1&nbsp;</td><td><a href="BSL_Tree_Tests.html" class="tocviewlink" data-pltdoc="x">BSL Tree Tests</a></td></tr><tr><td align="right">2&nbsp;</td><td><a href="BSL-Error-Tests.html" class="tocviewlink" data-pltdoc="x">BSL-<wbr></wbr>Error-<wbr></wbr>Tests</a></td></tr><tr><td align="right">3&nbsp;</td><td><a href="Quiz-Mode.html" class="tocviewlink" data-pltdoc="x">Quiz-<wbr></wbr>Mode</a></td></tr><tr><td align="right">4&nbsp;</td><td><a href="Internationalization.html" class="tocviewlink" data-pltdoc="x">Internationalization</a></td></tr><tr><td align="right">5&nbsp;</td><td><a href="JSON-Tree_Tests.html" class="tocviewlink" data-pltdoc="x">JSON-<wbr></wbr>Tree Tests</a></td></tr><tr><td align="right">6&nbsp;</td><td><a href="Stepper_Tests.html" class="tocviewlink" data-pltdoc="x">Stepper Tests</a></td></tr><tr><td align="right">7&nbsp;</td><td><a href="" class="tocviewselflink" data-pltdoc="x">Build your own Grammar!</a></td></tr></table></div></div><div class="tocviewlist"><table cellspacing="0" cellpadding="0"><tr><td style="width: 1em;"><a href="javascript:void(0);" title="Expand/Collapse" class="tocviewtoggle" onclick="TocviewToggle(this,&quot;tocview_1&quot;);">&#9658;</a></td><td>7&nbsp;</td><td><a href="" class="tocviewselflink" data-pltdoc="x">Build your own Grammar!</a></td></tr></table><div class="tocviewsublistbottom" style="display: none;" id="tocview_1"><table cellspacing="0" cellpadding="0"><tr><td align="right">7.1&nbsp;</td><td><a href="#%28part._.Example_of_a_context_free_grammar%29" class="tocviewlink" data-pltdoc="x">Example of a context free grammar</a></td></tr></table></div></div></div><div class="tocsub"><div class="tocsubtitle">On this page:</div><table class="tocsublist" cellspacing="0"><tr><td><span class="tocsublinknumber">7.1<tt>&nbsp;</tt></span><a href="#%28part._.Example_of_a_context_free_grammar%29" class="tocsubseclink" data-pltdoc="x">Example of a context free grammar</a></td></tr></table></div></div><div class="maincolumn"><div class="main"><div class="navsettop"><span class="navleft"><div class="nosearchform"></div>&nbsp;&nbsp;<span class="tocsettoggle">&nbsp;&nbsp;<a href="javascript:void(0);" title="show/hide table of contents" onclick="TocsetToggle();">contents</a></span></span><span class="navright">&nbsp;&nbsp;<a href="Stepper_Tests.html" title="backward to &quot;6 Stepper Tests&quot;" data-pltdoc="x">&larr; prev</a>&nbsp;&nbsp;<a href="index.html" title="up to &quot;Abstract Syntax Tree&quot;" data-pltdoc="x">up</a>&nbsp;&nbsp;<span class="nonavigation">next &rarr;</span></span>&nbsp;</div><h3>7<tt>&nbsp;</tt><a name="(part._.Build_your_own_.Grammar_)"></a>Build your own Grammar!</h3><h4>7.1<tt>&nbsp;</tt><a name="(part._.Example_of_a_context_free_grammar)"></a>Example of a context free grammar</h4><p><div class="SIntrapara">Below is an example for a grammar for numbers:
+</div><div class="SIntrapara"><table cellspacing="0" cellpadding="0"><tr><td valign="baseline"><p><span class="hspace">&nbsp;</span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">Number</span>&#8250;</span></p></td><td valign="baseline"><p><span class="stt"><span class="hspace">&nbsp;</span>::=<span class="hspace">&nbsp;</span></span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">PositiveNumber</span>&#8250;</span></p></td></tr><tr><td valign="baseline"><p><span class="hspace">&nbsp;</span></p></td><td valign="baseline"><p> </p></td><td valign="baseline"><p><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span></p></td><td valign="baseline"><p><span class="RktInBG"><span class="hspace"></span><span class="RktIn">-</span><span class="hspace"></span></span><span class="sroman">&#8249;<span style="font-style: italic">PositiveNumber</span>&#8250;</span></p></td></tr><tr><td valign="baseline"><p><span class="hspace">&nbsp;</span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">PositiveNumber</span>&#8250;</span></p></td><td valign="baseline"><p><span class="stt"><span class="hspace">&nbsp;</span>::=<span class="hspace">&nbsp;</span></span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">Integer</span>&#8250;</span></p></td></tr><tr><td valign="baseline"><p><span class="hspace">&nbsp;</span></p></td><td valign="baseline"><p> </p></td><td valign="baseline"><p><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">Decimal</span>&#8250;</span></p></td></tr><tr><td valign="baseline"><p><span class="hspace">&nbsp;</span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">Integer</span>&#8250;</span></p></td><td valign="baseline"><p><span class="stt"><span class="hspace">&nbsp;</span>::=<span class="hspace">&nbsp;</span></span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">DigitNotZero</span>&#8250;</span><span class="hspace">&nbsp;</span><span class="sroman">&#8249;<span style="font-style: italic">Digit</span>&#8250;</span><span class="sroman">*</span></p></td></tr><tr><td valign="baseline"><p><span class="hspace">&nbsp;</span></p></td><td valign="baseline"><p> </p></td><td valign="baseline"><p><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span></p></td><td valign="baseline"><p><span class="RktInBG"><span class="hspace"></span><span class="RktIn">0</span><span class="hspace"></span></span></p></td></tr><tr><td valign="baseline"><p><span class="hspace">&nbsp;</span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">Decimal</span>&#8250;</span></p></td><td valign="baseline"><p><span class="stt"><span class="hspace">&nbsp;</span>::=<span class="hspace">&nbsp;</span></span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">Integer</span>&#8250;</span><span class="hspace">&nbsp;</span><span class="RktInBG"><span class="hspace"></span><span class="RktIn">.</span><span class="hspace"></span></span><span class="hspace">&nbsp;</span><span class="sroman">&#8249;<span style="font-style: italic">Digit</span>&#8250;</span><span style="vertical-align: super; font-size: 80%">+</span></p></td></tr><tr><td valign="baseline"><p><span class="hspace">&nbsp;</span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">DigitNotZero</span>&#8250;</span></p></td><td valign="baseline"><p><span class="stt"><span class="hspace">&nbsp;</span>::=<span class="hspace">&nbsp;</span></span></p></td><td valign="baseline"><p><span class="RktInBG"><span class="hspace"></span><span class="RktIn">1</span><span class="hspace"></span></span><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span><span class="RktInBG"><span class="hspace"></span><span class="RktIn">2</span><span class="hspace"></span></span><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span><span class="RktInBG"><span class="hspace"></span><span class="RktIn">3</span><span class="hspace"></span></span><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span><span class="RktInBG"><span class="hspace"></span><span class="RktIn">4</span><span class="hspace"></span></span><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span><span class="RktInBG"><span class="hspace"></span><span class="RktIn">5</span><span class="hspace"></span></span><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span><span class="RktInBG"><span class="hspace"></span><span class="RktIn">6</span><span class="hspace"></span></span><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span><span class="RktInBG"><span class="hspace"></span><span class="RktIn">7</span><span class="hspace"></span></span><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span><span class="RktInBG"><span class="hspace"></span><span class="RktIn">8</span><span class="hspace"></span></span><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span><span class="RktInBG"><span class="hspace"></span><span class="RktIn">9</span><span class="hspace"></span></span></p></td></tr><tr><td valign="baseline"><p><span class="hspace">&nbsp;</span></p></td><td valign="baseline"><p><span class="sroman">&#8249;<span style="font-style: italic">Digit</span>&#8250;</span></p></td><td valign="baseline"><p><span class="stt"><span class="hspace">&nbsp;</span>::=<span class="hspace">&nbsp;</span></span></p></td><td valign="baseline"><p><span class="RktInBG"><span class="hspace"></span><span class="RktIn">0</span><span class="hspace"></span></span><span class="stt"><span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span>|<span class="hspace">&nbsp;</span><span class="hspace">&nbsp;</span></span><span class="sroman">&#8249;<span style="font-style: italic">DigitNotZero</span>&#8250;</span></p></td></tr></table></div><div class="SIntrapara">Examples for Strings that fulfill the <span class="sroman">&#8249;<span style="font-style: italic">Number</span>&#8250;</span> definition of this grammar are: <span class="RktInBG"><span class="hspace"></span><span class="RktIn">0</span><span class="hspace"></span></span>, <span class="RktInBG"><span class="hspace"></span><span class="RktIn">420</span><span class="hspace"></span></span>, <span class="RktInBG"><span class="hspace"></span><span class="RktIn">-87</span><span class="hspace"></span></span>, <span class="RktInBG"><span class="hspace"></span><span class="RktIn">3.1416</span><span class="hspace"></span></span>, <span class="RktInBG"><span class="hspace"></span><span class="RktIn">-2.09900</span><span class="hspace"></span></span>.</div></p><p>Examples for Strings that do not fulfill the <span class="sroman">&#8249;<span style="font-style: italic">Number</span>&#8250;</span> definition of this grammar are: <span class="RktInBG"><span class="hspace"></span><span class="RktIn">007</span><span class="hspace"></span></span>, <span class="RktInBG"><span class="hspace"></span><span class="RktIn">-.65</span><span class="hspace"></span></span>, <span class="RktInBG"><span class="hspace"></span><span class="RktIn">13.</span><span class="hspace"></span></span>, <span class="RktInBG"><span class="hspace"></span><span class="RktIn">zw&#246;lf</span><span class="hspace"></span></span>, <span class="RktInBG"><span class="hspace"></span><span class="RktIn">111Nonsense222</span><span class="hspace"></span></span>.</p><p>Here is an example of an AST based on the previous grammar.</p><p><style>jsontree .bsl-tools-tree span {margin-left: 2.5em; margin-right: 2.5em}</style><jsontree quiz="false" lang="en">{
+  "production": "&lt;Number&gt;",
+  "code": "-|3,14|",
+  "holes": [
+    {
+      "production": "&lt;PositiveNumber&gt;",
+      "code": "|3,14|",
+      "holes": [{
+        "production": "&lt;Decimal&gt;",
+        "code": "|3|,|1||4|",
+        "holes": [
+          {
+            "production": "&lt;Integer&gt;",
+            "code": "|3|",
+            "holes":[{
+              "production": "&lt;DigitNotZero&gt;",
+              "code": "3"
+              }]
+          },
+          {
+            "production": "&lt;Digit&gt;",
+            "code": "|1|",
+            "holes":[{
+              "production": "&lt;DigitNotZero&gt;",
+              "code": "1"
+              }]
+          },
+          {
+            "production": "&lt;Digit&gt;",
+            "code": "|4|",
+            "holes":[{
+              "production": "&lt;DigitNotZero&gt;",
+              "code": "4"
+              }]
+          }
+        ]
+      }]
+    }
+  ],
+  "grammar": {
+    "&lt;Number&gt;": ["&lt;PositiveNumber&gt;", "-&lt;PositiveNumber&gt;"],
+    "&lt;PositiveNumber&gt;": ["&lt;Integer&gt;", "&lt;Decimal&gt;"],
+    "&lt;Integer&gt;": ["&lt;DigitNotZero&gt;&lt;Digit&gt;*", "0"],
+    "&lt;Decimal&gt;": ["&lt;Integer&gt;.&lt;Digit&gt;+"],
+    "&lt;DigitNotZero&gt;": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+    "&lt;Digit&gt;": ["0", "&lt;DigitNotZero&gt;"]
+  }
+}</jsontree></p><p><style>jsontree .bsl-tools-tree span {margin-left: 2.5em; margin-right: 2.5em}</style><jsontree quiz="true" lang="de">{
+  "production": "&lt;Number&gt;",
+  "code": "|420|",
+  "holes": [
+    {
+      "production": "&lt;PositiveNumber&gt;",
+      "code": "|420|",
+      "holes": [{
+        "production": "&lt;Integer&gt;",
+        "code": "|4||2||0|",
+        "holes": [
+          {
+            "production": "&lt;DigitNotZero&gt;",
+            "code": "4"
+          },
+          {
+            "production": "&lt;Digit&gt;",
+            "code": "|2|",
+            "holes": [{
+              "production": "&lt;DigitNotZero&gt;",
+              "code": "2"
+            }]
+          },
+          {
+            "production": "&lt;Digit&gt;",
+            "code": "0"
+          }
+        ]
+      }]
+    }
+  ],
+  "grammar": {
+    "&lt;Number&gt;": ["&lt;PositiveNumber&gt;", "-&lt;PositiveNumber&gt;"],
+    "&lt;PositiveNumber&gt;": ["&lt;Integer&gt;", "&lt;Decimal&gt;"],
+    "&lt;Integer&gt;": ["&lt;DigitNotZero&gt;&lt;Digit&gt;*", "0"],
+    "&lt;Decimal&gt;": ["&lt;Integer&gt;.&lt;Digit&gt;+"],
+    "&lt;DigitNotZero&gt;": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+    "&lt;Digit&gt;": ["0", "&lt;DigitNotZero&gt;"]
+  }
+}</jsontree></p><div class="navsetbottom"><span class="navleft"><div class="nosearchform"></div>&nbsp;&nbsp;<span class="tocsettoggle">&nbsp;&nbsp;<a href="javascript:void(0);" title="show/hide table of contents" onclick="TocsetToggle();">contents</a></span></span><span class="navright">&nbsp;&nbsp;<a href="Stepper_Tests.html" title="backward to &quot;6 Stepper Tests&quot;" data-pltdoc="x">&larr; prev</a>&nbsp;&nbsp;<a href="index.html" title="up to &quot;Abstract Syntax Tree&quot;" data-pltdoc="x">up</a>&nbsp;&nbsp;<span class="nonavigation">next &rarr;</span></span>&nbsp;</div></div></div><div id="contextindicator">&nbsp;</div></body></html>
