@@ -13,7 +13,8 @@ Then, you can run:
 
 - `make build` to compile and bundle everything under `src` - grammar, TypeScript
 sources and assets - into `dist/bsl_tools.js`. (_Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes._)
-- `make doc` to compile the documentation under `docs/src` and `docs/demo` to `docs/book` (result is opened in your browser automatically).
+- `make test` to compile the Scribble Demo (requires Racket as described below). This also copies the current version of the JavaScript file to the HTML Test files directory (which is not required for them to load the latest version locally, but for distribution e.g. via Github workflow to test on mobile devices).
+- `make doc` to compile the documentation under `docs/src` and `docs/demo` to `docs/book` (result is opened in your browser automatically). For the scribble demo to be included, you need to have run `make test` first.
 
 ## Dependencies
 
