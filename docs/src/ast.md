@@ -76,6 +76,27 @@ from all occurring productions.
 
 The `lang` attribute is only applicable for Quiz mode, since the regular tree does not display any text in natural language. Currently implemented codes are `en`(English, default) and `de`(German).
 
+### Custom Styling
+
+If, for example, your production labels are significantly larger than the text in
+your nodes, you can give the nodes (represented by `<span>` elements)
+greater horizontal spacing with
+
+```css
+jsontree .bsl-tools-tree span {
+  margin-left: 5em;
+  margin-right: 5em;
+}
+```
+
+Note that you need to scope your styles to `.bsl-tools-tree`, or they are less
+specific than those in the general stylesheet and will be overridden.
+Also note that inline CSS is not scoped and will apply to all your `jsontree` elements (or whatever you specify).
+
+If you want to change colours, you can also provide css that is more specific than
+just `.bsl-tools-tree` and override the CSS variables set at the top of
+[`src/ressources/tree.css`](https://github.com/se-tuebingen/bsl-tools/blob/main/src/ressources/tree.css).
+
 ## Using AST View with Scribble
 
 ### Including the Files
@@ -150,12 +171,3 @@ greater horizontal spacing with
 Note that you need to scope your styles to `.bsl-tools-tree`, or they are less
 specific than those in the general stylesheet and will be overridden.
 Also note that inline CSS is not scoped and will apply to all your `jsontree` elements (or whatever you specify).
-
-Sometimes it might be usefulto readjust the width of the tree leafs, for example with
-
-```css
-jsontree .bsl-tools-tree span {
-  margin-left: 5em;
-  margin-right: 5em;
-}
-```
