@@ -8,4 +8,5 @@ dist/bsl_tools.js
 docs/book/**
 docs/index.html
 docs/src/demo/**
+docs/bsl_tools.js
 bin
