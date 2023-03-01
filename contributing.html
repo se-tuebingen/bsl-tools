@@ -148,18 +148,16 @@
                         <h2 id="building-the-project"><a class="header" href="#building-the-project">Building the project</a></h2>
 <p>For building the project, you need to have CMake or a similar tool that can handle
 the <code>Makefile</code> installed. For Linux and MacOS, this should already be the case.</p>
-<p>If you only changed something in the TypeScript Source Code or updated the Grammar,
-and are on a 64bit Linux, MaxOS or Windows Computer, you can simply run <code>make fallback_build</code>,
-which depends on binaries.
-<em>Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes.</em></p>
-<p>If you are on another OS or want to change more, or update the fallback binaries,
-you need to have <a href="https://nodejs.org">NodeJS</a> installed.
+<p>You also need to have <a href="https://nodejs.org">NodeJS and NPM</a> installed.
 <em>On Ubuntu, it is recommended to install it via <a href="https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions">NodeSource</a>.</em></p>
-<p>You need to run <code>npm install</code> anytime dependencies might have changed.</p>
-<p>Then, you can run</p>
+<p>You need to run <code>npm install</code> in a newly cloned project and
+anytime dependencies might have changed.</p>
+<p>Then, you can run:</p>
 <ul>
-<li><code>make build</code> to compile grammar and TypeScript Sources (<em>Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes.</em>)</li>
-<li><code>make update_fallback_build</code> to update the committed fallback binaries</li>
+<li><code>make build</code> to compile and bundle everything under <code>src</code> - grammar, TypeScript
+sources and assets - into <code>dist/bsl_tools.js</code>. (<em>Note that the command does not terminate, the TypeScript compiler keeps watching the source for changes.</em>)</li>
+<li><code>make test</code> to compile the Scribble Demo (requires Racket as described below). This also copies the current version of the JavaScript file to the HTML Test files directory (which is not required for them to load the latest version locally, but for distribution e.g. via Github workflow to test on mobile devices).</li>
+<li><code>make doc</code> to compile the documentation under <code>docs/src</code> and <code>docs/demo</code> to <code>docs/book</code> (result is opened in your browser automatically). For the scribble demo to be included, you need to have run <code>make test</code> first.</li>
 </ul>
 <h2 id="dependencies"><a class="header" href="#dependencies">Dependencies</a></h2>
 <p>Install the latest TypeScript version via <code>npm</code>. Also see <a href="https://www.typescriptlang.org/download">https://www.typescriptlang.org/download</a>.</p>
@@ -167,18 +165,32 @@ you need to have <a href="https://nodejs.org">NodeJS</a> installed.
 to compile TypeScript and bundle all resources into one single JavaScript file.</p>
 <p>For generating a BSL parser, we are using the <a href="https://github.com/metadevpro/ts-pegjs"><code>ts-pegjs</code></a> package, which builds upon <code>pegjs</code>.
 This package installs a node script which compiles the grammar found in <code>src/grammar/bsl.pegjs</code> to a TypeScript parser module. The best way to test and edit the grammar is the <a href="https://pegjs.org/online">pegjs online version</a>, since it has syntax highlighting and live testing.</p>
-<p>In order to generate a NodeJS-independent binary (effectively, a binary with
-NodeJS bundled, so not exactly lightweight) out of <code>ts-pegjs</code>, we are using
+<p>In order to generate a NodeJS-independent binary
+(effectively, a binary with
+NodeJS bundled, so not exactly lightweight) for the fallback build
+out of <code>ts-pegjs</code>, we are using
 the <a href="https://github.com/vercel/pkg"><code>pkg</code></a> package.</p>
 <p>If you want to contribute to the scribble part of <code>bsl-tools</code> you need to install Racket first. See <a href="https://download.racket-lang.org/">https://download.racket-lang.org/</a></p>
 <p>You also need to install dependencies for Scribble, the Racket Documentation Tool, preferably with the racket package manager raco. On Linux distributions you can install Scribble with <code>raco pkg install --deps search-auto scribble-math</code>.</p>
+<h3 id="fallback-build"><a class="header" href="#fallback-build">Fallback build</a></h3>
+<p>In the branch <code>fallback_build</code>, there are binaries of <code>tspegjs</code>, <code>esbuild</code> and
+<code>mdbook</code> for Mac, Windows and Linux 64bit systems as well as Makefile entries
+for using (<code>fallback_build</code> and <code>fallback_doc</code>) and updating them.
+This is to future-proof the toolchain, if updates
+break something or a tool is no longer supported.</p>
+<p>If the regular build <strong>does</strong>
+still work, it might be a good idea to checkout the branch and
+run <code>make update_fallback_build</code> to keep the binaries up-to-date from time to time.
+We split this to a separate branch, however, to make the repo a little bit more
+lightweight and spare you unnecessary megabytes of downloads.</p>
 <h2 id="testing"><a class="header" href="#testing">Testing</a></h2>
 <p>Running <code>make test</code> copies the generated JavaScript file and the latest version
 of the Scribble Plugin to the test folders and renders the Scribble test.</p>
 <p>In order to be able to render the Scribble test pages, you need to have
 <a href="https://racket-lang.org">Racket</a> installed.</p>
 <p>The HTML test pages load the JavaScript plugin from the <code>dist</code> folder if opened
-locally (served via <code>file://</code>).</p>
+locally (served via <code>file://</code>), so you do not need to run <code>make test</code> to update
+it - leaving the <code>make build</code> command running works fine.</p>
 <h2 id="publishing-a-version"><a class="header" href="#publishing-a-version">Publishing a version</a></h2>
 <p>Everytime a <a href="https://git-scm.com/book/en/v2/Git-Basics-Tagging">tag</a> starting with <code>v</code> is published, a github workflow similar to the one running when
 something is pushed on main will kick off, compile and test the code.

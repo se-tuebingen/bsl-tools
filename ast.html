@@ -200,6 +200,21 @@ nodes. The Rules are shown as tooltips on hover, and the keys are used as
 options in quiz mode. If no grammar is specified, quiz mode options are inferred
 from all occurring productions.</p>
 <p>The <code>lang</code> attribute is only applicable for Quiz mode, since the regular tree does not display any text in natural language. Currently implemented codes are <code>en</code>(English, default) and <code>de</code>(German).</p>
+<h3 id="custom-styling"><a class="header" href="#custom-styling">Custom Styling</a></h3>
+<p>If, for example, your production labels are significantly larger than the text in
+your nodes, you can give the nodes (represented by <code>&lt;span&gt;</code> elements)
+greater horizontal spacing with</p>
+<pre><code class="language-css">jsontree .bsl-tools-tree span {
+  margin-left: 5em;
+  margin-right: 5em;
+}
+</code></pre>
+<p>Note that you need to scope your styles to <code>.bsl-tools-tree</code>, or they are less
+specific than those in the general stylesheet and will be overridden.
+Also note that inline CSS is not scoped and will apply to all your <code>jsontree</code> elements (or whatever you specify).</p>
+<p>If you want to change colours, you can also provide css that is more specific than
+just <code>.bsl-tools-tree</code> and override the CSS variables set at the top of
+<a href="https://github.com/se-tuebingen/bsl-tools/blob/main/src/ressources/tree.css"><code>src/ressources/tree.css</code></a>.</p>
 <h2 id="using-ast-view-with-scribble"><a class="header" href="#using-ast-view-with-scribble">Using AST View with Scribble</a></h2>
 <h3 id="including-the-files"><a class="header" href="#including-the-files">Including the Files</a></h3>
 <p>To use the provided scribble module, you need to import it in your document:</p>
@@ -259,12 +274,6 @@ greater horizontal spacing with</p>
 <p>Note that you need to scope your styles to <code>.bsl-tools-tree</code>, or they are less
 specific than those in the general stylesheet and will be overridden.
 Also note that inline CSS is not scoped and will apply to all your <code>jsontree</code> elements (or whatever you specify).</p>
-<p>Sometimes it might be usefulto readjust the width of the tree leafs, for example with</p>
-<pre><code class="language-css">jsontree .bsl-tools-tree span {
-  margin-left: 5em;
-  margin-right: 5em;
-}
-</code></pre>
 
                     </main>
 

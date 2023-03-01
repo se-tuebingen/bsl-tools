@@ -146,10 +146,15 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="generator"><a class="header" href="#generator">Generator</a></h1>
-<p>You can generate with a simple</p>
-<pre><code class="language-html">&lt;bsltoolsgenerator&gt;&lt;/bsltoolsgenerator&gt;
+<p>Adding a simple <code>bsltoolsgenerator</code> tag in your HTML, like so:</p>
+<pre><code class="language-html">&lt;!-- import the bsl_tools script somewhere on the page, ideally in the head --&gt;
+&lt;script src=&quot;bsl_tools.js&quot;&gt;&lt;/script&gt;
+
+&lt;bsltoolsgenerator&gt;&lt;/bsltoolsgenerator&gt;
 </code></pre>
-<p>your own Stepper and AST Views, if you give valid BSL programs! Unfortunately there is no support for Scribble yet.</p>
+<p>gives you the <code>textarea</code> and buttons below, which you can use to generate your 
+your own Stepper and AST Views, if you give valid BSL programs!
+Unfortunately there is no support for Scribble yet.</p>
 <p><bsltoolsgenerator> </bsltoolsgenerator></p>
 
                     </main>
